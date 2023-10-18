@@ -1,5 +1,6 @@
 {
   "name": "piu-web-project",
+  "homepage": "demo.piueducation.org",
   "private": true,
   "version": "0.0.0",
   "type": "module",
