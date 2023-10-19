@@ -18,7 +18,7 @@ export default function Navbar() {
             <span className="text-2xl">International University</span>
           </div>
         </div>
-        <div className="lg:flex flex-col md:block items-center md:py-5">
+        <div className="lg:flex flex-col md:block items-center md:py-5 mt-2">
           <ul className="flex justify-around md:flex-row items-center gap-3">
             <li>
               <Link to="/">Home</Link>

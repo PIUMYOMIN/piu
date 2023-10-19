@@ -6,6 +6,9 @@ import About from '../pages/About'
 import Contact from '../pages/Contact'
 import Campus from '../pages/Campus'
 import Layout from "../pages/layouts/Layout";
+import Course1 from "./../pages/Course1";
+import Course2 from "./../pages/Course2";
+import Course3 from "./../pages/Course3";
 
 const router = createBrowserRouter([
   {
@@ -14,23 +17,35 @@ const router = createBrowserRouter([
     children: [
       {
         path: "",
-        element: <Home />,
+        element: <Home />
       },
       {
         path: "/courses",
-        element: <Courses />,
+        element: <Courses />
+      },
+      {
+        path: "/course1",
+        element: <Course1 />
+      },
+      {
+        path: "/course2",
+        element: <Course2 />
+      },
+      {
+        path: "/course3",
+        element: <Course3 />
       },
       {
         path: "/campuses",
-        element: <Campus />,
+        element: <Campus />
       },
       {
         path: "/about",
-        element: <About />,
+        element: <About />
       },
       {
         path: "/contact",
-        element: <Contact />,
+        element: <Contact />
       }
     ]
   }

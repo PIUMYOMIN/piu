@@ -1,9 +1,14 @@
 import React, { useState } from "react";
-import { FaBars } from "react-icons/fa";
+import { FaBars, FaPlus, FaMinus } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
-export default function Logo() {
+export default function Menu() {
   let [open, setOpen] = useState(false);
+  const [courseDropDownOpen, setCourseDropDownOpen] = useState(false);
+
+  const toggleCourseDropDown = () => {
+    setCourseDropDownOpen(!courseDropDownOpen);
+  };
 
   return (
     <div className="max-w-7xl mx-auto z-10 lg:bg-dark-purple text-white md:py-2 lg:pl-3">
@@ -22,8 +27,40 @@ export default function Logo() {
           <li className="md:my-0 my-5">
             <Link to="">Home</Link>
           </li>
-          <li className="md:my-0 my-5">
-            <Link to="/courses">Courses</Link>
+          <li
+            className={`relative group cursor-pointer ${courseDropDownOpen &&
+              "hover-dropdown"}`}
+            onMouseEnter={() => setCourseDropDownOpen(true)}
+            onMouseLeave={() => setCourseDropDownOpen(false)}
+          >
+            <Link to="/courses" onClick={toggleCourseDropDown}>
+              Courses
+            </Link>
+            <div
+              className={`md:absolute left-0 ${courseDropDownOpen
+                ? "block"
+                : "hidden"} bg-dark-purple text-white w-40 shadow-md`}
+            >
+              <ul>
+                <li className="my-5">
+                  <Link to="/course1">Course 1</Link>
+                </li>
+                <li className="my-5">
+                  <Link to="/course2">Course 2</Link>
+                </li>
+                <li className="my-5">
+                  <Link to="/course3">Course 3</Link>
+                </li>
+              </ul>
+            </div>
+            <div
+              className={`absolute md:hidden top-2 right-3 ${courseDropDownOpen
+                ? "plus-minus"
+                : ""}`}
+              onClick={toggleCourseDropDown}
+            >
+              {courseDropDownOpen ? <FaMinus /> : <FaPlus />}
+            </div>
           </li>
           <li className="md:my-0 my-5">
             <Link to="/campuses">Campuses</Link>
