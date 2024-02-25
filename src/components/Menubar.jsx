@@ -1,75 +1,129 @@
 import React, { useState } from "react";
-import { FaBars, FaPlus, FaMinus } from "react-icons/fa";
+import { FaBars, FaCaretDown, FaCaretUp } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
 export default function Menu() {
-  let [open, setOpen] = useState(false);
-  const [courseDropDownOpen, setCourseDropDownOpen] = useState(false);
+  const [open, setOpen] = useState(false);
 
-  const toggleCourseDropDown = () => {
-    setCourseDropDownOpen(!courseDropDownOpen);
-  };
+  const [newsHovered, setNewsHovered] = useState(false);
+  const [academicHovered, setAcademicHovered] = useState(false);
 
   return (
-    <div className="max-w-7xl mx-auto z-10 lg:bg-dark-purple text-white md:py-2 lg:pl-3">
-      <div className="md:flex items-center justify-between">
+    <div className="max-w-7xl mx-auto z-10 lg:bg-dark-purple text-white lg:py-2 lg:pl-3">
+      <div className="lg:flex items-center justify-between lg:py-5">
         <div
-          className="text-3xl absolute right-2 top-2 cursor-pointer md:hidden text-dark z-50"
+          className="text-3xl absolute right-2 top-2 cursor-pointer lg:hidden text-dark z-50"
           onClick={() => setOpen(!open)}
         >
           <FaBars />
         </div>
         <ul
-          className={`md:flex md:item:center md:pb-0 pb-12 absolute md:static md:z-auto z-20 left-0 w-full md:w-auto md:pl-0 pl-5 transition-all duration-500 ease-in ${open
+          className={`lg:flex lg:item:center lg:pb-0 pb-12 absolute lg:static lg:z-auto z-20 left-0 w-full lg:w-auto lg:pl-0 pl-5 transition-all duration-500 ease-in ${open
             ? "top-20 bg-dark-purple text-white"
-            : "top-[-490px]"} gap-3`}
+            : "top-[-490px]"} gap-8`}
         >
-          <li className="md:my-0 my-5">
-            <Link to="">Home</Link>
+          <li className="lg:my-0 my-5">
+            <Link to="">HOME</Link>
           </li>
           <li
-            className={`relative group cursor-pointer ${courseDropDownOpen &&
-              "hover-dropdown"}`}
-            onMouseEnter={() => setCourseDropDownOpen(true)}
-            onMouseLeave={() => setCourseDropDownOpen(false)}
+            className="relative lg:my-0 my-5"
+            onMouseEnter={() => setAcademicHovered(true)}
+            onMouseLeave={() => setAcademicHovered(false)}
           >
-            <Link to="/courses" onClick={toggleCourseDropDown}>
-              Courses
-            </Link>
-            <div
-              className={`md:absolute left-0 ${courseDropDownOpen
-                ? "block"
-                : "hidden"} bg-dark-purple text-white w-40 shadow-md`}
+            <button
+              type="button"
+              id="menu-button"
+              aria-expanded={academicHovered}
+              className="flex justify-center items-center"
+              onClick={() => setAcademicHovered(!academicHovered)}
             >
-              <ul>
-                <li className="my-5">
-                  <Link to="/course1">Course 1</Link>
+              ACADEMIC {academicHovered ? <FaCaretUp /> : <FaCaretDown />}
+            </button>
+            <div
+              className={`lg:absolute bg-dark-purple w-48 
+              ${academicHovered ? "block" : "hidden"}
+              transition-all duration-500 ease-in lg:pt-3 z-10`}
+              role="menu"
+              aria-orientation="vertical"
+              aria-labelledby="menu-button"
+              tabIndex="-1"
+            >
+              <ul className="px-2">
+                <li
+                  className="my-5 hover:text-gray-400"
+                  role="menuitem"
+                  tabIndex="-1"
+                  id="menu-item-0"
+                >
+                  <Link to="/course1">Postgraduate Program</Link>
                 </li>
-                <li className="my-5">
-                  <Link to="/course2">Course 2</Link>
+                <li
+                  className="my-5 hover:text-gray-400"
+                  role="menuitem"
+                  tabIndex="-1"
+                  id="menu-item-1"
+                >
+                  <Link to="/course2">Undergraduate Program</Link>
                 </li>
-                <li className="my-5">
-                  <Link to="/course3">Course 3</Link>
+                <li
+                  className="my-5 hover:text-gray-400"
+                  role="menuitem"
+                  tabIndex="-1"
+                  id="menu-item-2"
+                >
+                  <Link to="/course3">Certificate Program</Link>
                 </li>
               </ul>
             </div>
-            <div
-              className={`absolute md:hidden top-2 right-3 ${courseDropDownOpen
-                ? "plus-minus"
-                : ""}`}
-              onClick={toggleCourseDropDown}
+          </li>
+          <li
+            className="relative lg:my-0 my-5"
+            onMouseEnter={() => setNewsHovered(true)}
+            onMouseLeave={() => setNewsHovered(false)}
+          >
+            <button
+              type="button"
+              id="menu-button"
+              aria-expanded={newsHovered}
+              className="flex justify-center items-center"
+              onClick={() => setNewsHovered(!newsHovered)}
             >
-              {courseDropDownOpen ? <FaMinus /> : <FaPlus />}
+              NEWS{newsHovered ? <FaCaretUp /> : <FaCaretDown />}
+            </button>
+            <div
+              className={`lg:absolute bg-dark-purple w-48 ${newsHovered
+                ? "block"
+                : "hidden"} transition-all duration-500 ease-in lg:pt-3 z-10`}
+              role="menu"
+              aria-orientation="vertical"
+              aria-labelledby="menu-button"
+              tabIndex="-1"
+            >
+              <ul className="px-2">
+                <li
+                  className="my-5 hover:text-gray-400"
+                  role="menuitem"
+                  tabIndex="-1"
+                  id="menu-item-0"
+                >
+                  <Link to="/course1">News & Events</Link>
+                </li>
+                <li
+                  className="my-5 hover:text-gray-400"
+                  role="menuitem"
+                  tabIndex="-1"
+                  id="menu-item-1"
+                >
+                  <Link to="/course2">Announcements</Link>
+                </li>
+              </ul>
             </div>
           </li>
-          <li className="md:my-0 my-5">
-            <Link to="/campuses">Campuses</Link>
+          <li className="lg:my-0 my-5">
+            <Link to="/about">ABOUT</Link>
           </li>
-          <li className="md:my-0 my-5">
-            <Link to="/about">About</Link>
-          </li>
-          <li className="md:my-0 my-5">
-            <Link to="/contact">Contact</Link>
+          <li className="lg:my-0 my-5">
+            <Link to="/contact">CONTACT</Link>
           </li>
         </ul>
       </div>

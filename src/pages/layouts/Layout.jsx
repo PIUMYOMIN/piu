@@ -2,15 +2,17 @@ import React from 'react'
 import {Outlet} from 'react-router-dom'
 import Navbar from '../../components/Navbar'
 import Menubar from '../../components/Menubar'
+import Footer from "../../components/Footer";
 
 export default function Layout() {
   return (
-    <div>
+    <div className=" font-roboto">
       <Navbar />
       <Menubar />
-      <div className='max-w-7xl mx-auto mt-5'>
+      <div className="w-full mx-auto box-border overflow-hidden">
         <Outlet />
       </div>
+      <Footer />
     </div>
-  )
+  );
 }
