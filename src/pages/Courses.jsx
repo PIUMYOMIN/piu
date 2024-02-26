@@ -1,7 +1,5 @@
 import React from 'react'
 
 export default function Courses() {
-  return (
-    <div>Courses</div>
-  )
+  return <div className="max-w-7xl mx-auto">Courses</div>;
 }

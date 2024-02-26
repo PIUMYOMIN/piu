@@ -1,5 +1,5 @@
 import React from "react";
 
 export default function Course3() {
-  return <div>Course 3 Page.</div>;
+  return <div className="max-w-7xl mx-auto">Course 3 Page.</div>;
 }
