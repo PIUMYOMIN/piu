@@ -7,6 +7,7 @@ import Courses from "../pages/Courses";
 import Campus from "../pages/Campus";
 import About from "../pages/About";
 import Layout from "../pages/layouts/Layout";
+import CourseDetails from "../pages/CourseDetails";
 
 const router = createBrowserRouter([
   {
@@ -28,6 +29,10 @@ const router = createBrowserRouter([
       {
         path: "/courses",
         element: <Courses />
+      },
+      {
+        path: "/course-details",
+        element: <CourseDetails />
       },
       {
         path: "/contact-us",

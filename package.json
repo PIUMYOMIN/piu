@@ -15,12 +15,13 @@
   },
   "dependencies": {
     "aos": "^2.3.4",
+    "axios": "^1.6.8",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-icons": "^4.11.0",
     "react-router-dom": "^6.22.1",
     "sal.js": "^0.8.5",
-    "swiper": "^11.0.6"
+    "swiper": "^11.0.7"
   },
   "devDependencies": {
     "@types/react": "^18.2.15",
