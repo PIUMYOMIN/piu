@@ -1,11 +1,20 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { FaFacebook, FaTwitter, FaYoutube, FaTelegram } from "react-icons/fa";
+import {
+  FaFacebook,
+  FaTwitter,
+  FaYoutube,
+  FaTelegram,
+  FaMapMarkerAlt,
+  FaPhoneAlt,
+  FaEvernote,
+  FaEnvelope
+} from "react-icons/fa";
 
 export default function Footer() {
   return (
     <footer>
-      <div className="w-full my-10 bg-primary-background">
+      <div className="w-full my-10 bg-primary-background px-2">
         <div className="max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-4 lg:gap-5 gap-8">
             <div className="pr-3">
@@ -66,24 +75,37 @@ export default function Footer() {
             </div>
             <div>
               <h2 className="text-2xl">Contact Info</h2>
-              <div>
-                <div>
-                  <strong>Address</strong>
-                  <br />
-                  <p>
-                    123 Nineth Street, Mandalay, Block 10160,
-                    <br /> Myanmar
-                  </p>
+              <div className="grid grid-rows gap-1">
+                <div className="flex flex-row items">
+                  <div>
+                    <FaMapMarkerAlt className="text-4xl text-white bg-orange-400 rounded-full p-2" />
+                  </div>
+                  <div className="p-1 w-full font-montserrat font-regular">
+                    <strong>Address</strong>
+                    <br />
+                    <p>
+                      Dawnabwar Block, Nanshae Aungmyaetharzan Tsp, Mandalay,
+                      Myanmar
+                    </p>
+                  </div>
                 </div>
-                <br />
-                <div>
-                  <strong>Phone</strong>
-                  <p>+95 123456789</p>
+                <div className="flex flex-row items">
+                  <div>
+                    <FaPhoneAlt className="text-4xl text-white bg-orange-400 rounded-full p-2" />
+                  </div>
+                  <div className="p-1 w-full font-montserrat font-regular">
+                    <strong>Phone</strong>
+                    <p>+95 123456789</p>
+                  </div>
                 </div>
-                <br />
-                <div>
-                  <strong>Email</strong>
-                  <p>abc@gmail.com</p>
+                <div className="flex flex-row items">
+                  <div>
+                    <FaEnvelope className="text-4xl text-white bg-orange-400 rounded-full p-2" />
+                  </div>
+                  <div className="p-1 w-full font-montserrat font-regular">
+                    <strong>Email</strong>
+                    <p>abc@gmail.com</p>
+                  </div>
                 </div>
               </div>
             </div>

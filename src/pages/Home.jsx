@@ -12,38 +12,34 @@ export default function Home() {
   useEffect(() => {
     Aos.init({ duration: 2000 });
   }, []);
-  return (
-    <div>
+  return <div>
       {/* carosel section start  */}
       <Carousel />
       {/* carousel section end  */}
 
       {/* about section start  */}
-      <div className="w-full">
+      <div className="w-full px-2">
         <div className=" max-w-5xl mx-auto">
-          <div className="lg:flex flex-row justify-center items-center my-5 py-5 bg-primary-background">
-            <div className="lg:w-1/2 flex justify-center items-center">
+          <div className="md:flex justify-center items-center my-5 py-5 bg-primary-background">
+            <div className="md:w-1/2 flex justify-center items-center">
               <img src={about} alt="" className="object-cover lg:w-80 w-72" />
             </div>
-            <div className="lg:w-1/2 flex flex-row font-nato">
+            <div className="md:w-1/2 flex flex-row font-nato">
               <div className="flex flex-col gap-3 py-3">
                 <div className="">
-                  <p className="text-3xl lg:py-2 font-montserrat font-regular lg:text-left text-center">
+                  <p className="text-2xl lg:py-2 font-montserrat font-regular lg:text-left text-center">
                     About PIU
                   </p>
                   <p>
                     Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                    Debitis vero totam ipsa facere cumque officia odio sunt eum
-                    enim libero quis blanditiis, quos culpa ad error nihil
+                    Debitis vero totam ipsa facere cumque officia odio sunt
+                    eum enim libero quis blanditiis, quos culpa ad error nihil
                     doloribus laudantium voluptatem impedit adipisci rem? Unde
                     magnam tenetur quia iure, iste eum sed repellat architecto
                     porro, quaerat aliquam dolores deleniti quod maxime?
                   </p>
                   <div className="mt-3">
-                    <Link
-                      to="/about-us"
-                      className="px-3 py-2 bg-blue-400 text-white rounded-md cursor-pointer"
-                    >
+                    <Link to="/about-us" className="px-3 py-2 bg-blue-400 text-white rounded-md cursor-pointer">
                       Learn More
                     </Link>
                   </div>
@@ -109,6 +105,5 @@ export default function Home() {
       {/* news section start  */}
       <News />
       {/* news section end  */}
-    </div>
-  );
+    </div>;
 }

@@ -29,21 +29,18 @@ export default function News() {
 
     fetchNews();
   }, []);
-  return (
-    <div className="w-full bg-secondary-background lg:py-8">
-      {loading
-        ? <LoadingSpinner />
-        : <div className="max-w-7xl mx-auto">
+  return <div className="w-full bg-secondary-background lg:py-8 px-2 overflow-hidden">
+      {loading ? <LoadingSpinner /> : <div className="max-w-7xl mx-auto">
             <div className="text-center mt-8 mb-10">
               <h2 className="text-4xl my-3 font-oswald font-medium">
                 {" "}NEWS & EVENTS
               </h2>
-              <p>
+              <p className="font-montserrat font-regular">
                 Lorem ipsum dolor sit amet consectetur adipisicing elit. Atque
                 excepturi beatae vel doloribus eveniet corrupti.
               </p>
             </div>
-            <div className="grid lg:grid-cols-3 sm:grid-1 gap-x-10 lg:gap-y-10 gap-y-10 py-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {news.map((newItem, index) =>
                 <Link
                   to={newItem.slug}
@@ -59,12 +56,12 @@ export default function News() {
                     />
                   </div>
                   <div className="flex flex-col justify-between">
-                    <div className="text-xl pl-5 my-5 hover:text-orange-500">
+                    <div className="text-xl md:pl-5 my-5 hover:text-orange-500 transition duration-300 ease-in-out">
                       <p>
                         {newItem.title}
                       </p>
                     </div>
-                    <div className="flex flex-row justify-between text-zinc-400 pl-2">
+                    <div className="flex flex-row justify-between text-zinc-400 md:pl-2">
                       <div>
                         <p>Faculty of PIU</p>
                       </div>
@@ -78,6 +75,5 @@ export default function News() {
               )}
             </div>
           </div>}
-    </div>
-  );
+    </div>;
 }

@@ -47,7 +47,7 @@ const Carousel = () => {
         prevEl: ".swiper-button-prev"
       },
       pagination: {
-        el: ".swiper-pagination",
+        // el: ".swiper-pagination",
         clickable: true
       }
     });
@@ -56,10 +56,8 @@ const Carousel = () => {
     };
   }, []);
 
-  return (
-    <div className="max-w-7xl mx-auto z-[-10] overflow-hidden relative">
-      {loading && <LoadingSpinner />}{" "}
-      {/* Conditional rendering of loading spinner */}
+  return <div className="max-w-7xl mx-auto z-[-10] overflow-hidden relative">
+      {loading && <LoadingSpinner />} {/* Conditional rendering of loading spinner */}
       <div className="swiper">
         <div className="swiper-wrapper">
           {slides.map((slide, index) =>
@@ -70,7 +68,7 @@ const Carousel = () => {
                 className="w-full"
               />
               <div className=" bg-black opacity-70">
-                <div className="flex flex-row justify-between px-2 py-2 text-xs text-white">
+                <div className="flex flex-row justify-between px-2 py-2 text-sm text-white">
                   <p>
                     {slide.title}
                   </p>
@@ -86,8 +84,7 @@ const Carousel = () => {
         <div className="swiper-button-prev" />
         <div className="swiper-button-next" />
       </div>
-    </div>
-  );
+    </div>;
 };
 
 export default Carousel;
