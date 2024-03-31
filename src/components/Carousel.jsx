@@ -6,8 +6,15 @@ import "swiper/swiper-bundle.css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 
+const LoadingSpinner = () => (
+  <div className="fixed top-0 left-0 z-50 w-full h-full flex justify-center items-center bg-gray-900 bg-opacity-50">
+    <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-gray-900"></div>
+  </div>
+);
+
 export default function Carousel() {
   const [slides, setSlides] = useState([]);
+  const [loading, setLoading] = useState(true); // Loading state
 
   useEffect(() => {
     const fetchSlides = async () => {
@@ -18,6 +25,7 @@ export default function Carousel() {
         }
         const data = await response.json();
         setSlides(data);
+        setLoading(false);
       } catch (error) {
         console.error("Error fetching slides:", error);
       }
@@ -50,7 +58,9 @@ export default function Carousel() {
   }, []);
 
   return (
-    <div className="max-w-7xl mx-auto z-[-10] overflow-hidden">
+  <>
+    {loading ? <LoadingSpinner />  : (
+        <div className="max-w-7xl mx-auto z-[-10] overflow-hidden">
       <div className="swiper">
         <div className="swiper-wrapper">
           {slides.map((slide, index) =>
@@ -78,5 +88,8 @@ export default function Carousel() {
         <div className="swiper-button-next" />
       </div>
     </div>
+      )
+      }
+      </>
   );
 }
