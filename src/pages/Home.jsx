@@ -1,8 +1,8 @@
 import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 import Carousel from "../components/Carousel";
-import Courses from "../components/Courses";
-import News from "../components/News";
+import Courses from "../components/News";
+import News from "../components/Courses";
 import Aos from "aos";
 import "aos/dist/aos.css";
 import about from "../assets/about_piu.jpg";
@@ -11,7 +11,7 @@ import { FaFacebook, FaYoutube, FaTelegram, FaUsers } from "react-icons/fa";
 export default function Home() {
   useEffect(() => {
     Aos.init({ duration: 2000 });
-  });
+  }, []);
   return (
     <div>
       {/* carosel section start  */}
