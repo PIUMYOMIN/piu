@@ -1,16 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { FaAngleRight } from "react-icons/fa";
-import student from "../assets/IMG_0233.jpg";
-import ppg from "../assets/piu_ppg.jpg";
-import richard from "../assets/Richard's Class.jpg";
+import CourseDetails from "../pages/CourseDetails";
 
-const LoadingSpinner = () =>
-  <div className="fixed top-0 left-0 z-50 w-full h-full flex justify-center items-center bg-gray-900 bg-opacity-50">
-    <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-gray-900" />
-  </div>;
-
-export default function News() {
+export default function Course() {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -47,11 +40,15 @@ export default function News() {
         return "bg-blue-400 rounded-full px-2 text-white text-sm";
     }
   }
-  return <div className="w-full bg-primary-background py-8 px-2">
+  return (
+    <div className="w-full bg-primary-background py-8 px-2">
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-row justify-between items-center my-3">
           <h2 className="text-4xl my-3 font-oswald font-medium"> COURSES</h2>
-          <Link to="#!" className="flex flex-row items-center hover:underline gap-2">
+          <Link
+            to={"/course-detail"}
+            className="flex flex-row items-center hover:underline gap-2"
+          >
             <span className="text-gray-500">List All</span>
             <FaAngleRight className="lg:w-7 w-5 lg:h-7 h-5 lg:p-2 p-1 bg-gray-500 text-white rounded-full" />
           </Link>
@@ -59,10 +56,10 @@ export default function News() {
         <div className="grid lg:grid-cols-4 grid-cols-2 gap-5">
           {courses.map((course, index) =>
             <Link
-              to={course.slug}
+              to={`/courses/${course.slug}`}
               className="flex flex-col overflow-hidden px-2"
               data-aos="fade-up"
-              key={course.index}
+              key={index}
             >
               <img
                 src={`https://piueducation.org/storage/${course.image}`}
@@ -82,16 +79,14 @@ export default function News() {
                     {course.duration}
                   </small>
                 </div>
-                <Link
-                  to={course.slug}
-                  className="lg:text-xl block hover:underline my-2 transition duration-300 ease-in-out hover:text-orange-400"
-                >
+                <div className="lg:text-xl block hover:underline my-2 transition duration-300 ease-in-out hover:text-orange-400">
                   {course.title}
-                </Link>
+                </div>
               </div>
             </Link>
           )}
         </div>
       </div>
-    </div>;
+    </div>
+  );
 }

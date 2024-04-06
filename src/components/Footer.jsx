@@ -12,17 +12,16 @@ import {
 } from "react-icons/fa";
 
 export default function Footer() {
-  return (
-    <footer>
-      <div className="w-full my-10 bg-primary-background px-2">
+  return <footer>
+      <div className="w-full bg-dark-purple text-white font-montserrat px-2 lg:pt-20 py-3">
         <div className="max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-4 lg:gap-5 gap-8">
             <div className="pr-3">
               <h2 className="text-2xl">About Us</h2>
               <p>
-                Lorem ipsum dolor sit, amet consectetur adipisicing elit. Alias
-                repellat saepe ab nemo magnam eum ullam provident, repudiandae
-                nulla eos.
+                Lorem ipsum dolor sit, amet consectetur adipisicing elit.
+                Alias repellat saepe ab nemo magnam eum ullam provident,
+                repudiandae nulla eos.
               </p>
               <div className="flex flex-row gap-5 text-2xl mt-5">
                 <Link to="#!">
@@ -80,7 +79,7 @@ export default function Footer() {
                   <div>
                     <FaMapMarkerAlt className="text-4xl text-white bg-orange-400 rounded-full p-2" />
                   </div>
-                  <div className="p-1 w-full font-montserrat font-regular">
+                  <div className="px-3 w-full font-regular">
                     <strong>Address</strong>
                     <br />
                     <p>
@@ -93,24 +92,26 @@ export default function Footer() {
                   <div>
                     <FaPhoneAlt className="text-4xl text-white bg-orange-400 rounded-full p-2" />
                   </div>
-                  <div className="p-1 w-full font-montserrat font-regular">
+                  <div className="flex flex-col px-3 w-full font-regular">
                     <strong>Phone</strong>
-                    <p>+95 123456789</p>
+                    <Link to="tel:+95 0912345678">+95 0912345678</Link>
                   </div>
                 </div>
                 <div className="flex flex-row items">
                   <div>
                     <FaEnvelope className="text-4xl text-white bg-orange-400 rounded-full p-2" />
                   </div>
-                  <div className="p-1 w-full font-montserrat font-regular">
+                  <div className="flex flex-col px-3 w-full font-regular">
                     <strong>Email</strong>
-                    <p>abc@gmail.com</p>
+                    <Link to="mail:piumail.@gmail.com">
+                      piumail@gmail.com
+                    </Link>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-          <div className="mt-5 pt-5 border-t-2 flex flex-row justify-between items-center">
+          <div className="mt-5 pt-3 border-t border-gray-400 flex flex-row justify-between items-center text-sm">
             <div>
               <p>
                 Copyright &copy; {new Date().getFullYear()}
@@ -122,6 +123,5 @@ export default function Footer() {
           </div>
         </div>
       </div>
-    </footer>
-  );
+    </footer>;
 }
