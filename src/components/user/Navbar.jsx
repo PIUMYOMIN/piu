@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { FaSearch } from "react-icons/fa";
-import Logo from "../assets/logo.png";
+import Logo from "../../assets/logo.png";
 
 export default function Navbar() {
   return (
@@ -18,19 +18,19 @@ export default function Navbar() {
         </div>
         <div className="lg:flex flex-col block items-center lg:py-3 mt-2">
           <ul className="flex justify-around lg:flex-row items-center lg:gap-3">
-            <li>
+            <li className="hover:border-b border-dark-purple transition-all delay-75 ease-in-out">
               <Link to="/">HOME</Link>
             </li>
-            <li>
+            <li className="hover:border-b border-dark-purple transition-all delay-75 ease-in-out">
               <Link to="/courses">COURSES</Link>
             </li>
-            <li>
+            <li className="hover:border-b border-dark-purple transition-all delay-75 ease-in-out">
               <Link to="/campuses">CAMPUS</Link>
             </li>
-            <li>
+            <li className="hover:border-b border-dark-purple transition-all delay-75 ease-in-out">
               <Link to="/about-us">ABOUT</Link>
             </li>
-            <li>
+            <li className="hover:border-b border-dark-purple transition-all delay-75 ease-in-out">
               <Link to="/contact-us">CONTACT US</Link>
             </li>
           </ul>

@@ -1,5 +1,5 @@
 import React from "react";
-import President from "../assets/president.jpg";
+import President from "../../assets/president.jpg";
 
 export default function president() {
   return (

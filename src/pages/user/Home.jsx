@@ -1,18 +1,19 @@
 import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
-import Carousel from "../components/Carousel";
-import Courses from "../components/News";
-import News from "../components/Courses";
+import Carousel from "../../components/user/Carousel";
+import Courses from "../../components/user/News";
+import News from "../../components/user/Courses";
 import Aos from "aos";
 import "aos/dist/aos.css";
-import about from "../assets/about_piu.jpg";
+import about from "../../assets/about_piu.jpg";
 import { FaFacebook, FaYoutube, FaTelegram, FaUsers } from "react-icons/fa";
 
 export default function Home() {
   useEffect(() => {
     Aos.init({ duration: 2000 });
   }, []);
-  return <div>
+  return (
+    <div>
       {/* carosel section start  */}
       <Carousel />
       {/* carousel section end  */}
@@ -32,14 +33,17 @@ export default function Home() {
                   </p>
                   <p>
                     Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                    Debitis vero totam ipsa facere cumque officia odio sunt
-                    eum enim libero quis blanditiis, quos culpa ad error nihil
+                    Debitis vero totam ipsa facere cumque officia odio sunt eum
+                    enim libero quis blanditiis, quos culpa ad error nihil
                     doloribus laudantium voluptatem impedit adipisci rem? Unde
                     magnam tenetur quia iure, iste eum sed repellat architecto
                     porro, quaerat aliquam dolores deleniti quod maxime?
                   </p>
                   <div className="mt-3">
-                    <Link to="/about-us" className="px-3 py-2 bg-blue-400 text-white rounded-md cursor-pointer">
+                    <Link
+                      to="/about-us"
+                      className="px-3 py-2 bg-blue-400 text-white rounded-md cursor-pointer"
+                    >
                       Learn More
                     </Link>
                   </div>
@@ -105,5 +109,6 @@ export default function Home() {
       {/* news section start  */}
       <News />
       {/* news section end  */}
-    </div>;
+    </div>
+  );
 }

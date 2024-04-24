@@ -1,18 +1,23 @@
 import React from "react";
 import { createBrowserRouter } from "react-router-dom";
-import Home from "../pages/Home";
-import Contact from "../pages/Contact";
-import President from "../pages/President";
-import Courses from "../pages/Courses";
-import Campus from "../pages/Campus";
-import About from "../pages/About";
-import Layout from "../pages/layouts/Layout";
-import CourseDetails from "../pages/CourseDetails";
+import { AuthProvider } from "../contexts/AuthContext";
+import Home from "../pages/user/Home";
+import Contact from "../pages/user/Contact";
+import President from "../pages/user/President";
+import Courses from "../pages/user/Courses";
+import Campus from "../pages/user/Campus";
+import About from "../pages/user/About";
+import Login from "../pages/user/Login";
+import AdminLayout from "../layouts/AdminLayout";
+import UserLayout from "../layouts/UserLayout";
+import CourseDetails from "../pages/user/CourseDetails";
+import Dashboard from "../pages/admin/Dashboard";
+import Users from "../pages/admin/Users";
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <Layout />,
+    element: <UserLayout />,
     children: [
       {
         path: "/",
@@ -41,6 +46,36 @@ const router = createBrowserRouter([
       {
         path: "/president-of-piu",
         element: <President />
+      },
+      {
+        path: "/login",
+        element: (
+          <AuthProvider>
+            <Login />
+          </AuthProvider>
+        )
+      }
+    ]
+  },
+  {
+    path: "/admin",
+    element: (
+      <AuthProvider>
+        <AdminLayout />
+      </AuthProvider>
+    ),
+    children: [
+      {
+        path: "",
+        element: <Dashboard />
+      },
+      {
+        path: "users",
+        element: <Users />
+      },
+      {
+        path: "courses",
+        element: <Courses />
       }
     ]
   }

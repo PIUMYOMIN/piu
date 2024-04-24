@@ -8,7 +8,7 @@ import {
   FaGlobe,
   FaHourglassHalf
 } from "react-icons/fa";
-import LoadingSpinner from "../components/LoadingSpinner";
+import LoadingSpinner from "../../components/user/LoadingSpinner";
 
 export default function CourseDetails() {
   const { slug } = useParams();
