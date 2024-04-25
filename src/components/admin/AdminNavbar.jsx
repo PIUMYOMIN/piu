@@ -1,17 +1,17 @@
 import React, { useState } from "react";
-import Logo from '../../assets/logo.png'
+import Logo from '../../assets/logo.png';
+import {useAuth} from "../../contexts/AuthContext"
 
 export default function adminNavbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const { logout } = useAuth();
 
   const toggleDropdown = () => {
     setIsOpen(!isOpen);
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    setIsAuthenticated(false);
-    navigate("/login");
+    logout();
   };
   return (
     <>
@@ -117,13 +117,13 @@ export default function adminNavbar() {
                         </a>
                       </li>
                       <li>
-                        <a
-                          href="#"
+                        <button
+                          onClick={handleLogout}
                           className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
                           role="menuitem"
                         >
                           Sign out
-                        </a>
+                        </button>
                       </li>
                     </ul>
                   </div>}

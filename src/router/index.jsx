@@ -17,7 +17,11 @@ import Users from "../pages/admin/Users";
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <UserLayout />,
+    element: (
+      <AuthProvider>
+        <UserLayout />
+      </AuthProvider>
+    ),
     children: [
       {
         path: "/",
@@ -49,11 +53,7 @@ const router = createBrowserRouter([
       },
       {
         path: "/login",
-        element: (
-          <AuthProvider>
-            <Login />
-          </AuthProvider>
-        )
+        element: <Login />
       }
     ]
   },

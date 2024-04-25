@@ -1,15 +1,25 @@
-import React from "react";
-import { Redirect } from "react-router-dom";
-import { useAuth } from "../contexts/AuthContext"; // Update the path to your AuthContext
+import React, { useEffect } from "react";
+import { Outlet, useNavigate } from "react-router-dom";
+import AdminNavbar from "../components/admin/AdminNavbar";
+import AdminSidebar from "../components/admin/AdminSidebar";
+import { useAuth } from "../contexts/AuthContext";
 
-const AdminLayout = () => {
-  const { isAuthenticated } = useAuth();
+export default function AdminLayout() {
+  const navigate = useNavigate();
+  const { isAuthenticated, isLoading } = useAuth(); // Get isLoading from useAuth
 
-  console.log("isAuthenticated in AdminLayout:", isAuthenticated); // Add this line to check the value
+  useEffect(
+    () => {
+      console.log("isAuthenticated in AdminLayout:", isAuthenticated);
 
-  if (!isAuthenticated) {
-    return <Redirect to="/login" />;
-  }
+      if (!isLoading && !isAuthenticated) {
+        // Check isLoading
+        navigate("/login");
+        console.log("Redirecting to /login");
+      }
+    },
+    [isAuthenticated, isLoading]
+  ); // Add isLoading to dependency array
 
   return (
     <div className="font-roboto">
@@ -24,4 +34,4 @@ const AdminLayout = () => {
       </div>
     </div>
   );
-};
+}

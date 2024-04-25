@@ -12,20 +12,29 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
       setIsAuthenticated(true);
     }
-    console.log("AuthProvider isAuthenticated:", isAuthenticated); // Add this line
+    setIsLoading(false);
   }, []);
 
-  const value = { isAuthenticated, setIsAuthenticated };
+  const login = () => {
+    setIsAuthenticated(true);
+    localStorage.setItem("token", "your_token_here");
+  };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  const logout = () => {
+    setIsAuthenticated(false);
+    localStorage.removeItem("token");
+  };
+
+  const value = { isAuthenticated, setIsAuthenticated, login, logout, isLoading };
+
+  return <AuthContext.Provider value={value}>
+      {isLoading ? <div>Loading...</div> : children}
+    </AuthContext.Provider>;
 };
