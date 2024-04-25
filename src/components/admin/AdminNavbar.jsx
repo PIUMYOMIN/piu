@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import Logo from '../../assets/logo.png';
-import {useAuth} from "../../contexts/AuthContext"
+import { useAuth } from "../../contexts/AuthContext"
+import { useNavigate } from "react-router-dom";
 
 export default function adminNavbar() {
   const [isOpen, setIsOpen] = useState(false);
   const { logout } = useAuth();
+  const navigate = useNavigate();
 
   const toggleDropdown = () => {
     setIsOpen(!isOpen);
@@ -12,6 +14,7 @@ export default function adminNavbar() {
 
   const handleLogout = () => {
     logout();
+    navigate("/")
   };
   return (
     <>
