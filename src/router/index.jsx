@@ -13,6 +13,7 @@ import UserLayout from "../layouts/UserLayout";
 import CourseDetails from "../pages/user/CourseDetails";
 import Dashboard from "../pages/admin/Dashboard";
 import Users from "../pages/admin/Users";
+import Register from "./../pages/user/Register";
 
 const router = createBrowserRouter([
   {
@@ -54,6 +55,10 @@ const router = createBrowserRouter([
       {
         path: "/login",
         element: <Login />
+      },
+      {
+        path: "/register",
+        element: <Register />
       }
     ]
   },
