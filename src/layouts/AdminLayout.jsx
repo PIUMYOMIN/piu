@@ -6,20 +6,16 @@ import { useAuth } from "../contexts/AuthContext";
 
 export default function AdminLayout() {
   const navigate = useNavigate();
-  const { isAuthenticated, isLoading } = useAuth(); // Get isLoading from useAuth
+  const { isAuthenticated, isLoading } = useAuth();
 
   useEffect(
     () => {
-      console.log("isAuthenticated in AdminLayout:", isAuthenticated);
-
       if (!isLoading && !isAuthenticated) {
-        // Check isLoading
         navigate("/login");
-        console.log("Redirecting to /login");
       }
     },
     [isAuthenticated, isLoading]
-  ); // Add isLoading to dependency array
+  );
 
   return (
     <div className="font-roboto">
