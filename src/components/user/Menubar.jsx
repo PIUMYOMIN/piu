@@ -54,10 +54,10 @@ export default function Menu() {
               </div>
             </li>
             <li className="lg:my-0 my-5">
-              <Link to="/about-us">ABOUT</Link>
+              <Link to="/piu/about-us">ABOUT</Link>
             </li>
             <li className="lg:my-0 my-5">
-              <Link to="/contact">CONTACT</Link>
+              <Link to="/piu/contact">CONTACT</Link>
             </li>
           </ul>
         </div>

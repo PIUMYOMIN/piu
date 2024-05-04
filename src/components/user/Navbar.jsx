@@ -21,16 +21,16 @@ export default function Navbar() {
               <Link to="/piu">HOME</Link>
             </li>
             <li className="hover:border-b border-dark-purple transition-all delay-75 ease-in-out">
-              <Link to="/courses">COURSES</Link>
+              <Link to="/piu/courses">COURSES</Link>
             </li>
             <li className="hover:border-b border-dark-purple transition-all delay-75 ease-in-out">
-              <Link to="/campuses">CAMPUS</Link>
+              <Link to="/piu/campuses">CAMPUS</Link>
             </li>
             <li className="hover:border-b border-dark-purple transition-all delay-75 ease-in-out">
-              <Link to="/about-us">ABOUT</Link>
+              <Link to="/piu/about-us">ABOUT</Link>
             </li>
             <li className="hover:border-b border-dark-purple transition-all delay-75 ease-in-out">
-              <Link to="/contact-us">CONTACT US</Link>
+              <Link to="/piu/contact-us">CONTACT US</Link>
             </li>
           </ul>
           <div className=" relative flex items-center w-[100%] lg:mt-3">

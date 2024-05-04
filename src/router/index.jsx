@@ -29,35 +29,35 @@ const router = createBrowserRouter([
         element: <Home />
       },
       {
-        path: "/campuses",
+        path: "/piu/campuses",
         element: <Campus />
       },
       {
-        path: "/about-us",
+        path: "/piu/about-us",
         element: <About />
       },
       {
-        path: "/courses",
+        path: "/piu/courses",
         element: <Courses />
       },
       {
-        path: "/courses/:slug",
+        path: "/piu/courses/:slug",
         element: <CourseDetails />
       },
       {
-        path: "/contact-us",
+        path: "/piu/contact-us",
         element: <Contact />
       },
       {
-        path: "/president-of-piu",
+        path: "/piu/president-of-piu",
         element: <President />
       },
       {
-        path: "/login",
+        path: "/piu/login",
         element: <Login />
       },
       {
-        path: "/register",
+        path: "/piu/register",
         element: <Register />
       }
     ]
