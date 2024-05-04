@@ -21,7 +21,7 @@ const router = createBrowserRouter([
     element: <UserLayout />,
     children: [
       {
-        path: "/",
+        path: "/piu",
         element: <Home />
       },
       {
