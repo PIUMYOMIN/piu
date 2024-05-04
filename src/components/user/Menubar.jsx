@@ -16,7 +16,7 @@ export default function Menu() {
           </div>
           <ul className={`lg:flex lg:item:center lg:pb-0 pb-12 absolute lg:static lg:z-auto z-20 left-0 w-full lg:w-auto lg:pl-0 pl-5 transition-all duration-500 ease-in ${open ? "top-20 bg-dark-purple text-white" : "top-[-490px]"} gap-8`}>
             <li className="lg:my-0 my-5">
-              <Link to="/">HOME</Link>
+              <Link to="/piu">HOME</Link>
             </li>
             <li className="relative lg:my-0 my-5" onMouseEnter={() => setAcademicHovered(true)} onMouseLeave={() => setAcademicHovered(false)}>
               <button type="button" id="menu-button" aria-expanded={academicHovered} className="flex justify-center items-center" onClick={() => setAcademicHovered(!academicHovered)}>
