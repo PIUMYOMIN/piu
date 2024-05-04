@@ -114,7 +114,7 @@ export default function Footer() {
           <div className="mt-5 pt-3 border-t border-gray-400 flex flex-row justify-between items-center text-sm">
             <div>
               <p>
-                Copyright &copy; {new Date().getFullYear()}
+                Copyright &copy; {new Date().getFullYear()}, All Rights Reserved
               </p>
             </div>
             <div>
