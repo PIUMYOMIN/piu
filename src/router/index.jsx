@@ -17,7 +17,7 @@ import Register from "./../pages/user/Register";
 
 const router = createBrowserRouter([
   {
-    path: "/",
+    path: "/piu",
     element: <UserLayout />,
     children: [
       {
