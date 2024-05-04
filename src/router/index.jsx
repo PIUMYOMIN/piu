@@ -18,10 +18,14 @@ import Register from "./../pages/user/Register";
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <UserLayout />,
+    element: (
+      <AuthProvider>
+        <UserLayout />
+      </AuthProvider>
+    ),
     children: [
       {
-        path: "/piu",
+        path: "/",
         element: <Home />
       },
       {
