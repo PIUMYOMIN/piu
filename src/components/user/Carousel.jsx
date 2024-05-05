@@ -13,7 +13,7 @@ const LoadingSpinner = () =>
 
 const Carousel = () => {
   const [slides, setSlides] = useState([]);
-  const [loading, setLoading] = useState(true); // Loading state
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchSlides = async () => {
@@ -24,7 +24,7 @@ const Carousel = () => {
         }
         const data = await response.json();
         setSlides(data);
-        setLoading(false); // Set loading to false when fetching completes
+        setLoading(false);
       } catch (error) {
         console.error("Error fetching slides:", error);
       }
@@ -42,12 +42,8 @@ const Carousel = () => {
         disableOnInteraction: false
       },
       modules: [Navigation, Pagination, Autoplay],
-      navigation: {
-        nextEl: ".swiper-button-next",
-        prevEl: ".swiper-button-prev"
-      },
       pagination: {
-        // el: ".swiper-pagination",
+        el: ".swiper-pagination",
         clickable: true
       }
     });
@@ -57,7 +53,7 @@ const Carousel = () => {
   }, []);
 
   return <div className="max-w-7xl mx-auto z-[-10] overflow-hidden relative">
-      {loading && <LoadingSpinner />} {/* Conditional rendering of loading spinner */}
+      {loading && <LoadingSpinner />}
       <div className="swiper">
         <div className="swiper-wrapper">
           {slides.map((slide, index) =>
@@ -81,8 +77,6 @@ const Carousel = () => {
           )}
         </div>
         <div className="swiper-pagination" />
-        <div className="swiper-button-prev" />
-        <div className="swiper-button-next" />
       </div>
     </div>;
 };
