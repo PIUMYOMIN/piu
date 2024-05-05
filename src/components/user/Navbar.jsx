@@ -1,10 +1,11 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { FaSearch } from "react-icons/fa";
+import { FaSearch, FaUserCircle } from "react-icons/fa";
 import Logo from "../../assets/logo.png";
 
 export default function Navbar() {
-  return <nav>
+  return (
+    <nav>
       <div className="max-w-7xl mx-auto lg:flex justify-between items-center">
         <div className="flex items-center">
           <img src={Logo} alt="Logo" className="object-contain w-20" />
@@ -32,18 +33,31 @@ export default function Navbar() {
             <li className="hover:border-b border-dark-purple transition-all delay-75 ease-in-out">
               <Link to="/piu/contact-us">CONTACT US</Link>
             </li>
+            <li className="text-xl text-dark-purple border-dark-purple transition-all delay-75 ease-in-out">
+              <Link to="/piu/login">
+                <FaUserCircle />
+              </Link>
+            </li>
           </ul>
           <div className=" relative flex items-center w-[100%] lg:mt-3">
             <form action="">
               <div className="p-2">
-                <input type="text" className="font-normal lg:border-b text-dark lg:w-96 w-[350px] lg:focus:outline-none focus:border-dark-purple px-3 py-1 lg:rounded-e-full relative" placeholder="Search..." />
+                <input
+                  type="text"
+                  className="font-normal lg:border-b text-dark lg:w-96 w-[350px] lg:focus:outline-none focus:border-dark-purple px-3 py-1 lg:rounded-e-full relative"
+                  placeholder="Search..."
+                />
               </div>
-              <button className="absolute lg:top-1/2 transform -translate-y-1/2 text-slate-500 lg:p-2 cursor-pointer lg:right-10 right-4 top-6" type="submit">
+              <button
+                className="absolute lg:top-1/2 transform -translate-y-1/2 text-slate-500 lg:p-2 cursor-pointer lg:right-10 right-4 top-6"
+                type="submit"
+              >
                 <FaSearch />
               </button>
             </form>
           </div>
         </div>
       </div>
-    </nav>;
+    </nav>
+  );
 }
