@@ -1,7 +1,6 @@
 import React, { useState, useLocator, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import LoadingSpinner from "../../components/user/LoadingSpinner";
-import CourseDetails from "./CourseDetails";
 export default function NewsDetails() {
   const { slug } = useParams();
   const [newsDetails, setNewsDetails] = useState(null);
@@ -56,9 +55,9 @@ export default function NewsDetails() {
   const formattedDate = `${day}-${month}-${year}`;
 
   return (
-    <div className="max-w-7xl mx-auto my-5">
+    <div className="max-w-7xl mx-auto my-5 lg:px-0 px-3">
       <div className="lg:ml-40">
-        <div className="text-2xl text-gray-600 font-merriweather">
+        <div className="lg:text-2xl text-gray-600 font-merriweather my-5">
           {newsDetails.title}
         </div>
         <div>
@@ -72,7 +71,7 @@ export default function NewsDetails() {
         </div>
       </div>
       <div className="lg:ml-32 lg:my-10">
-        <div className="lg:ml-32">
+        <div className="lg:ml-32 text-wrap">
           {newsDetails.body}
         </div>
       </div>

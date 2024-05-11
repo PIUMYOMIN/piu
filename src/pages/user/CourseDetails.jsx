@@ -46,16 +46,12 @@ export default function CourseDetails() {
     return <LoadingSpinner />;
   }
 
-  return (
-    <div className="max-w-7xl mx-auto bg-secondary-background lg:py-8 lg:px-0 px-2">
+  return <div className="max-w-7xl mx-auto bg-secondary-background lg:py-8 lg:px-0 px-2">
       <div className="flex flex-col lg:flex-row gap-2">
         <main className="w-fulll lg:w-8/12">
           <div className="flex flex-col">
             <div>
-              <img
-                src={`https://piueducation.org/storage/${courseDetails.image}`}
-                alt=""
-              />
+              <img src={`https://piueducation.org/storage/${courseDetails.image}`} alt="" />
             </div>
             <div>
               <p>
@@ -66,26 +62,8 @@ export default function CourseDetails() {
             <div className="my-3">
               <h3 className="text-2xl">Course Overview</h3>
               <div className="font-montserrat font-normal">
-                <p>
-                  {courseDetails.description}
-                </p>
-                <p className="mt-4">
-                  {courseDetails.requirements}
-                </p>
-              </div>
-
-              <h3 className="text-2xl my-3">What You Will Learn</h3>
-              <div>
-                <p className="font-montserrat">
-                  {courseDetails.eligibility}
-                </p>
-                <p className="font-montserrat mt-3">
-                  Corporis, quo, natus distinctio doloribus delectus repellat
-                  nam rerum modi quod veritatis tempora repellendus! Laboriosam
-                  nisi natus assumenda reprehenderit ab. Id ipsum aliquid
-                  asperiores, quidem sapiente ipsam fugit dolorum autem, maxime
-                  similique vero.Corporis.
-                </p>
+                <div className="font-montserrat font-normal" dangerouslySetInnerHTML={{ __html: courseDetails.description }} />
+                <div className="font-montserrat font-normal" dangerouslySetInnerHTML={{ __html: courseDetails.requirement }} />
               </div>
             </div>
             <table className="min-w-full text-sm font-light text-surface dark:tex-white">
@@ -138,24 +116,19 @@ export default function CourseDetails() {
               <form action="">
                 <ul className="text-surface font-montserrat">
                   <li className="w-full border-b border-orange-400 py-4 flex flex-row items-center gap-2">
-                    <FaHome className="text-2xl text-orange-500" />{" "}
-                    <div>Class Szie : 18</div>
+                    <FaHome className="text-2xl text-orange-500" /> <div>Class Szie : 18</div>
                   </li>
                   <li className="w-full border-b border-orange-400 py-4 flex flex-row items-center gap-2">
-                    <FaBook className="text-2xl text-orange-500" />{" "}
-                    <div>Lectures : 12</div>
+                    <FaBook className="text-2xl text-orange-500" /> <div>Lectures : 12</div>
                   </li>
                   <li className="w-full border-b border-orange-400 py-4 flex flex-row items-center gap-2">
-                    <FaCalendarCheck className="text-2xl text-orange-500" />{" "}
-                    <div>Start : {courseDetails.start_date}</div>
+                    <FaCalendarCheck className="text-2xl text-orange-500" /> <div>Start : {courseDetails.start_date}</div>
                   </li>
                   <li className="w-full border-b border-orange-400 py-4 flex flex-row items-center gap-2">
-                    <FaRegClock className="text-2xl text-orange-500" />{" "}
-                    <div>Time : 9:00AM - 4:00PM</div>
+                    <FaRegClock className="text-2xl text-orange-500" /> <div>Time : 9:00AM - 4:00PM</div>
                   </li>
                   <li className="w-full border-b border-orange-400 py-4 flex flex-row items-center gap-2">
-                    <FaHourglassHalf className="text-2xl text-orange-500" />{" "}
-                    <div>Duration : {courseDetails.duration}</div>
+                    <FaHourglassHalf className="text-2xl text-orange-500" /> <div>Duration : {courseDetails.duration}</div>
                   </li>
                   <li className="w-full border-b border-orange-400 py-4 flex flex-row items-center gap-2">
                     <FaUsers className="text-2xl text-orange-500" />
@@ -166,7 +139,7 @@ export default function CourseDetails() {
                   <li className="w-full border-b border-orange-400 py-4 flex flex-row items-center gap-2">
                     <FaDollarSign className="text-2xl text-orange-500" />
                     <div>
-                      Seat : {courseDetails.fees}
+                      Fees : {courseDetails.fees}
                     </div>
                   </li>
                   <li className="w-full py-4 flex flex-row items-center gap-2">
@@ -184,6 +157,5 @@ export default function CourseDetails() {
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 }

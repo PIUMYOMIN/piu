@@ -5,6 +5,7 @@ import Courses from "../../pages/user/Courses";
 import News from "../../components/user/News";
 import Aos from "aos";
 import "aos/dist/aos.css";
+import CountUp from "react-countup";
 import about from "../../assets/about_piu.jpg";
 import { FaFacebook, FaYoutube, FaTelegram, FaUsers } from "react-icons/fa";
 
@@ -70,7 +71,7 @@ export default function Home() {
               </div>
               <div className="flex flex-col justify-center items-center">
                 <small>Facebook</small>
-                <span className="text-3xl">12021</span>
+                <CountUp end={1202} duration={10} className="text-3xl" />
               </div>
             </div>
             <div className="flex flex-col justify-center items-center gap-3">
@@ -79,7 +80,7 @@ export default function Home() {
               </div>
               <div className="flex flex-col justify-center items-center">
                 <small>Youtute</small>
-                <span className="text-3xl">3251</span>
+                <CountUp end={3251} duration={10} className="text-3xl" />
               </div>
             </div>
             <div className="flex flex-col justify-center items-center gap-3">
@@ -88,7 +89,7 @@ export default function Home() {
               </div>
               <div className="flex flex-col justify-center items-center">
                 <small>Telegram</small>
-                <span className="text-3xl">8512</span>
+                <CountUp end={8512} duration={9} className="text-3xl" />
               </div>
             </div>
             <div className="flex flex-col justify-center items-center gap-3">
@@ -97,7 +98,7 @@ export default function Home() {
               </div>
               <div className="flex flex-col justify-center items-center">
                 <small>Students</small>
-                <span className="text-3xl">850</span>
+                <CountUp end={1200} duration={10} className="text-3xl" />
               </div>
             </div>
           </div>
