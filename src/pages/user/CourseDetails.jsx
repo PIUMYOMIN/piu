@@ -6,7 +6,9 @@ import {
   FaRegClock,
   FaUsers,
   FaGlobe,
-  FaHourglassHalf
+  FaHourglassHalf,
+  FaCalendarCheck,
+  FaDollarSign
 } from "react-icons/fa";
 import LoadingSpinner from "../../components/user/LoadingSpinner";
 
@@ -31,7 +33,7 @@ export default function CourseDetails() {
           }
         } catch (error) {
           console.error("Error fetching course details:", error);
-          setLoading(false); // Update loading state in case of error
+          setLoading(false);
         }
       };
 
@@ -45,7 +47,7 @@ export default function CourseDetails() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto bg-secondary-background lg:py-8">
+    <div className="max-w-7xl mx-auto bg-secondary-background lg:py-8 lg:px-0 px-2">
       <div className="flex flex-col lg:flex-row gap-2">
         <main className="w-fulll lg:w-8/12">
           <div className="flex flex-col">
@@ -65,40 +67,17 @@ export default function CourseDetails() {
               <h3 className="text-2xl">Course Overview</h3>
               <div className="font-montserrat font-normal">
                 <p>
-                  Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                  Consectetur soluta quam architecto magni nostrum magnam, a
-                  molestias nulla earum est provident reprehenderit autem
-                  voluptatem ullam neque maxime quas accusantium accusamus
-                  dolorem incidunt quia, distinctio repudiandae.
+                  {courseDetails.description}
                 </p>
                 <p className="mt-4">
-                  Accusamus accusantiumsunt quam eius cupiditate error molestiae
-                  alias quos porro magnam numquam, aliquid sapiente magni
-                  quaerat iste ipsam fuga totam tempore, facilis sequi
-                  distinctio eum fugit nobis! Repudiandae corrupti vel ipsum
-                  libero nihil ipsa doloribus nostrum est illum facere voluptate
-                  temporibus saepe nisi delectus odit possimus exercitationem
-                  sed a quam tempora, dolorum minima. Unde, ut. Distinctio
-                  quidem natus illo esse cumque tempora eius, recusandae dolorem
-                  repudiandae accusantium error harum suscipit, necessitatibus
-                  tempore laborum culpa voluptas autem consequatur velit.
+                  {courseDetails.requirements}
                 </p>
               </div>
 
               <h3 className="text-2xl my-3">What You Will Learn</h3>
               <div>
                 <p className="font-montserrat">
-                  Amet, possimus deserunt est, illo fugit laboriosam quaerat
-                  recusandae, assumenda reprehenderit nulla inventore mollitia.
-                  Aut cum necessitatibus voluptatum? Vero porro libero cumque
-                  necessitatibus sequi labore soluta, provident sunt quibusdam
-                  quia vel error ut blanditiis! Iure praesentium dolor numquam,
-                  ducimus quas similique nihil necessitatibus tenetur. Corporis,
-                  quo, natus distinctio doloribus delectus repellat nam rerum
-                  modi quod veritatis tempora repellendus! Laboriosam nisi natus
-                  assumenda reprehenderit ab. Id ipsum aliquid asperiores,
-                  quidem sapiente ipsam fugit dolorum autem, maxime similique
-                  vero.
+                  {courseDetails.eligibility}
                 </p>
                 <p className="font-montserrat mt-3">
                   Corporis, quo, natus distinctio doloribus delectus repellat
@@ -167,6 +146,10 @@ export default function CourseDetails() {
                     <div>Lectures : 12</div>
                   </li>
                   <li className="w-full border-b border-orange-400 py-4 flex flex-row items-center gap-2">
+                    <FaCalendarCheck className="text-2xl text-orange-500" />{" "}
+                    <div>Start : {courseDetails.start_date}</div>
+                  </li>
+                  <li className="w-full border-b border-orange-400 py-4 flex flex-row items-center gap-2">
                     <FaRegClock className="text-2xl text-orange-500" />{" "}
                     <div>Time : 9:00AM - 4:00PM</div>
                   </li>
@@ -178,6 +161,12 @@ export default function CourseDetails() {
                     <FaUsers className="text-2xl text-orange-500" />
                     <div>
                       Seat : {courseDetails.total_seat}
+                    </div>
+                  </li>
+                  <li className="w-full border-b border-orange-400 py-4 flex flex-row items-center gap-2">
+                    <FaDollarSign className="text-2xl text-orange-500" />
+                    <div>
+                      Seat : {courseDetails.fees}
                     </div>
                   </li>
                   <li className="w-full py-4 flex flex-row items-center gap-2">

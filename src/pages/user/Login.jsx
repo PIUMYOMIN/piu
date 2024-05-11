@@ -28,8 +28,6 @@ export default function Login() {
       });
 
       const data = await response.json();
-      console.log(data.user);
-
       if (response.ok) {
         localStorage.setItem("token", data.token);
         localStorage.setItem("name", data.name);
@@ -40,10 +38,10 @@ export default function Login() {
         localStorage.setItem("country", data.country);
         localStorage.setItem("picture", data.picture);
         setIsAuthenticated(true);
-        navigate("/admin");
+        navigate("/piu/admin");
       } else {
         console.error("Login failed:", data.error);
-        navigate("/login");
+        navigate("/piu/login");
         setError(data.error || "Login Failed");
       }
     } catch (err) {

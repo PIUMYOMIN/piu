@@ -14,7 +14,7 @@ export default function adminNavbar() {
 
   const handleLogout = () => {
     logout();
-    navigate("/")
+    navigate("/piu")
   };
 
   const name = localStorage.getItem("name");

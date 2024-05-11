@@ -5,15 +5,18 @@ import Home from "../pages/user/Home";
 import Contact from "../pages/user/Contact";
 import President from "../pages/user/President";
 import Courses from "../pages/user/Courses";
+import AdminCourses from "../pages/admin/Courses";
 import Campus from "../pages/user/Campus";
 import About from "../pages/user/About";
 import Login from "../pages/user/Login";
 import AdminLayout from "../layouts/AdminLayout";
 import UserLayout from "../layouts/UserLayout";
 import CourseDetails from "../pages/user/CourseDetails";
+import NewsDetails from "../pages/user/NewsDetails";
 import Dashboard from "../pages/admin/Dashboard";
-import Users from "../pages/admin/Users";
+import AdminUsers from "../pages/admin/Users";
 import Register from "./../pages/user/Register";
+import CourseEdit from "../pages/admin/CourseEdit";
 
 const router = createBrowserRouter([
   {
@@ -45,6 +48,10 @@ const router = createBrowserRouter([
         element: <CourseDetails />
       },
       {
+        path: "/piu/news/:slug",
+        element: <NewsDetails />
+      },
+      {
         path: "/piu/contact-us",
         element: <Contact />
       },
@@ -63,7 +70,7 @@ const router = createBrowserRouter([
     ]
   },
   {
-    path: "/admin",
+    path: "piu/admin",
     element: (
       <AuthProvider>
         <AdminLayout />
@@ -75,12 +82,16 @@ const router = createBrowserRouter([
         element: <Dashboard />
       },
       {
-        path: "users",
-        element: <Users />
+        path: "/piu/admin/users",
+        element: <AdminUsers />
       },
       {
-        path: "courses",
-        element: <Courses />
+        path: "/piu/admin/courses",
+        element: <AdminCourses />
+      },
+      {
+        path: "/piu/admin/courses/:slug/edit",
+        element: <CourseEdit />
       }
     ]
   }

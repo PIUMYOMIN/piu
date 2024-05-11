@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 import Carousel from "../../components/user/Carousel";
-import Courses from "../../components/user/Courses";
+import Courses from "../../pages/user/Courses";
 import News from "../../components/user/News";
 import Aos from "aos";
 import "aos/dist/aos.css";

@@ -11,7 +11,7 @@ export default function AdminLayout() {
   useEffect(
     () => {
       if (!isLoading && !isAuthenticated) {
-        navigate("/login");
+        navigate("/piu/login");
       }
     },
     [isAuthenticated, isLoading]

@@ -43,7 +43,7 @@ export default function News() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {news.map((newItem, index) =>
                 <Link
-                  to={newItem.slug}
+                  to={`/piu/news/${newItem.slug}`}
                   className="md:mb-2 pb-2 w-96 hover:shadow-2xl transition duration-300 ease-in-out rounded-md"
                   data-aos="fade-up"
                   key={index}
