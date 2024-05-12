@@ -57,7 +57,7 @@ export default function Menu() {
               <Link to="/piu/about-us">ABOUT</Link>
             </li>
             <li className="lg:my-0 my-5">
-              <Link to="/piu/#!">ADMISSION</Link>
+              <Link to="/piu/admissions/application-form">ADMISSION</Link>
             </li>
           </ul>
         </div>

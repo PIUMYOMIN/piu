@@ -17,6 +17,7 @@ import Dashboard from "../pages/admin/Dashboard";
 import AdminUsers from "../pages/admin/Users";
 import Register from "./../pages/user/Register";
 import CourseEdit from "../pages/admin/CourseEdit";
+import Admission from "../pages/user/Admission";
 
 const router = createBrowserRouter([
   {
@@ -66,6 +67,10 @@ const router = createBrowserRouter([
       {
         path: "/piu/register",
         element: <Register />
+      },
+      {
+        path: "/piu/admissions/application-form",
+        element: <Admission />
       }
     ]
   },
