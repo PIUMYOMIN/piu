@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { FaAngleRight } from "react-icons/fa";
-import CourseDetails from "../../pages/user/CourseDetails";
 
 export default function Course() {
   const [courses, setCourses] = useState([]);

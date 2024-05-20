@@ -54,27 +54,20 @@ export default function NewsDetails() {
   const year = createdDate.getFullYear();
   const formattedDate = `${day}-${month}-${year}`;
 
-  return (
-    <div className="max-w-7xl mx-auto my-5 lg:px-0 px-3">
+  return <div className="max-w-7xl mx-auto my-5 lg:px-0 px-3">
       <div className="lg:ml-40">
         <div className="lg:text-2xl text-gray-600 font-merriweather my-5">
           {newsDetails.title}
         </div>
         <div>
-          <img
-            src={`https://piueducation.org/storage/${newsDetails.image}`}
-            alt={newsDetails.title}
-          />
+          <img src={`https://piueducation.org/storage/${newsDetails.image}`} alt={newsDetails.title} />
           <p className="lg:ml-24">
             {formattedDate}
           </p>
         </div>
       </div>
       <div className="lg:ml-32 lg:my-10">
-        <div className="lg:ml-32 text-wrap">
-          {newsDetails.body}
-        </div>
+        <div className="lg:ml-32 text-wrap" dangerouslySetInnerHTML={{ __html: newsDetails.body }} />
       </div>
-    </div>
-  );
+    </div>;
 }

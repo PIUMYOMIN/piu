@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import Carousel from "../../components/user/Carousel";
 import Courses from "../../pages/user/Courses";
 import News from "../../components/user/News";
+import Gallery from "../../components/user/Gallery";
+import President from "../../components/user/President";
 import Aos from "aos";
 import "aos/dist/aos.css";
 import CountUp from "react-countup";
@@ -110,6 +112,14 @@ export default function Home() {
       {/* news section start  */}
       <News />
       {/* news section end  */}
+
+      {/* gallery section start  */}
+      <Gallery />
+      {/* gallery section end  */}
+
+      {/* gallery section start  */}
+      <President />
+      {/* gallery section end  */}
     </div>
   );
 }
