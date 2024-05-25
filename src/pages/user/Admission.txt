@@ -73,28 +73,29 @@ export default function Admission() {
       return;
     }
 
-    const formData = new FormData();
-    formData.append("name", name);
-    formData.append("email", email);
-    formData.append("phone", phone);
-    formData.append("address", address);
-    formData.append("city", city);
-    formData.append("country", country);
-    formData.append("zipcode", zipcode);
-    formData.append("dob", dob);
-    formData.append("alumni_sts", alumni_sts);
-    formData.append("student_id", student_id);
-    formData.append("marital_sts", marital_sts);
-    formData.append("gender", gender);
-    formData.append("national_id", national_id);
-    formData.append("course_id", course_id);
-    formData.append("profile", profile);
-    formData.append("personal_statement", personal_statement);
-    formData.append("language_proficiency", language_proficiency);
-    formData.append("education_certificate", education_certificate);
-    formData.append("other_document", other_document);
+    const formData = {
+      name,
+      email,
+      phone,
+      address,
+      city,
+      country,
+      zipcode,
+      dob,
+      alumni_sts,
+      student_id,
+      marital_sts,
+      gender,
+      national_id,
+      course_id,
+      profile,
+      personal_statement,
+      language_proficiency,
+      education_certificate,
+      other_document
+    };
 
-    console.log(...formData);
+    console.log(formData);
 
     try {
       const response = await fetch(
@@ -472,7 +473,7 @@ export default function Admission() {
                   : "border-gray-200"} rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white`}
                 id="grid-profile"
                 type="file"
-                onChange={e => setProfile(e.target.files[0])}
+                onChange={e => setProfile(e.target.files)}
               />
               {error.profile &&
                 <p className="text-red-500 text-xs italic">
@@ -492,7 +493,7 @@ export default function Admission() {
                   : "border-gray-200"} rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white`}
                 id="grid-profile"
                 type="file"
-                onChange={e => setPersonalStatement(e.target.files[0])}
+                onChange={e => setPersonalStatement(e.target.files)}
               />
               {error.personal_statement &&
                 <p className="text-red-500 text-xs italic">
@@ -514,7 +515,7 @@ export default function Admission() {
                   : "border-gray-200"} rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white`}
                 id="grid-education-certificate"
                 type="file"
-                onChange={e => setEducationCertificate(e.target.files[0])}
+                onChange={e => setEducationCertificate(e.target.files)}
               />
               {error.education_certificate &&
                 <p className="text-red-500 text-xs italic">
@@ -534,7 +535,7 @@ export default function Admission() {
                   : "border-gray-200"} rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white`}
                 id="grid-profile"
                 type="file"
-                onChange={e => setLanguageProficiency(e.target.files[0])}
+                onChange={e => setLanguageProficiency(e.target.files)}
               />
               {error.language_proficiency &&
                 <p className="text-red-500 text-xs italic">
@@ -556,7 +557,7 @@ export default function Admission() {
                   : "border-gray-200"} rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white`}
                 id="grid-profile"
                 type="file"
-                onChange={e => setOtherDocument(e.target.files[0])}
+                onChange={e => setOtherDocument(e.target.files)}
               />
               {error.otherDocument &&
                 <p className="text-red-500 text-xs italic">

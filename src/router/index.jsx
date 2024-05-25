@@ -18,6 +18,7 @@ import AdminUsers from "../pages/admin/Users";
 import Register from "./../pages/user/Register";
 import CourseEdit from "../pages/admin/CourseEdit";
 import Admission from "../pages/user/Admission";
+import ApplicationFormSubmitSuccessful from "../pages/user/ApplicationFormSubmitSuccessful";
 
 const router = createBrowserRouter([
   {
@@ -71,6 +72,10 @@ const router = createBrowserRouter([
       {
         path: "/piu/admissions/application-form",
         element: <Admission />
+      },
+      {
+        path: "/piu/admissions/application-form-submitted-successfully",
+        element: <ApplicationFormSubmitSuccessful />
       }
     ]
   },
