@@ -19,8 +19,6 @@ export default function Register() {
       return;
     }
 
-    console.log(credentials);
-
     try {
       const response = await fetch(
         "https://piueducation.org/api/v1/register",

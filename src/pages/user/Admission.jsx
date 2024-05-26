@@ -94,21 +94,14 @@ export default function Admission() {
     formData.append("education_certificate", education_certificate);
     formData.append("other_document", other_document);
 
-    console.log(...formData);
-
     try {
       const response = await fetch(
         "https://piueducation.org/api/v1/application-form/submit",
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify(formData)
+          body: formData
         }
       );
-
-      console.log(response);
 
       if (!response.ok) {
         const data = await response.json();
