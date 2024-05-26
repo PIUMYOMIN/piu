@@ -18,7 +18,7 @@ export default function Footer() {
           <div className="grid lg:grid-cols-4 lg:gap-5 gap-8">
             <div className="pr-3">
               <h2 className="text-2xl">About Us</h2>
-              <p>
+              <p className="text-sm">
                 Lorem ipsum dolor sit, amet consectetur adipisicing elit.
                 Alias repellat saepe ab nemo magnam eum ullam provident,
                 repudiandae nulla eos.
@@ -40,7 +40,7 @@ export default function Footer() {
             </div>
             <div>
               <h2 className="text-2xl">Useful Links</h2>
-              <ul>
+              <ul className="text-sm">
                 <li className="list-item">
                   <Link to="#!">Home</Link>
                 </li>
@@ -57,7 +57,7 @@ export default function Footer() {
             </div>
             <div>
               <h2 className="text-2xl">Popular Courses</h2>
-              <ul>
+              <ul className="text-sm">
                 <li className="list-item">
                   <Link to="#!">Social Entrepreneurship</Link>
                 </li>
@@ -77,12 +77,12 @@ export default function Footer() {
               <div className="grid grid-rows gap-1">
                 <div className="flex flex-row items">
                   <div>
-                    <FaMapMarkerAlt className="text-4xl text-white bg-orange-400 rounded-full p-2" />
+                    <FaMapMarkerAlt className="text-3xl text-white bg-orange-400 rounded-full p-2" />
                   </div>
                   <div className="px-3 w-full font-regular">
                     <strong>Address</strong>
                     <br />
-                    <p>
+                    <p className="text-sm">
                       Dawnabwar Block, Nanshae Aungmyaetharzan Tsp, Mandalay,
                       Myanmar
                     </p>
@@ -90,7 +90,7 @@ export default function Footer() {
                 </div>
                 <div className="flex flex-row items">
                   <div>
-                    <FaPhoneAlt className="text-4xl text-white bg-orange-400 rounded-full p-2" />
+                    <FaPhoneAlt className="text-3xl text-white bg-orange-400 rounded-full p-2" />
                   </div>
                   <div className="flex flex-col px-3 w-full font-regular">
                     <strong>Phone</strong>
@@ -99,7 +99,7 @@ export default function Footer() {
                 </div>
                 <div className="flex flex-row items">
                   <div>
-                    <FaEnvelope className="text-4xl text-white bg-orange-400 rounded-full p-2" />
+                    <FaEnvelope className="text-3xl text-white bg-orange-400 rounded-full p-2" />
                   </div>
                   <div className="flex flex-col px-3 w-full font-regular">
                     <strong>Email</strong>

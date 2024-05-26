@@ -12,7 +12,9 @@ export default function Navbar() {
             <h2 className="text-3xl font-roboto text-green-700">
               Phaung Daw Oo
             </h2>
-            <span className="text-2xl">International University</span>
+            <span className="text-2xl text-yellow-600">
+              International University
+            </span>
           </div>
         </div>
         <div className="lg:flex flex-col block items-center lg:py-3 mt-2">

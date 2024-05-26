@@ -6,6 +6,7 @@ export default function Menu() {
   const [open, setOpen] = useState(false);
 
   const [newsHovered, setNewsHovered] = useState(false);
+  const [applicationHovered, setApplicationHovered] = useState(false);
   const [academicHovered, setAcademicHovered] = useState(false);
 
   return <div className="max-w-7xl mx-auto z-10">
@@ -53,11 +54,22 @@ export default function Menu() {
                 </ul>
               </div>
             </li>
-            <li className="lg:my-0 my-5">
-              <Link to="/piu/about-us">ABOUT</Link>
+            <li className="relative lg:my-0 my-5" onMouseEnter={() => setApplicationHovered(true)} onMouseLeave={() => setApplicationHovered(false)}>
+              <button type="button" id="menu-button" aria-expanded={applicationHovered} className="flex justify-center items-center" onClick={() => setApplicationHovered(!applicationHovered)}>
+                ADMISSION{applicationHovered ? <FaCaretUp /> : <FaCaretDown />}
+              </button>
+              <div className={`lg:absolute bg-dark-purple w-48 ${applicationHovered ? "block" : "hidden"} transition-all duration-500 ease-in lg:pt-3 z-10`} role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabIndex="-1">
+                <ul className="px-2">
+                  <li className="my-5 hover:text-gray-400" role="menuitem" tabIndex="-1" id="menu-item-0">
+                    <Link to="/piu/admissions/application-form">
+                      Application Form
+                    </Link>
+                  </li>
+                </ul>
+              </div>
             </li>
             <li className="lg:my-0 my-5">
-              <Link to="/piu/admissions/application-form">ADMISSION</Link>
+              <Link to="/piu/about-us">ABOUT</Link>
             </li>
           </ul>
         </div>
