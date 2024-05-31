@@ -31,20 +31,16 @@ export default function News() {
   }, []);
   return <div className="w-full bg-secondary-background lg:py-8 px-2 overflow-hidden">
       {loading ? <LoadingSpinner /> : <div className="max-w-7xl mx-auto">
-            <div className="text-center mt-8 mb-10">
+            <div className="mt-8 mb-10">
               <h2 className="text-4xl my-3 font-oswald font-medium">
                 {" "}NEWS & EVENTS
               </h2>
-              <p className="font-montserrat font-regular">
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Atque
-                excepturi beatae vel doloribus eveniet corrupti.
-              </p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {news.map((newItem, index) =>
                 <Link
                   to={`/piu/news/${newItem.slug}`}
-                  className="md:mb-2 pb-2 w-96 hover:shadow-2xl transition duration-300 ease-in-out rounded-md"
+                  className="md:mb-2 pb-2 lg:w-96 hover:shadow-2xl transition duration-300 ease-in-out rounded-md"
                   data-aos="fade-up"
                   key={index}
                 >

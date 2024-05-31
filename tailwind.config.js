@@ -8,7 +8,8 @@ export default {
         nato: ["Nato-Sans", "sans-serif"],
         montserrat: ["Montserrat", "sans-serif"],
         oswald: ["Oswald", "sans-serif"],
-        merriweather: ["Merriweather", "sans-serif"]
+        merriweather: ["Merriweather", "sans-serif"],
+        robotoSlab: ["Roboto Slab", "serif"]
       },
       colors: {
         "dark-purple": "#081A51",

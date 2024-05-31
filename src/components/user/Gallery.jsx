@@ -4,6 +4,7 @@ import { Carousel } from "react-responsive-carousel";
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 import Modal from "react-modal";
 import LoadingSpinner from "../../components/user/LoadingSpinner";
+import { Link } from "react-router-dom";
 
 Modal.setAppElement("#root");
 
@@ -50,25 +51,29 @@ export default function Gallery() {
     ? <div className="w-full bg-dark-purple text-white lg:py-8 overflow-hidden md:px-2">
         <div className="max-w-7xl mx-auto font-montserrat">
           <div className="lg:grid grid-cols-2 gap-5 lg:py-8 px-2">
-            <div className="pr-2" data-aos="fade-up">
-              <div className="lg:text-4xl text-2xl text-center mb-3 font-oswald font-medium">
+            <div className="lg:pr-2">
+              <div className="lg:text-4xl text-2xl my-3 font-oswald font-medium">
                 About
               </div>
-              <p className="lg:text-justify">
-                Lorem ipsum dolor, sit amet consectetur adipisicing elit. Illum,
-                dignissimos, iste in, autem unde explicabo voluptatibus
-                cupiditate sit fugiat libero quia iure amet cum. Placeat
-                corrupti reprehenderit tempora voluptas veniam deleniti magni
-                quo, nostrum numquam mollitia quos sequi, quasi aliquid nam
-                necessitatibus possimus quia debitis iure hic nihil! Soluta
-                alias ex atque dolores voluptatum, possimus tenetur expedita
-                quibusdam non commodi fugit architecto velit accusantium
-                officiis ab exercitationem dolor est, cumque aperiam ducimus
-                modi dolorem dignissimos. Natus temporibus repudiandae quae vel
-                ut at mollitia magni earum quod perferendis hic quibusdam ipsam
-                aliquid odio necessitatibus, laboriosam ea dolorum quasi quidem
-                corporis repellat?
-              </p>
+              <div className="my-3" data-aos="fade-up">
+                <p className="lg:text-justify text-base">
+                  As the education in Myanmar is lasting behind so do every
+                  aspect of Myanmar. Therefore, it is desperately needed to lift
+                  the status of education in Myanmar. We can see that the
+                  countries which have internationally high ranking universities
+                  become well developed ones in the world. To establish quality
+                  assurance university qualify teachers and eligible students
+                  are needed. As Myanmar has been deteriorating for many years
+                  qualify teachers are very difficult to have. So, no eligible
+                  students become. I have been facing this broken process of
+                  education system for over a decade. Good quality university
+                  students have to become from good quality basic education
+                  level students i.e primary, secondary, and tertiary.{" "}
+                  <Link to="#!" className="text-gray-500 hover:text-gray-300">
+                    Continue Reading ...
+                  </Link>
+                </p>
+              </div>
             </div>
             <div data-aos="fade-up">
               <ResponsiveMasonry columnsCountBreakPoints={{ 750: 2, 900: 3 }}>

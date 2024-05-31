@@ -13,7 +13,7 @@ import {
 
 export default function Footer() {
   return <footer>
-      <div className="w-full bg-dark-purple text-white font-montserrat px-2 lg:pt-20 py-3">
+      <div className="w-full bg-dark-purple text-white font-montserrat px-2 lg:pt-20 py-5">
         <div className="max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-4 lg:gap-5 gap-8">
             <div className="pr-3">
@@ -94,7 +94,9 @@ export default function Footer() {
                   </div>
                   <div className="flex flex-col px-3 w-full font-regular">
                     <strong>Phone</strong>
-                    <Link to="tel:+95 0912345678">+95 0912345678</Link>
+                    <Link to="tel:+95 0912345678">
+                      <p className="text-sm">+95 0912345678</p>
+                    </Link>
                   </div>
                 </div>
                 <div className="flex flex-row items">
@@ -104,14 +106,14 @@ export default function Footer() {
                   <div className="flex flex-col px-3 w-full font-regular">
                     <strong>Email</strong>
                     <Link to="mail:piumail.@gmail.com">
-                      piumail@gmail.com
+                      <p className="text-sm">piumail@gmail.com</p>
                     </Link>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-          <div className="mt-5 pt-3 border-t border-gray-400 flex flex-row justify-between items-center text-sm">
+          <div className="mt-5 pt-3 border-t border-gray-50 lg:flex flex-row justify-between items-center text-sm text-center">
             <div>
               <p>
                 Copyright &copy; {new Date().getFullYear()}, All Rights Reserved

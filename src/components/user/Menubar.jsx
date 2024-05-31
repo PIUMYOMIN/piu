@@ -9,7 +9,7 @@ export default function Menu() {
   const [applicationHovered, setApplicationHovered] = useState(false);
   const [academicHovered, setAcademicHovered] = useState(false);
 
-  return <div className="max-w-7xl mx-auto z-10">
+  return <div className="max-w-7xl mx-auto z-10 font-robotoSlab">
       <div className="lg:bg-dark-purple text-white lg:py-2 lg:pl-3">
         <div className="lg:flex items-center justify-between lg:py-5">
           <div className="text-3xl absolute right-2 top-2 cursor-pointer lg:hidden text-dark z-50" onClick={() => setOpen(!open)}>

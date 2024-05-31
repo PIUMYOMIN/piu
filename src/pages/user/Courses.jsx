@@ -48,7 +48,7 @@ export default function Course() {
             <FaAngleRight className="lg:w-7 w-5 lg:h-7 h-5 lg:p-2 p-1 bg-gray-500 text-white rounded-full" />
           </Link>
         </div>
-        <div className="grid lg:grid-cols-4 grid-cols-2 gap-5">
+        <div className="grid lg:grid-cols-4 grid-cols-2 gap-1">
           {courses.map((course, index) =>
             <Link
               to={`/piu/courses/${course.slug}`}
@@ -59,7 +59,7 @@ export default function Course() {
               <img
                 src={`https://piueducation.org/storage/${course.image}`}
                 alt=""
-                className="object-cover lg:h-48 hover:scale-105 transition-all duration-200 ease-in"
+                className="object-cover lg:h-48 h-28 hover:scale-105 transition-all duration-200 ease-in"
               />
               <div className="py-2">
                 <div className="flex flex-row justify-between">

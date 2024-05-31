@@ -113,8 +113,8 @@ export default function Admission() {
   };
 
   return <div className="max-w-7xl mx-auto">
-      <div className="flex justify-center items-center lg:my-8">
-        <form className="max-w-6xl my-5" onSubmit={submitApplicationForm}>
+      <div className="flex justify-center items-center lg:my-8 my-5 px-2">
+        <form className="max-w-6xl my-5 overflow-hidden" onSubmit={submitApplicationForm}>
           <div className="hidden lg:block mt-8 mb-14 py-2 text-center border-b border-black">
             <div className="text-xl">Applicant Information Form</div>
             <div className="flex flex-row justify-between mt-3">

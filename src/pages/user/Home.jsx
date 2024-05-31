@@ -4,12 +4,11 @@ import Carousel from "../../components/user/Carousel";
 import Courses from "../../pages/user/Courses";
 import News from "../../components/user/News";
 import Gallery from "../../components/user/Gallery";
+import Followers from "../../components/user/Followers";
 import President from "../../components/user/President";
 import Aos from "aos";
 import "aos/dist/aos.css";
-import CountUp from "react-countup";
-import about from "../../assets/about_piu.jpg";
-import { FaFacebook, FaYoutube, FaTelegram, FaUsers } from "react-icons/fa";
+import president from "../../assets/president.jpg";
 
 export default function Home() {
   useEffect(() => {
@@ -22,34 +21,33 @@ export default function Home() {
       {/* carousel section end  */}
 
       {/* about section start  */}
-      <div className="w-full px-2">
-        <div className=" max-w-5xl mx-auto">
-          <div className="md:flex justify-center items-center my-5 py-5 bg-primary-background">
-            <div className="md:w-1/2 flex justify-center items-center">
-              <img src={about} alt="" className="object-cover lg:w-80 w-72" />
+      <div className="w-full">
+        <div className=" max-w-7xl mx-auto lg:p-10 p-2 bg-secondary-background">
+          <div className="max-w-4xl mx-auto lg:grid grid-cols-2">
+            <div className="flex justify-end items-center lg:pr-10">
+              <img src={president} alt="" className="object-cover lg:w-60" />
             </div>
-            <div className="md:w-1/2 flex flex-row font-nato">
+            <div className="flex flex-row font-nato">
               <div className="flex flex-col gap-3 py-3">
-                <div className="">
-                  <p className="text-2xl lg:py-2 font-montserrat font-regular lg:text-left text-center">
-                    About PIU
-                  </p>
-                  <p>
-                    Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                    Debitis vero totam ipsa facere cumque officia odio sunt eum
-                    enim libero quis blanditiis, quos culpa ad error nihil
-                    doloribus laudantium voluptatem impedit adipisci rem? Unde
-                    magnam tenetur quia iure, iste eum sed repellat architecto
-                    porro, quaerat aliquam dolores deleniti quod maxime?
-                  </p>
-                  <div className="mt-3">
-                    <Link
-                      to="/about-us"
-                      className="px-3 py-2 bg-blue-400 text-white rounded-md cursor-pointer"
-                    >
-                      Learn More
-                    </Link>
-                  </div>
+                <p className="text-2xl lg:py-2 font-montserrat font-regular lg:text-left text-center">
+                  About PIU
+                </p>
+                <p>
+                  25th years ago Phaung Daw Oo monastic education school was
+                  established by the two brothers, Ven Nayaka and Ven Jotika.
+                  During eight years times the school has been developed from
+                  primary to high school level: In 1993 Primary, In 1998
+                  Secondary, In 2000 High School. In 2011 the principal and his
+                  colleagues attended an annual conference of International
+                  Network of Engage Buddhist (INEB).
+                </p>
+                <div className="mt-3">
+                  <Link
+                    to="/piu/about-us"
+                    className="px-3 py-2 bg-blue-400 text-white rounded-md cursor-pointer"
+                  >
+                    Learn More
+                  </Link>
                 </div>
               </div>
             </div>
@@ -64,48 +62,7 @@ export default function Home() {
 
       {/* follower section start  */}
 
-      <div className="w-full bg-dark-purple text-white">
-        <div className="max-w-7xl mx-auto py-10">
-          <div className="grid lg:grid-cols-4 grid-cols-2 lg:gap-10 gap-6 font-roboto font-medium">
-            <div className="flex flex-col justify-center items-center gap-3">
-              <div className="text-3xl">
-                <FaFacebook />
-              </div>
-              <div className="flex flex-col justify-center items-center">
-                <small>Facebook</small>
-                <CountUp end={1202} duration={10} className="text-3xl" />
-              </div>
-            </div>
-            <div className="flex flex-col justify-center items-center gap-3">
-              <div className="text-3xl">
-                <FaYoutube />
-              </div>
-              <div className="flex flex-col justify-center items-center">
-                <small>Youtute</small>
-                <CountUp end={3251} duration={10} className="text-3xl" />
-              </div>
-            </div>
-            <div className="flex flex-col justify-center items-center gap-3">
-              <div className="text-3xl">
-                <FaTelegram />
-              </div>
-              <div className="flex flex-col justify-center items-center">
-                <small>Telegram</small>
-                <CountUp end={8512} duration={9} className="text-3xl" />
-              </div>
-            </div>
-            <div className="flex flex-col justify-center items-center gap-3">
-              <div className="text-3xl">
-                <FaUsers />
-              </div>
-              <div className="flex flex-col justify-center items-center">
-                <small>Students</small>
-                <CountUp end={1200} duration={10} className="text-3xl" />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <Followers />
 
       {/* follower section end  */}
 
