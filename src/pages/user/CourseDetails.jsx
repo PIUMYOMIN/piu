@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import {
   FaHome,
   FaBook,
@@ -8,7 +8,10 @@ import {
   FaGlobe,
   FaHourglassHalf,
   FaCalendarCheck,
-  FaDollarSign
+  FaDollarSign,
+  FaFacebook,
+  FaTwitter,
+  FaTelegram
 } from "react-icons/fa";
 import LoadingSpinner from "../../components/user/LoadingSpinner";
 import "../../../src/custom.css";
@@ -59,9 +62,38 @@ export default function CourseDetails() {
               />
             </div>
             <div>
-              <p>
-                {courseDetails.title}
-              </p>
+              <div className="flex flex-row justify-between items-center">
+                <div className="text-2xl text-orange-500">
+                  {courseDetails.title}
+                </div>
+                <div className="flex justify-center items-center gap-2 text-slate-500">
+                  <p>Share on:</p>
+                  <Link
+                    to={`https://www.facebook.com/sharer/sharer.php?u=https://piueducation.org/courses/${slug}`}
+                    className="text-2xl"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <FaFacebook className="hover:text-blue-600 transition duration-200 ease-in-out" />
+                  </Link>
+                  <Link
+                    to={`https://twitter.com/intent/tweet?url=https://piueducation.org/courses/${slug}&text=${courseDetails.title}`}
+                    className="text-2xl"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <FaTwitter className="hover:text-blue-400 transition duration-200 ease-in-out" />
+                  </Link>
+                  <Link
+                    to={`https://t.me/share/url?url=https://piueducation.org/courses/${slug}&text=${courseDetails.title}`}
+                    className="text-2xl"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <FaTelegram className="hover:text-blue-700 transition duration-200 ease-in-out" />
+                  </Link>
+                </div>
+              </div>
             </div>
             <div />
             <div className="my-3">
@@ -127,10 +159,13 @@ export default function CourseDetails() {
                     <FaGlobe className="text-2xl text-orange-500" />
                     <div>Language : English</div>
                   </li>
-                  <li className="w-full bg-orange-400 text-center text-xl text-white font-oswald rounded-lg hover:bg-dark-purple transition duration-200 ease-in-out">
-                    <button type="button" className="w-full py-4">
+                  <li className="w-full bg-orange-400 text-center text-xl text-white font-oswald rounded-lg hover:bg-dark-purple transition duration-200 ease-in-out py-4">
+                    <Link
+                      to="/piu/admissions/application-form"
+                      className="w-full"
+                    >
                       ENROLL NOW
-                    </button>
+                    </Link>
                   </li>
                 </ul>
               </form>

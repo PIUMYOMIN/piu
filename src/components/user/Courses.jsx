@@ -39,22 +39,20 @@ export default function Course() {
         return "bg-blue-400 rounded-full px-2 text-white text-sm";
     }
   }
-  return <div className="w-full bg-primary-background px-2">
+  return <div className="w-full bg-primary-background py-8 px-2">
       <div className="max-w-7xl mx-auto">
-        <div className="text-center bg-green-300 py-28">
-          <div className="text-3xl font-oswald">
-            Faculty of the Departments
-          </div>
-          <p className="font-nato">
-            Lorem, ipsum dolor sit amet consectetur adipisicing elit. Illum
-            necessitatibus tempore quos perferendis, magnam illo.
-          </p>
+        <div className="flex flex-row justify-between items-center my-3">
+          <h2 className="text-4xl my-3 font-oswald font-medium"> COURSES</h2>
+          <Link to="/piu/courses" className="flex flex-row items-center hover:underline gap-2">
+            <span className="text-gray-500">List All</span>
+            <FaAngleRight className="lg:w-7 w-5 lg:h-7 h-5 lg:p-2 p-1 bg-gray-500 text-white rounded-full" />
+          </Link>
         </div>
-        <div className="grid lg:grid-cols-4 grid-cols-2 gap-2 mt-10">
+        <div className="grid lg:grid-cols-4 grid-cols-2 gap-1">
           {courses.map((course, index) =>
             <Link
               to={`/piu/courses/${course.slug}`}
-              className="flex flex-col overflow-hidden"
+              className="flex flex-col overflow-hidden px-2"
               data-aos="fade-up"
               key={index}
             >

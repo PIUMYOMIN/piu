@@ -47,29 +47,16 @@ export default function Gallery() {
     setModalIsOpen(false);
   };
 
-  return !loading
-    ? <div className="w-full bg-dark-purple text-white lg:py-8 overflow-hidden md:px-2">
+  return !loading ? <div className="w-full bg-dark-purple text-white lg:py-8 overflow-hidden md:px-2">
         <div className="max-w-7xl mx-auto font-montserrat">
           <div className="lg:grid grid-cols-2 gap-5 lg:py-8 px-2">
-            <div className="lg:pr-2">
+            <div className="lg:pr-2" data-aos="fade-up">
               <div className="lg:text-4xl text-2xl my-3 font-oswald font-medium">
                 About
               </div>
-              <div className="my-3" data-aos="fade-up">
+              <div className="my-3">
                 <p className="lg:text-justify text-base">
-                  As the education in Myanmar is lasting behind so do every
-                  aspect of Myanmar. Therefore, it is desperately needed to lift
-                  the status of education in Myanmar. We can see that the
-                  countries which have internationally high ranking universities
-                  become well developed ones in the world. To establish quality
-                  assurance university qualify teachers and eligible students
-                  are needed. As Myanmar has been deteriorating for many years
-                  qualify teachers are very difficult to have. So, no eligible
-                  students become. I have been facing this broken process of
-                  education system for over a decade. Good quality university
-                  students have to become from good quality basic education
-                  level students i.e primary, secondary, and tertiary.{" "}
-                  <Link to="#!" className="text-gray-500 hover:text-gray-300">
+                  As the education in Myanmar is lasting behind so do every aspect of Myanmar. Therefore, it is desperately needed to lift the status of education in Myanmar. We can see that the countries which have internationally high ranking universities become well developed ones in the world. To establish quality assurance university qualify teachers and eligible students are needed. As Myanmar has been deteriorating for many years qualify teachers are very difficult to have. So, no eligible students become. I have been facing this broken process of education system for over a decade. Good quality university students have to become from good quality basic education level students i.e primary, secondary, and tertiary. <Link to="#!" className="text-gray-500 hover:text-gray-300">
                     Continue Reading ...
                   </Link>
                 </p>
@@ -92,42 +79,11 @@ export default function Gallery() {
             </div>
           </div>
         </div>
-        <Modal
-          isOpen={modalIsOpen}
-          onRequestClose={closeModal}
-          contentLabel="Image Carousel Modal"
-          style={{
-            content: {
-              top: "50%",
-              left: "50%",
-              right: "auto",
-              bottom: "auto",
-              marginRight: "-50%",
-              transform: "translate(-50%, -50%)",
-              backgroundColor: "black",
-              overflow: "hidden",
-              color: "white",
-              border: "none",
-              padding: "0",
-              maxWidth: "90%",
-              maxHeight: "90%"
-            },
-            overlay: { backgroundColor: "rgba(0, 0, 0, 0.75)" }
-          }}
-        >
-          <button
-            onClick={closeModal}
-            style={{ position: "absolute", top: 10, right: 10, zIndex: 1000 }}
-          >
+        <Modal isOpen={modalIsOpen} onRequestClose={closeModal} contentLabel="Image Carousel Modal" style={{ content: { top: "50%", left: "50%", right: "auto", bottom: "auto", marginRight: "-50%", transform: "translate(-50%, -50%)", backgroundColor: "black", overflow: "hidden", color: "white", border: "none", padding: "0", maxWidth: "90%", maxHeight: "90%" }, overlay: { backgroundColor: "rgba(0, 0, 0, 0.75)" } }}>
+          <button onClick={closeModal} style={{ position: "absolute", top: 10, right: 10, zIndex: 1000 }}>
             Close
           </button>
-          <Carousel
-            selectedItem={currentImageIndex}
-            showThumbs={false}
-            infiniteLoop
-            useKeyboardArrows
-            dynamicHeight
-          >
+          <Carousel selectedItem={currentImageIndex} showThumbs={false} infiniteLoop useKeyboardArrows dynamicHeight>
             {galleries.map((gallery, index) =>
               <div className="bg-blue-500" key={index}>
                 <img
@@ -141,6 +97,5 @@ export default function Gallery() {
             )}
           </Carousel>
         </Modal>
-      </div>
-    : <LoadingSpinner />;
+      </div> : <LoadingSpinner />;
 }
