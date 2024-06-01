@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { FaAngleRight } from "react-icons/fa";
-import "react-lazyload";
 import LazyLoad from "react-lazyload";
+import LoadingSpinner from "../../components/user/LoadingSpinner";
 
 export default function Course() {
   const [courses, setCourses] = useState([]);
