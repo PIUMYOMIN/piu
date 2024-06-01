@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { FaCalendarCheck } from "react-icons/fa";
-import LazyLoad from "react-lazyload";
-import LoadingSpinner from "../../components/user/LoadingSpinner";
+
+const LoadingSpinner = () =>
+  <div className="fixed top-0 left-0 z-50 w-full h-full flex justify-center items-center bg-gray-900 bg-opacity-50">
+    <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-gray-900" />
+  </div>;
 
 export default function News() {
   const [news, setNews] = useState([]);
@@ -44,14 +47,13 @@ export default function News() {
                   data-aos="fade-up"
                   key={index}
                 >
-                  <LazyLoad className="overflow-hidden h-60">
+                  <div className="overflow-hidden h-60">
                     <img
                       src={`https://piueducation.org/storage/${newItem.image}`}
-                      alt="{newItem.title}"
-                      loading="lazy"
+                      alt=""
                       className="object-fit w-full hover:scale-105 transition duration-300 ease-out h-full"
                     />
-                  </LazyLoad>
+                  </div>
                   <div className="flex flex-col justify-between">
                     <div className="text-xl md:pl-5 my-5 hover:text-orange-500 transition duration-300 ease-in-out">
                       <p>
