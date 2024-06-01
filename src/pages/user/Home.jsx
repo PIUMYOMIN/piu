@@ -14,8 +14,7 @@ export default function Home() {
   useEffect(() => {
     Aos.init({ duration: 2000 });
   }, []);
-  return (
-    <div>
+  return <div>
       {/* carosel section start  */}
       <Carousel />
       {/* carousel section end  */}
@@ -25,7 +24,7 @@ export default function Home() {
         <div className=" max-w-7xl mx-auto lg:p-10 p-2 bg-secondary-background">
           <div className="max-w-4xl mx-auto lg:grid grid-cols-2">
             <div className="flex justify-end items-center lg:pr-10">
-              <img src={president} alt="" className="object-cover lg:w-60" />
+              <img src={president} alt="President" className="object-cover lg:w-60" />
             </div>
             <div className="flex flex-row font-nato">
               <div className="flex flex-col gap-3 py-3">
@@ -37,15 +36,12 @@ export default function Home() {
                   established by the two brothers, Ven Nayaka and Ven Jotika.
                   During eight years times the school has been developed from
                   primary to high school level: In 1993 Primary, In 1998
-                  Secondary, In 2000 High School. In 2011 the principal and his
-                  colleagues attended an annual conference of International
-                  Network of Engage Buddhist (INEB).
+                  Secondary, In 2000 High School. In 2011 the principal and
+                  his colleagues attended an annual conference of
+                  International Network of Engage Buddhist (INEB).
                 </p>
                 <div className="mt-3">
-                  <Link
-                    to="/piu/about-us"
-                    className="px-3 py-2 bg-blue-400 text-white rounded-md cursor-pointer"
-                  >
+                  <Link to="/piu/about-us" className="px-3 py-2 bg-blue-400 text-white rounded-md cursor-pointer">
                     Learn More
                   </Link>
                 </div>
@@ -77,6 +73,5 @@ export default function Home() {
       {/* gallery section start  */}
       <President />
       {/* gallery section end  */}
-    </div>
-  );
+    </div>;
 }

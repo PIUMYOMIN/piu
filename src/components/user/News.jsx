@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
+import "react-lazyload";
 import { Link } from "react-router-dom";
 import { FaCalendarCheck } from "react-icons/fa";
+import LazyLoad from "react-lazyload";
 
 const LoadingSpinner = () =>
   <div className="fixed top-0 left-0 z-50 w-full h-full flex justify-center items-center bg-gray-900 bg-opacity-50">
@@ -23,14 +25,17 @@ export default function News() {
           setLoading(false);
         }
       } catch (error) {
-        console.error("Error fetching news:", error);
+        console.error("Network error found.", error);
       }
     };
 
     fetchNews();
   }, []);
-  return <div className="w-full bg-secondary-background lg:py-8 px-2 overflow-hidden">
-      {loading ? <LoadingSpinner /> : <div className="max-w-7xl mx-auto">
+  return (
+    <div className="w-full bg-secondary-background lg:py-8 px-2 overflow-hidden">
+      {loading
+        ? <LoadingSpinner />
+        : <div className="max-w-7xl mx-auto">
             <div className="mt-8 mb-10">
               <h2 className="text-4xl my-3 font-oswald font-medium">
                 {" "}NEWS & EVENTS
@@ -44,13 +49,14 @@ export default function News() {
                   data-aos="fade-up"
                   key={index}
                 >
-                  <div className="overflow-hidden h-60">
+                  <LazyLoad className="overflow-hidden h-60">
                     <img
                       src={`https://piueducation.org/storage/${newItem.image}`}
-                      alt=""
+                      alt="{newItem.title}"
+                      loading="lazy"
                       className="object-fit w-full hover:scale-105 transition duration-300 ease-out h-full"
                     />
-                  </div>
+                  </LazyLoad>
                   <div className="flex flex-col justify-between">
                     <div className="text-xl md:pl-5 my-5 hover:text-orange-500 transition duration-300 ease-in-out">
                       <p>
@@ -61,7 +67,7 @@ export default function News() {
                       <div>
                         <p>Faculty of PIU</p>
                       </div>
-                      <div className="flex justify-center items-center pr-2">
+                      <div className="flex justify-center items-center pr-2 text-sm">
                         <FaCalendarCheck /> &nbsp;
                         {new Date(newItem.created_at).toLocaleString()}
                       </div>
@@ -71,5 +77,6 @@ export default function News() {
               )}
             </div>
           </div>}
-    </div>;
+    </div>
+  );
 }

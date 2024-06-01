@@ -19,7 +19,7 @@ const Carousel = () => {
         setSlides(data);
         setLoading(false);
       } catch (error) {
-        console.error("Error fetching slides:", error);
+        console.error("Network error found.", error);
       }
     };
 
