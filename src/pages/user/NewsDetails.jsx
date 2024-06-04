@@ -1,6 +1,8 @@
 import React, { useState, useLocator, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import LoadingSpinner from "../../components/user/LoadingSpinner";
+
+
 export default function NewsDetails() {
   const { slug } = useParams();
   const [newsDetails, setNewsDetails] = useState(null);

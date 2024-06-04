@@ -3,6 +3,7 @@ import Principal from "../../assets/Principal.jpg";
 import Rector from "../../assets/Rector.png";
 import { FaFacebook, FaYoutube, FaTelegram, FaUsers } from "react-icons/fa";
 import CountUp from "react-countup";
+import Teams from "../../components/user/Teams";
 
 export default function About() {
   return (
@@ -181,55 +182,7 @@ export default function About() {
             </p>
           </div>
         </div>
-        <div className="my-8 lg:px-0 px-2">
-          <div>
-            <div>
-              <div className="text-2xl">OUR FACULTY</div>
-            </div>
-            <div className="flex gap-1">
-              <div className="w-8 border-b-2 border-slate-400" />
-              <div className="w-12 border-b-2 border-slate-500" />
-            </div>
-          </div>
-          <div className="grid lg:grid-cols-4 grid-cols-2 gap-3 my-8">
-            <div>
-              <div className="overflow-hidden">
-                <img src={Principal} alt="" className="lg:h-52 h-36" />
-              </div>
-              <div className="my-3">
-                <div className="text-xl">Ven.Nayaka</div>
-                <p>Founder (President)</p>
-              </div>
-            </div>
-            <div>
-              <div className="overflow-hidden">
-                <img src={Rector} alt="" className="lg:h-52 h-36" />
-              </div>
-              <div className="my-3">
-                <div className="text-xl">Mr.Cardonal</div>
-                <p>Rector (PIU)</p>
-              </div>
-            </div>
-            <div>
-              <div className="overflow-hidden">
-                <img src={Principal} alt="" className="lg:h-52 h-36" />
-              </div>
-              <div className="my-3">
-                <div className="text-xl">Ven.Nayaka</div>
-                <p>Founder (President)</p>
-              </div>
-            </div>
-            <div>
-              <div className="overflow-hidden">
-                <img src={Principal} alt="" className="lg:h-52 h-36" />
-              </div>
-              <div className="my-3">
-                <div className="text-xl">Ven.Nayaka</div>
-                <p>Founder (President)</p>
-              </div>
-            </div>
-          </div>
-        </div>
+        <Teams />
       </div>
     </div>
   );

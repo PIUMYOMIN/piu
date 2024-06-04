@@ -1,11 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { FaCalendarCheck } from "react-icons/fa";
-
-const LoadingSpinner = () =>
-  <div className="fixed top-0 left-0 z-50 w-full h-full flex justify-center items-center bg-gray-900 bg-opacity-50">
-    <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-gray-900" />
-  </div>;
+import LoadingSpinner from "./LoadingSpinner";
 
 export default function News() {
   const [news, setNews] = useState([]);

@@ -19,6 +19,7 @@ import Register from "./../pages/user/Register";
 import CourseEdit from "../pages/admin/CourseEdit";
 import Admission from "../pages/user/Admission";
 import ApplicationFormSubmitSuccessful from "../pages/user/ApplicationFormSubmitSuccessful";
+import TeamProfile from "../pages/user/TeamProfile";
 
 const router = createBrowserRouter([
   {
@@ -48,6 +49,10 @@ const router = createBrowserRouter([
       {
         path: "/piu/courses/:slug",
         element: <CourseDetails />
+      },
+      {
+        path: "/piu/team/:slug",
+        element: <TeamProfile />
       },
       {
         path: "/piu/news/:slug",
