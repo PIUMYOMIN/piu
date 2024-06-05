@@ -31,7 +31,7 @@ const router = createBrowserRouter([
     ),
     children: [
       {
-        path: "/piu",
+        path: "/",
         element: <Home />
       },
       {
