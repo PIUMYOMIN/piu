@@ -20,19 +20,19 @@ export default function Navbar() {
         <div className="lg:flex flex-col block items-center lg:py-3 mt-2">
           <ul className="flex justify-around lg:flex-row items-center lg:gap-3">
             <li className="hover:border-b border-dark-purple transition-all delay-75 ease-in-out">
-              <Link to="/piu">HOME</Link>
+              <Link to="/">HOME</Link>
             </li>
             <li className="hover:border-b border-dark-purple transition-all delay-75 ease-in-out">
-              <Link to="/piu/courses">COURSES</Link>
+              <Link to="/courses">COURSES</Link>
             </li>
             <li className="hover:border-b border-dark-purple transition-all delay-75 ease-in-out">
-              <Link to="/piu/campuses">CAMPUS</Link>
+              <Link to="/campuses">CAMPUS</Link>
             </li>
             <li className="hover:border-b border-dark-purple transition-all delay-75 ease-in-out">
-              <Link to="/piu/about-us">ABOUT</Link>
+              <Link to="/about-us">ABOUT</Link>
             </li>
             <li className="hover:border-b border-dark-purple transition-all delay-75 ease-in-out">
-              <Link to="/piu/contact-us">CONTACT US</Link>
+              <Link to="/contact-us">CONTACT US</Link>
             </li>
             {/* <li className="text-xl text-dark-purple border-dark-purple transition-all delay-75 ease-in-out">
               <Link to="/piu/login">

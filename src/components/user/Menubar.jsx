@@ -17,7 +17,7 @@ export default function Menu() {
           </div>
           <ul className={`lg:flex lg:item:center lg:pb-0 pb-12 absolute lg:static lg:z-auto z-20 left-0 w-full lg:w-auto lg:pl-0 pl-5 transition-all duration-500 ease-in ${open ? "top-20 bg-dark-purple text-white" : "top-[-490px]"} gap-8`}>
             <li className="lg:my-0 my-5">
-              <Link to="/piu">HOME</Link>
+              <Link to="/">HOME</Link>
             </li>
             <li className="relative lg:my-0 my-5" onMouseEnter={() => setAcademicHovered(true)} onMouseLeave={() => setAcademicHovered(false)}>
               <button type="button" id="menu-button" aria-expanded={academicHovered} className="flex justify-center items-center" onClick={() => setAcademicHovered(!academicHovered)}>
@@ -61,7 +61,7 @@ export default function Menu() {
               <div className={`lg:absolute bg-dark-purple w-48 ${applicationHovered ? "block" : "hidden"} transition-all duration-500 ease-in lg:pt-3 z-10`} role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabIndex="-1">
                 <ul className="px-2">
                   <li className="my-5 hover:text-gray-400" role="menuitem" tabIndex="-1" id="menu-item-0">
-                    <Link to="/piu/admissions/application-form">
+                    <Link to="/admissions/application-form">
                       Application Form
                     </Link>
                   </li>
@@ -69,7 +69,7 @@ export default function Menu() {
               </div>
             </li>
             <li className="lg:my-0 my-5">
-              <Link to="/piu/about-us">ABOUT</Link>
+              <Link to="/about-us">ABOUT</Link>
             </li>
           </ul>
         </div>

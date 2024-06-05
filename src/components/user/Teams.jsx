@@ -28,11 +28,8 @@ export default function Teams() {
     teamFetch();
   }, []);
 
-  return (
-    <div>
-      {loading
-        ? <LoadingSpinner />
-        : <div className="my-8 lg:px-0 px-2">
+  return <div>
+      {loading ? <LoadingSpinner /> : <div className="my-8 lg:px-0 px-2">
             <div>
               <div>
                 <div className="text-2xl">OUR FACULTY</div>
@@ -44,7 +41,7 @@ export default function Teams() {
             </div>
             <div className="grid lg:grid-cols-4 grid-cols-2 gap-3 my-8">
               {teams.map((team, index) =>
-                <Link to={`/piu/team/${team.slug}`} key={index}>
+                <Link to={`/team/${team.slug}`} key={index}>
                   <div className="overflow-hidden">
                     <img
                       src={`https://piueducation.org/storage/${team.profile}`}
@@ -64,6 +61,5 @@ export default function Teams() {
               )}
             </div>
           </div>}
-    </div>
-  );
+    </div>;
 }

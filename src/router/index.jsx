@@ -35,51 +35,51 @@ const router = createBrowserRouter([
         element: <Home />
       },
       {
-        path: "/piu/campuses",
+        path: "/campus",
         element: <Campus />
       },
       {
-        path: "/piu/about-us",
+        path: "/about-us",
         element: <About />
       },
       {
-        path: "/piu/courses",
+        path: "/courses",
         element: <Courses />
       },
       {
-        path: "/piu/courses/:slug",
+        path: "/courses/:slug",
         element: <CourseDetails />
       },
       {
-        path: "/piu/team/:slug",
+        path: "/team/:slug",
         element: <TeamProfile />
       },
       {
-        path: "/piu/news/:slug",
+        path: "/news/:slug",
         element: <NewsDetails />
       },
       {
-        path: "/piu/contact-us",
+        path: "/contact-us",
         element: <Contact />
       },
       {
-        path: "/piu/president-of-piu",
+        path: "/president-of-piu",
         element: <President />
       },
       {
-        path: "/piu/login",
+        path: "/login",
         element: <Login />
       },
       {
-        path: "/piu/register",
+        path: "/register",
         element: <Register />
       },
       {
-        path: "/piu/admissions/application-form",
+        path: "/admissions/application-form",
         element: <Admission />
       },
       {
-        path: "/piu/admissions/application-form-submitted-successfully",
+        path: "/admissions/application-form-submitted-successfully",
         element: <ApplicationFormSubmitSuccessful />
       }
     ]
