@@ -36,15 +36,10 @@ export default function TeamProfile() {
     return <LoadingSpinner />;
   }
 
-  return (
-    <div className="max-w-7xl mx-auto">
+  return <div className="max-w-7xl mx-auto">
       <div className="lg:flex py-10" key="">
-        <div className="w-1/2">
-          <img
-            src={`https://piueducation.org/storage/${teamProfileDetails.profile}`}
-            alt=""
-            className="w-96"
-          />
+        <div className="lg:w-1/2 lg:px-0 px-2">
+          <img src={`https://piueducation.org/storage/${teamProfileDetails.profile}`} alt="" className="w-96" />
           <div className="w-96 text-center">
             <div className="text-xl text-slate-600">
               {teamProfileDetails.name}
@@ -54,16 +49,11 @@ export default function TeamProfile() {
             </div>
           </div>
         </div>
-        <div className="w-3/4">
+        <div className="lg:w-3/4 lg:px-0 px-2">
           <div>
-            <div
-              dangerouslySetInnerHTML={{
-                __html: teamProfileDetails.description
-              }}
-            />
+            <div dangerouslySetInnerHTML={{ __html: teamProfileDetails.description }} />
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 }

@@ -1,14 +1,14 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import Principal from "../../assets/Principal.jpg";
-import Rector from "../../assets/Rector.png";
 import { FaFacebook, FaYoutube, FaTelegram, FaUsers } from "react-icons/fa";
 import CountUp from "react-countup";
 import Teams from "../../components/user/Teams";
 
 export default function About() {
   return (
-    <div className="w-full">
-      <div className="max-w-7xl mx-auto font-robotoSlab">
+    <div className="max-w-7xl mx-auto font-robotoSlab">
+      <div>
         <div className="flex justify-center items-center h-64 bg-green-300">
           <div className="text-3xl font-oswald font-medium border-b border-black">
             About Us
@@ -95,9 +95,11 @@ export default function About() {
             </div>
           </div>
           <div className="lg:w-1/3 font-robotoSlab text-center text-slate-500">
-            <img src={Principal} alt="" className="object-cover" />
-            <p className="text-xl">Ven.Nayaka</p>
-            <p>President of PIU</p>
+            <Link to="/piu/team/vennayaka">
+              <img src={Principal} alt="" className="object-cover" />
+              <p className="text-xl">Ven.Nayaka</p>
+              <p>President of PIU</p>
+            </Link>
           </div>
         </div>
         <div className="w-full">
@@ -182,8 +184,8 @@ export default function About() {
             </p>
           </div>
         </div>
-        <Teams />
       </div>
+      <Teams />
     </div>
   );
 }
