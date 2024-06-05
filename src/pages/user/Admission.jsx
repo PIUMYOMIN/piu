@@ -279,10 +279,10 @@ export default function Admission() {
                 </p>}
             </div>
             <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
-              <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" htmlFor="grid-city">
-                Student ID (Option)
+              <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" htmlFor="student_id">
+                Student ID
               </label>
-              <input className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white" id="grid-city" type="text" placeholder="Student ID" onChange={e => setStudentId(e.target.value)} />
+              <input className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white" id="student_id" type="number" placeholder="Student ID (Optional)" onChange={e => setStudentId(e.target.value)} />
             </div>
           </div>
           <div className="flex flex-wrap -mx-3 mb-6">
