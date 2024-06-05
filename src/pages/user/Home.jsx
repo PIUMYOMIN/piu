@@ -41,7 +41,7 @@ export default function Home() {
                   International Network of Engage Buddhist (INEB).
                 </p>
                 <div className="mt-3">
-                  <Link to="/piu/about-us" className="px-3 py-2 bg-blue-400 text-white rounded-md cursor-pointer">
+                  <Link to="/about-us" className="px-3 py-2 bg-blue-400 text-white rounded-md cursor-pointer">
                     Learn More
                   </Link>
                 </div>
