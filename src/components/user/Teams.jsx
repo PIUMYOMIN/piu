@@ -44,7 +44,7 @@ export default function Teams() {
                 <Link to={`/team/${team.slug}`} key={index}>
                   <div className="overflow-hidden">
                     <img
-                      src={`https://piueducation.org/storage/${team.profile}`}
+                      src={`https://dashboard.piueducation.org/storage/${team.profile}`}
                       alt=""
                       className="lg:h-52 h-36"
                     />

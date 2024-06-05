@@ -12,7 +12,7 @@ export default function TeamProfile() {
       const fetchTeamProfile = async () => {
         try {
           const response = await fetch(
-            `https://piueducation.org/api/v1/team/${slug}`
+            `https://dashboard.piueducation.org/api/v1/team/${slug}`
           );
 
           if (!response.ok) {

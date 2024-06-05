@@ -42,7 +42,7 @@ export default function News() {
                 >
                   <div className="overflow-hidden h-60">
                     <img
-                      src={`https://piueducation.org/storage/${newItem.image}`}
+                      src={`https://dashboard.piueducation.org/storage/${newItem.image}`}
                       alt=""
                       className="object-fit w-full hover:scale-105 transition duration-300 ease-out h-full"
                     />

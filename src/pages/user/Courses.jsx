@@ -64,7 +64,7 @@ export default function Course() {
                   key={index}
                 >
                   <img
-                    src={`https://piueducation.org/storage/${course.image}`}
+                    src={`https://dashboard.piueducation.org/storage/${course.image}`}
                     alt=""
                     className="object-cover lg:h-48 h-28 hover:scale-105 transition-all duration-200 ease-in"
                   />

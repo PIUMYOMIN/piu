@@ -62,7 +62,7 @@ export default function NewsDetails() {
           {newsDetails.title}
         </div>
         <div>
-          <img src={`https://piueducation.org/storage/${newsDetails.image}`} alt={newsDetails.title} />
+          <img src={`https://dashboard.piueducation.org/storage/${newsDetails.image}`} alt={newsDetails.title} />
           <p className="lg:ml-24">
             {formattedDate}
           </p>
