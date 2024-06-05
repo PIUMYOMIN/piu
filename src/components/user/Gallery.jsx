@@ -17,7 +17,7 @@ export default function Gallery() {
   useEffect(() => {
     const fetchGallery = async () => {
       try {
-        const response = await fetch("https://piueducation.org/api/v1/gallery");
+        const response = await fetch("https://dashboard.piueducation.org/api/v1/gallery");
 
         if (!response.ok) {
           throw new Error("message", "Failed to fetch gallery.");

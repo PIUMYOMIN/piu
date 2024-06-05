@@ -10,7 +10,7 @@ export default function Teams() {
   useEffect(() => {
     const teamFetch = async () => {
       try {
-        const response = await fetch("https://piueducation.org/api/v1/team");
+        const response = await fetch("https://dashboard.piueducation.org/api/v1/team");
 
         if (!response.ok) {
           throw new Error("message", "Failed to fetch team.");

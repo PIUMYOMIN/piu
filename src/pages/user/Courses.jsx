@@ -9,7 +9,9 @@ export default function Course() {
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const response = await fetch("https://piueducation.org/api/v1/courses");
+        const response = await fetch(
+          "https://dashboard.piueducation.org/api/v1/courses"
+        );
         if (!response.ok) {
           throw new Error("Failed to fetch course.");
         } else {

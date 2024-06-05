@@ -10,7 +10,7 @@ export default function News() {
   useEffect(() => {
     const fetchNews = async () => {
       try {
-        const response = await fetch("https://piueducation.org/api/v1/news");
+        const response = await fetch("https://dashboard.piueducation.org/api/v1/news");
         if (!response.ok) {
           throw new Error("Failed to fetch news.");
         } else {

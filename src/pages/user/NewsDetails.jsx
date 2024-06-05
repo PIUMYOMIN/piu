@@ -13,7 +13,7 @@ export default function NewsDetails() {
       const fetchNewsDetails = async () => {
         try {
           const response = await fetch(
-            `https://piueducation.org/api/v1/news/${slug}`
+            `https://dashboard.piueducation.org/api/v1/news/${slug}`
           );
           if (!response.ok) {
             throw new Error("Failed to fetch news details.");
