@@ -6,8 +6,7 @@ import CountUp from "react-countup";
 import Teams from "../../components/user/Teams";
 
 export default function About() {
-  return (
-    <div className="max-w-7xl mx-auto font-robotoSlab">
+  return <div className="max-w-7xl mx-auto font-robotoSlab">
       <div>
         <div className="flex justify-center items-center h-64 bg-green-300">
           <div className="text-3xl font-oswald font-medium border-b border-black">
@@ -38,8 +37,8 @@ export default function About() {
                 colleagues attended an annual conference of International
                 Network of Engage Buddhist (INEB). The conference gave him a
                 chance to study about Santiniketan University founded by
-                Rabindra Nath Tagore which has the education programs start from
-                Kindergarten to PhD level. It inspired him to establish a
+                Rabindra Nath Tagore which has the education programs start
+                from Kindergarten to PhD level. It inspired him to establish a
                 University. When he came back he steps forward to upgrade his
                 school to university. In 2013 the principal and his colleagues
                 were invited from Australian Education Institutions, primary
@@ -49,15 +48,15 @@ export default function About() {
                 education in Diploma. In 2014 A well-wishers donated 450 acres
                 land near Mandalay to establish a university. Meanwhile the
                 Phaung Daw Oo School tries to link with some Western
-                Universities like American University (AU), Menandar University,
-                Hamsted University, Victoria University, and University of
-                Melbourne. Students were sent to theses universities to study MA
-                program, BA program and Intensive courses. In 2017_2018 the
-                Eastern Universities also came and joined the school to work
-                education matter together: Foguang Shan University from Taiwan
-                and International Buddhist College (IBC) from Thailand. On
-                January 25, 2019, the PIU signed a higher academic cooperation
-                agreement with IBC in Mandalay.
+                Universities like American University (AU), Menandar
+                University, Hamsted University, Victoria University, and
+                University of Melbourne. Students were sent to theses
+                universities to study MA program, BA program and Intensive
+                courses. In 2017_2018 the Eastern Universities also came and
+                joined the school to work education matter together: Foguang
+                Shan University from Taiwan and International Buddhist College
+                (IBC) from Thailand. On January 25, 2019, the PIU signed a
+                higher academic cooperation agreement with IBC in Mandalay.
               </p>
             </div>
             <div>
@@ -72,25 +71,25 @@ export default function About() {
             </div>
             <div className="my-3">
               <p className="text-justify">
-                As the education in Myanmar is lasting behind so do every aspect
-                of Myanmar. Therefore, it is desperately needed to lift the
-                status of education in Myanmar. We can see that the countries
-                which have internationally high ranking universities become well
-                developed ones in the world. To establish quality assurance
-                university qualify teachers and eligible students are needed. As
-                Myanmar has been deteriorating for many years qualify teachers
-                are very difficult to have. So, no eligible students become. I
-                have been facing this broken process of education system for
-                over a decade. Good quality university students have to become
-                from good quality basic education level students i.e primary,
-                secondary, and tertiary. Taking the help from international
-                education aid organization I have provided numbers of teacher
-                trainings, from which quality teachers were produced. I hope
-                those quality teachers will reproduce eligible students. In
-                fact, this education reform process is just for basic education
-                level. Now it is time for university level. I believe Phaung Daw
-                Oo International University will become the international
-                standard one.
+                As the education in Myanmar is lasting behind so do every
+                aspect of Myanmar. Therefore, it is desperately needed to lift
+                the status of education in Myanmar. We can see that the
+                countries which have internationally high ranking universities
+                become well developed ones in the world. To establish quality
+                assurance university qualify teachers and eligible students
+                are needed. As Myanmar has been deteriorating for many years
+                qualify teachers are very difficult to have. So, no eligible
+                students become. I have been facing this broken process of
+                education system for over a decade. Good quality university
+                students have to become from good quality basic education
+                level students i.e primary, secondary, and tertiary. Taking
+                the help from international education aid organization I have
+                provided numbers of teacher trainings, from which quality
+                teachers were produced. I hope those quality teachers will
+                reproduce eligible students. In fact, this education reform
+                process is just for basic education level. Now it is time for
+                university level. I believe Phaung Daw Oo International
+                University will become the international standard one.
               </p>
             </div>
           </div>
@@ -153,23 +152,23 @@ export default function About() {
             </div>
             <p>
               Lorem ipsum, dolor sit amet consectetur adipisicing elit. Nam
-              impedit inventore iusto eos architecto excepturi, nulla repellat!
-              Possimus neque sint voluptatum voluptatibus ea ullam. Laborum
-              nulla odit explicabo temporibus nobis facilis nam qui illum totam,
-              ex molestias itaque sit maiores tenetur reprehenderit labore. Et
-              obcaecati distinctio reprehenderit totam dignissimos recusandae
-              consequatur.
+              impedit inventore iusto eos architecto excepturi, nulla
+              repellat! Possimus neque sint voluptatum voluptatibus ea ullam.
+              Laborum nulla odit explicabo temporibus nobis facilis nam qui
+              illum totam, ex molestias itaque sit maiores tenetur
+              reprehenderit labore. Et obcaecati distinctio reprehenderit
+              totam dignissimos recusandae consequatur.
             </p>
           </div>
-          <div className="lg:w-4/12 bg-green-200 px-5 lg:py-10 py-5">
+          <div className="lg:w-4/12 bg-green-300 px-5 lg:py-10 py-5">
             <div className="text-2xl font-robotoSlab">Our Mission</div>
             <div className="flex gap-1">
               <div className="w-8 border-b-2 border-slate-500" />
               <div className="w-12 border-b-2 border-slate-700" />
             </div>
             <p>
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Animi, a
-              unde quibusdam necessitatibus eligendi nesciunt?
+              Lorem ipsum dolor sit amet consectetur adipisicing elit. Animi,
+              a unde quibusdam necessitatibus eligendi nesciunt?
             </p>
           </div>
           <div className="lg:w-4/12 bg-green-200 px-5 lg:py-10 py-5">
@@ -179,13 +178,12 @@ export default function About() {
               <div className="w-12 border-b-2 border-slate-700" />
             </div>
             <p>
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Animi, a
-              unde quibusdam necessitatibus eligendi nesciunt?
+              Lorem ipsum dolor sit amet consectetur adipisicing elit. Animi,
+              a unde quibusdam necessitatibus eligendi nesciunt?
             </p>
           </div>
         </div>
       </div>
       <Teams />
-    </div>
-  );
+    </div>;
 }

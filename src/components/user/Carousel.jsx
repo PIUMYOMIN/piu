@@ -50,14 +50,13 @@ const Carousel = () => {
     [loading]
   );
 
-  return !loading
-    ? <div className="max-w-7xl mx-auto z-[-10] overflow-hidden relative">
+  return !loading ? <div className="max-w-7xl mx-auto z-[-10] overflow-hidden relative">
         <div className="swiper">
           <div className="swiper-wrapper">
             {slides.map((slide, index) =>
               <div key={slide.id} className="swiper-slide">
                 <img
-                  src={`https://piueducation.org/storage/${slide.slide_image}`}
+                  src={`https://dashboard.piueducation.org/storage/${slide.slide_image}`}
                   alt=""
                   className="w-full"
                 />
@@ -76,8 +75,7 @@ const Carousel = () => {
           </div>
           <div className="swiper-pagination" />
         </div>
-      </div>
-    : <LoadingSpinner />;
+      </div> : <LoadingSpinner />;
 };
 
 export default Carousel;

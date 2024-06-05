@@ -58,7 +58,7 @@ export default function Course() {
             <div className="grid lg:grid-cols-4 grid-cols-2 gap-2 mt-10">
               {courses.map((course, index) =>
                 <Link
-                  to={`/piu/courses/${course.slug}`}
+                  to={`/courses/${course.slug}`}
                   className="flex flex-col overflow-hidden"
                   data-aos="fade-up"
                   key={index}
