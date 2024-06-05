@@ -160,7 +160,7 @@ export default function About() {
               totam dignissimos recusandae consequatur.
             </p>
           </div>
-          <div className="lg:w-4/12 bg-green-300 px-5 lg:py-10 py-5">
+          <div className="lg:w-4/12 bg-green-200 px-5 lg:py-10 py-5">
             <div className="text-2xl font-robotoSlab">Our Mission</div>
             <div className="flex gap-1">
               <div className="w-8 border-b-2 border-slate-500" />
@@ -171,7 +171,7 @@ export default function About() {
               a unde quibusdam necessitatibus eligendi nesciunt?
             </p>
           </div>
-          <div className="lg:w-4/12 bg-green-200 px-5 lg:py-10 py-5">
+          <div className="lg:w-4/12 bg-green-100 px-5 lg:py-10 py-5">
             <div className="text-2xl font-robotoSlab">Our Vision</div>
             <div className="flex gap-1">
               <div className="w-8 border-b-2 border-slate-500" />
