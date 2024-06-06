@@ -66,7 +66,7 @@ export default function Course() {
                   <img
                     src={`https://dashboard.piueducation.org/storage/${course.image}`}
                     alt=""
-                    className="object-cover lg:h-48 h-28 hover:scale-105 transition-all duration-200 ease-in"
+                    className="object-cover lg:h-48 hover:scale-105 transition-all duration-200 ease-in"
                   />
                   <div className="py-2">
                     <div className="flex flex-row justify-between">

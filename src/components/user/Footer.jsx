@@ -105,8 +105,8 @@ export default function Footer() {
                   </div>
                   <div className="flex flex-col px-3 w-full font-regular">
                     <strong>Email</strong>
-                    <Link to="mail:piumail.@gmail.com">
-                      <p className="text-sm">piumail@gmail.com</p>
+                    <Link to="mail:piu.edu2014@gmail.com">
+                      <p className="text-sm">piu.edu2014@gmail.com</p>
                     </Link>
                   </div>
                 </div>

@@ -23,8 +23,8 @@ export default function Home() {
       <div className="w-full">
         <div className=" max-w-7xl mx-auto lg:p-10 p-2 bg-secondary-background">
           <div className="max-w-4xl mx-auto lg:grid grid-cols-2">
-            <div className="flex justify-end items-center lg:pr-10">
-              <img src={president} alt="President" className="object-cover lg:w-60" />
+            <div className="flex lg:justify-end justify-center items-center lg:pr-10">
+              <img src={president} alt="President" className="object-cover w-60" />
             </div>
             <div className="flex flex-row font-nato">
               <div className="flex flex-col gap-3 py-3">
