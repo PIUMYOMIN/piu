@@ -104,7 +104,7 @@ export default function Admission() {
         const data = await response.json();
         throw new Error(data.error);
       }
-      navigate("/piu/admissions/application-form-submitted-successfully");
+      navigate("/admissions/application-form-submitted-successfully");
     } catch (error) {
       setError({
         form: "An error occurred while submitting the application form."
