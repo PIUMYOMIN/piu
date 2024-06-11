@@ -59,7 +59,7 @@ export default function Footer() {
               <h2 className="text-2xl">Popular Courses</h2>
               <ul className="text-sm">
                 <li className="list-item">
-                  <Link to="#!">Social Entrepreneurship</Link>
+                  <Link to="/courses/master-of-arts-in-social-entrepreneurship">Social Entrepreneurship</Link>
                 </li>
                 <li className="list-item">
                   <Link to="#!">Business Administration</Link>
