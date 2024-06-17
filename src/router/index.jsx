@@ -79,7 +79,7 @@ const router = createBrowserRouter([
         element: <Admission />
       },
       {
-        path: "/admissions/application-form-submitted-successfully",
+        path: "/admissions/application-form/successfully-submitted",
         element: <ApplicationFormSubmitSuccessful />
       }
     ]

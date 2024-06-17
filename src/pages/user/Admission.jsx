@@ -55,7 +55,6 @@ export default function Admission() {
     if (!city) newError.city = "City is required";
     if (!country) newError.country = "Country is required";
     if (!zipcode) newError.zipcode = "Zipcode is required";
-    if (!student_id) newError.student_id = "Student ID is required";
     if (!alumni_sts) newError.alumni_sts = "Alumni status is required";
     if (!profile) newError.profile = "Profile picture is required";
     if (!personal_statement) newError.personal_statement = "Personal statement is required";
@@ -85,13 +84,44 @@ export default function Admission() {
     formData.append("gender", gender);
     formData.append("national_id", national_id);
     formData.append("course_id", course_id);
-    formData.append("profile", profile);
-    formData.append("personal_statement", personal_statement);
-    formData.append("language_proficiency", language_proficiency);
-    formData.append("education_certificate", education_certificate);
-    formData.append("other_document", other_document);
+    // formData.append("profile", profile);
+    // formData.append("personal_statement", personal_statement);
+    // formData.append("language_proficiency", language_proficiency);
+    // formData.append("education_certificate", education_certificate);
+    // formData.append("other_document", other_document);
 
-    console.log(formData);
+     // Add files to FormData and log their details
+  if (profile instanceof File) {
+    formData.append("profile", profile, profile.name);
+    console.log("Profile File Name:", profile.name);
+    console.log("Profile File Type:", profile.type);
+  }
+
+  if (personal_statement instanceof File) {
+    formData.append("personal_statement", personal_statement, personal_statement.name);
+    console.log("Personal Statement File Name:", personal_statement.name);
+    console.log("Personal Statement File Type:", personal_statement.type);
+  }
+
+  if (language_proficiency instanceof File) {
+    formData.append("language_proficiency", language_proficiency, language_proficiency.name);
+    console.log("Language Proficiency File Name:", language_proficiency.name);
+    console.log("Language Proficiency File Type:", language_proficiency.type);
+  }
+
+  if (education_certificate instanceof File) {
+    formData.append("education_certificate", education_certificate, education_certificate.name);
+    console.log("Education Certificate File Name:", education_certificate.name);
+    console.log("Education Certificate File Type:", education_certificate.type);
+  }
+
+  if (other_document instanceof File) {
+    formData.append("other_document", other_document, other_document.name);
+    console.log("Other Document File Name:", other_document.name);
+    console.log("Other Document File Type:", other_document.type);
+  }
+
+
 
     try {
       const response = await fetch(
@@ -109,7 +139,7 @@ export default function Admission() {
         throw new Error(data.error);
       }
 
-      navigate("/admissions/application-form-submitted-successfully");
+      navigate("/admissions/application-form/successfully-submitted");
     } catch (error) {
       setError({
         form: "An error occurred while submitting the application form."
