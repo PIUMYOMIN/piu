@@ -91,6 +91,8 @@ export default function Admission() {
     formData.append("education_certificate", education_certificate);
     formData.append("other_document", other_document);
 
+    console.log(formData);
+
     try {
       const response = await fetch(
         "https://dashboard.piueducation.org/api/v1/application-form/submit",
@@ -100,10 +102,13 @@ export default function Admission() {
         }
       );
 
+      console.log(response);
+
       if (!response.ok) {
         const data = await response.json();
         throw new Error(data.error);
       }
+
       navigate("/admissions/application-form-submitted-successfully");
     } catch (error) {
       setError({
@@ -282,7 +287,7 @@ export default function Admission() {
               <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" htmlFor="student_id">
                 Student ID
               </label>
-              <input className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white" id="student_id" type="number" placeholder="Student ID (Optional)" onChange={e => setStudentId(e.target.value)} />
+              <input className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white" id="student_id" type="text" placeholder="Student ID (Optional)" onChange={e => setStudentId(e.target.value)} />
             </div>
           </div>
           <div className="flex flex-wrap -mx-3 mb-6">

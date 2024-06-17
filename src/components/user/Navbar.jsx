@@ -34,11 +34,11 @@ export default function Navbar() {
             <li className="hover:border-b border-dark-purple transition-all delay-75 ease-in-out">
               <Link to="/contact-us">CONTACT US</Link>
             </li>
-            {/* <li className="text-xl text-dark-purple border-dark-purple transition-all delay-75 ease-in-out">
-              <Link to="/piu/login">
+            <li className="text-xl text-dark-purple border-dark-purple transition-all delay-75 ease-in-out">
+              <Link to="https://dashboard.piueducation.org" target="_blank">
                 <FaUserCircle />
               </Link>
-            </li> */}
+            </li>
           </ul>
           <div className=" relative flex items-center w-[100%] lg:mt-3">
             <form action="">
