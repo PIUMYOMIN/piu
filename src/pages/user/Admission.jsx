@@ -1,4 +1,4 @@
-Do you see any error with this code? import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function Admission() {
