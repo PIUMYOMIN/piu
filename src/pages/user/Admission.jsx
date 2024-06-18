@@ -55,7 +55,6 @@ export default function Admission() {
     if (!city) newError.city = "City is required";
     if (!country) newError.country = "Country is required";
     if (!zipcode) newError.zipcode = "Zipcode is required";
-    if (!student_id) newError.student_id = "Student ID is required";
     if (!alumni_sts) newError.alumni_sts = "Alumni status is required";
     if (!profile) newError.profile = "Profile picture is required";
     if (!personal_statement) newError.personal_statement = "Personal statement is required";
