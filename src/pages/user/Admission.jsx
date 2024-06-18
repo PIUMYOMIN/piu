@@ -90,6 +90,10 @@ export default function Admission() {
     formData.append("education_certificate", education_certificate);
     formData.append("other_document", other_document);
 
+    for (var pair of formData.entries()) {
+    console.log(pair[0] + ": " + pair[1]);
+  }
+
     try {
       const response = await fetch(
         "https://dashboard.piueducation.org/api/v1/application-form/submit",
@@ -106,7 +110,7 @@ export default function Admission() {
         throw new Error(data.error);
       }
 
-      navigate("/admissions/application-form-submitted-successfully");
+      navigate("/admissions/application-form/successfully-submitted");
     } catch (error) {
       setError({
         form: "An error occurred while submitting the application form."
