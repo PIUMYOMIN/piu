@@ -95,26 +95,24 @@ export default function Admission() {
   }
 
     try {
-      const response = await fetch(
-        "https://dashboard.piueducation.org/api/v1/application-form/submit",
-        {
-          method: "POST",
-          body: formData
+        const response = await fetch("https://dashboard.piueducation.org/api/v1/application-form/submit", {
+            method: "POST",
+            body: formData,
+            headers: {
+                "Accept": "application/json",
+            },
+        });
+
+        if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data.error);
         }
-      );
 
-      console.log(response);
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error);
-      }
-
-      navigate("/admissions/application-form/successfully-submitted");
+        navigate("/admissions/application-form/successfully-submitted");
     } catch (error) {
-      setError({
-        form: "An error occurred while submitting the application form."
-      });
+        setError({
+            form: "An error occurred while submitting the application form."
+        });
     }
   };
 
