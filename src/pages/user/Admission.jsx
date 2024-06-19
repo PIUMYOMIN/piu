@@ -98,9 +98,6 @@ export default function Admission() {
         const response = await fetch("https://dashboard.piueducation.org/api/v1/application-form/submit", {
             method: "POST",
             body: formData,
-            headers: {
-                "Accept": "application/json",
-            },
         });
 
         if (!response.ok) {
