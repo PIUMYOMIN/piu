@@ -25,6 +25,9 @@ export default function News() {
 
     fetchNews();
   }, []);
+
+  const maxNews = 3;
+  const limitedNews = news.slice(0, maxNews);
   return <div className="w-full bg-secondary-background lg:py-8 px-2 overflow-hidden">
       {loading ? <LoadingSpinner /> : <div className="max-w-7xl mx-auto">
             <div className="mt-8 mb-10">
@@ -33,7 +36,7 @@ export default function News() {
               </h2>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {news.map((newItem, index) =>
+              {limitedNews.map((newItem, index) =>
                 <Link
                   to={`/news/${newItem.slug}`}
                   className="md:mb-2 pb-2 lg:w-96 hover:shadow-2xl transition duration-300 ease-in-out rounded-md"
