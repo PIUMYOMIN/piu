@@ -167,8 +167,7 @@ export default function About() {
               <div className="w-12 border-b-2 border-slate-700" />
             </div>
             <p>
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Animi,
-              a unde quibusdam necessitatibus eligendi nesciunt?
+            To be a globally recognized center of excellence in education, research, and innovation, empowering individuals to contribute to the sustainable socio-economic development of Myanmar and the world.
             </p>
           </div>
           <div className="lg:w-4/12 bg-green-100 px-5 lg:py-10 py-5">
@@ -177,10 +176,17 @@ export default function About() {
               <div className="w-8 border-b-2 border-slate-500" />
               <div className="w-12 border-b-2 border-slate-700" />
             </div>
-            <p>
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Animi,
-              a unde quibusdam necessitatibus eligendi nesciunt?
-            </p>
+            {/* <p> */}
+              <ul>
+                <li>1. Provide quality education</li>
+                <li>2. Cultivate global perspectives</li>
+                <li>3. Foster research and innovation</li>
+                <li>4. Collaboration and partnerships</li>
+                <li>5. Promote community engagement</li>
+                <li>6. Embrace technology advancements</li>
+                <li>7. Uphold ethical and professional standards</li>
+              </ul>
+            {/* </p> */}
           </div>
         </div>
       </div>
