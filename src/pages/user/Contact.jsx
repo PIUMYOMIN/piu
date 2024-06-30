@@ -1,98 +1,248 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  FaEnvelope,
+  FaGlobeAsia,
+  FaMapMarkerAlt,
+  FaPhoneAlt
+} from "react-icons/fa";
+import { Link } from "react-router-dom";
 
 export default function Contact() {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    subject: '',
-    message: '',
-  });
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [country, setCountry] = useState("");
+  const [message, setMessage] = useState("");
+  const [errors, setErrors] = useState("");
+  const navigate = useNavigate();
 
-  const [errors, setErrors] = useState({});
-  const [submitted, setSubmitted] = useState(false);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+  const validateForm = () => {
+    const newErrors = {};
+    if (!name) newErrors.name = "Name field is required.";
+    if (!email) newErrors.email = "Email field is required.";
+    if (!phone) newErrors.phone = "Phone field is required.";
+    if (!country) newErrors.country = "Country field is required.";
+    if (!message) newErrors.message = "Message field is required.";
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
-  const validate = () => {
-    let tempErrors = {};
-    tempErrors.name = formData.name ? "" : "Name is required.";
-    tempErrors.email = formData.email ? "" : "Email is required.";
-    tempErrors.subject = formData.subject ? "" : "Subject is required.";
-    tempErrors.message = formData.message ? "" : "Message is required.";
-    setErrors({ ...tempErrors });
-    return Object.values(tempErrors).every(x => x === "");
-  };
-
-  const handleSubmit = (e) => {
+  const submitContactForm = async e => {
     e.preventDefault();
-    if (validate()) {
-      setSubmitted(true);
-      // Here, you would normally handle the form submission, e.g., send the data to a server
-      console.log('Form data:', formData);
+
+    const formValidationErrors = validateForm();
+    if (Object.keys(formValidationErrors).length > 0) {
+      setErrors(formValidationErrors);
+      return;
+    }
+
+    setErrors({});
+
+    const formData = { name, email, phone, country, message };
+
+    try {
+      const response = await fetch(
+        "https://dashboard.piueducation.org/contact-form-submit",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(formData)
+        }
+      );
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || "Something went wrong");
+      }
+      navigate("/contact/thank-you-for-contacting-us");
+    } catch (error) {
+      setErrors({ submit: error.message });
     }
   };
-
   return (
-    <div className="max-w-7xl mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-6">Contact Us</h1>
-      {submitted ? (
-        <div className="text-green-500">Thank you for your message! We will get back to you soon.</div>
-      ) : (
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block mb-1" htmlFor="name">Name</label>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              className={`w-full p-2 border ${errors.name ? 'border-red-500' : 'border-gray-300'} rounded`}
-            />
-            {errors.name && <div className="text-red-500 text-sm">{errors.name}</div>}
+    <div className="w-full">
+      <div className="max-w-7xl mx-auto bg-secondary-background">
+        <div className="bg-green-400 h-40 lg:h-48 text-white text-2xl flex justify-center items-center">
+          <div className="font-oswald lg:text-3xl text-xl">Contact us</div>
+        </div>
+        <div className="grid lg:grid-cols-4 grid-cols-2 gap-2 lg:py-5">
+          <div className="flex flex-col lg:justify-center items-center p-2 text-center font-mono">
+            <div className="bg-dark-purple p-5 text-white rounded-full lg:text-xl">
+              <FaMapMarkerAlt />
+            </div>
+            Address
+            <span>19st, Bet 59-60, &nbsp; Aungmyaetharsan Tsp, Mandalay</span>
           </div>
-          <div>
-            <label className="block mb-1" htmlFor="email">Email</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              className={`w-full p-2 border ${errors.email ? 'border-red-500' : 'border-gray-300'} rounded`}
-            />
-            {errors.email && <div className="text-red-500 text-sm">{errors.email}</div>}
+          <div className="flex flex-col lg:justify-center items-center p-2 text-center font-mono">
+            <div className="bg-dark-purple p-5 text-white rounded-full lg:text-xl">
+              <FaEnvelope />
+            </div>
+            Email
+            <span>
+              <Link to="mailto:piu.edu2014@gmail.com">
+                piu.edu2014@gmail.com
+              </Link>
+            </span>
           </div>
-          <div>
-            <label className="block mb-1" htmlFor="subject">Subject</label>
-            <input
-              type="text"
-              id="subject"
-              name="subject"
-              value={formData.subject}
-              onChange={handleChange}
-              className={`w-full p-2 border ${errors.subject ? 'border-red-500' : 'border-gray-300'} rounded`}
-            />
-            {errors.subject && <div className="text-red-500 text-sm">{errors.subject}</div>}
+          <div className="flex flex-col lg:justify-center items-center p-2 text-center font-mono">
+            <div className="bg-dark-purple p-5 text-white rounded-full lg:text-xl">
+              <FaPhoneAlt />
+            </div>
+            Phone
+            <span>
+              <Link to="tel:+09-793200074">+09-793200074</Link>
+              <br />
+              <Link to="tel:+09-799183631">+09-799183631</Link>
+            </span>
           </div>
-          <div>
-            <label className="block mb-1" htmlFor="message">Message</label>
-            <textarea
-              id="message"
-              name="message"
-              value={formData.message}
-              onChange={handleChange}
-              className={`w-full p-2 border ${errors.message ? 'border-red-500' : 'border-gray-300'} rounded`}
-              rows="5"
-            />
-            {errors.message && <div className="text-red-500 text-sm">{errors.message}</div>}
+          <div className="flex flex-col lg:justify-center items-center p-2 text-center font-mono">
+            <div className="bg-dark-purple p-5 text-white rounded-full lg:text-xl">
+              <FaGlobeAsia />
+            </div>
+            Country
+            <span>Myanmar(Burma)</span>
           </div>
-          <button type="submit" className="px-4 py-2 bg-blue-500 text-white rounded">Send Message</button>
-        </form>
-      )}
+        </div>
+        <div className="grid lg:grid-cols-2 my-10 bg-primary-background">
+          <div className="py-5">
+            <div className="text-center text-xl font-merriweather">
+              We love to hear from you.
+            </div>
+            <form
+              className="w-full px-5 lg:mt-8 mx-auto"
+              onSubmit={submitContactForm}
+            >
+              <div className="grid md:grid-cols-2 md:gap-6">
+                <div className="relative z-0 w-full mb-5 group">
+                  <label
+                    htmlFor="name"
+                    className="block mb-2 text-sm font-medium text-gray-700"
+                  >
+                    Your name
+                  </label>
+                  <input
+                    type="text"
+                    id="name"
+                    aria-describedby="helper-text-explanation"
+                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                    required
+                    placeholder="Name"
+                    onChange={e => setName(e.target.value)}
+                  />
+                  {errors.name &&
+                    <p className="text-red-400 italic">
+                      {errors.name}
+                    </p>}
+                </div>
+                <div className="relative z-0 w-full mb-5 group">
+                  <label
+                    htmlFor="email"
+                    className="block mb-2 text-sm font-medium text-gray-700"
+                  >
+                    Your email
+                  </label>
+                  <input
+                    type="email"
+                    id="email"
+                    aria-describedby="helper-text-explanation"
+                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                    required
+                    placeholder="name@mail.com"
+                    onChange={e => setEmail(e.target.value)}
+                  />
+                  {errors.email &&
+                    <p className="text-red-400 italic">
+                      {errors.email}
+                    </p>}
+                </div>
+              </div>
+              <div className="grid md:grid-cols-2 md:gap-6">
+                <div className="relative z-0 w-full mb-5 group">
+                  <label
+                    htmlFor="phone"
+                    className="block mb-2 text-sm font-medium text-gray-700"
+                  >
+                    Your phone
+                  </label>
+                  <input
+                    type="tel"
+                    id="phone"
+                    aria-describedby="helper-text-explanation"
+                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                    required
+                    placeholder="+00 012 345 6547"
+                    onChange={e => setPhone(e.target.value)}
+                  />
+                  {errors.phone &&
+                    <p className="text-red-400 italic">
+                      {errors.phone}
+                    </p>}
+                </div>
+                <div className="relative z-0 w-full mb-5 group">
+                  <label
+                    htmlFor="country"
+                    className="block mb-2 text-sm font-medium text-gray-700"
+                  >
+                    Your Country
+                  </label>
+                  <input
+                    type="text"
+                    id="country"
+                    aria-describedby="helper-text-explanation"
+                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                    required
+                    placeholder="Country"
+                    onChange={e => setCountry(e.target.value)}
+                  />
+                  {errors.country &&
+                    <p className="text-red-400 italic">
+                      {errors.country}
+                    </p>}
+                </div>
+              </div>
+              <div>
+                <label
+                  htmlFor="message"
+                  className="block mb-2 text-sm font-medium text-gray-700"
+                >
+                  Your message
+                </label>
+                <textarea
+                  id="message"
+                  rows="4"
+                  className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  required
+                  placeholder="message..."
+                  onChange={e => setMessage(e.target.value)}
+                />
+                {errors.message &&
+                  <p className="text-red-400 italic">
+                    {errors.message}
+                  </p>}
+              </div>
+              <button
+                type="submit"
+                className="text-white mt-5 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+              >
+                Submit
+              </button>
+            </form>
+          </div>
+          <div className="h-auto">
+            <iframe
+              src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d29575.835549774383!2d96.278025!3d22.088602!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x30cb6f89b745f459%3A0x55a960cb1a2c6872!2sPhaung%20Daw%20Oo%20International%20University%20(PIU)!5e0!3m2!1sen!2smm!4v1719730784142!5m2!1sen!2smm"
+              width="100%"
+              height="100%"
+              style={{ border: 0 }}
+              allowFullScreen=""
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+            />
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

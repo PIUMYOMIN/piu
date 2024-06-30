@@ -20,6 +20,7 @@ import CourseEdit from "../pages/admin/CourseEdit";
 import Admission from "../pages/user/Admission";
 import ApplicationFormSubmitSuccessful from "../pages/user/ApplicationFormSubmitSuccessful";
 import TeamProfile from "../pages/user/TeamProfile";
+import ContactFormSubmittedSuccessful from "../pages/user/ContactFormSubmittedSuccessful";
 
 const router = createBrowserRouter([
   {
@@ -81,6 +82,10 @@ const router = createBrowserRouter([
       {
         path: "/admissions/application-form/successfully-submitted",
         element: <ApplicationFormSubmitSuccessful />
+      },
+      {
+        path: "/contact/thank-you-for-contacting-us",
+        element: <ContactFormSubmittedSuccessful />
       }
     ]
   },
