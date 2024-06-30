@@ -58,6 +58,13 @@ export default {
         box: "0px 20px 20px 10px rgba(0,0,0,0.14)"
       }
     },
+    listStyleType: {
+      none: "none",
+      disc: "disc",
+      decimal: "decimal",
+      square: "square",
+      roman: "upper-roman"
+    },
     fontSize: {
       xs: "0.75rem;",
       sm: "0.875rem",

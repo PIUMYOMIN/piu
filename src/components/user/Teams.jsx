@@ -28,6 +28,9 @@ export default function Teams() {
     teamFetch();
   }, []);
 
+  const maxTeam = 4;
+  const teamLimits = teams.slice(0, maxTeam);
+
   return <div>
       {loading ? <LoadingSpinner /> : <div className="my-8 lg:px-0 px-2">
             <div>
@@ -40,7 +43,7 @@ export default function Teams() {
               </div>
             </div>
             <div className="grid lg:grid-cols-4 grid-cols-2 gap-3 my-8">
-              {teams.map((team, index) =>
+              {teamLimits.map((team, index) =>
                 <Link to={`/team/${team.slug}`} key={index}>
                   <div className="overflow-hidden">
                     <img

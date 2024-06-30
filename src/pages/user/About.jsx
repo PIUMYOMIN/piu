@@ -13,8 +13,8 @@ export default function About() {
             About Us
           </div>
         </div>
-        <div className="lg:flex flex-row justify-between my-5">
-          <div className="lg:w-1/2 lg:px-0 px-2">
+        <div className="lg:flex flex-row justify-between gap-5 my-5">
+          <div className="lg:w-8/12 lg:px-0 px-2">
             <div>
               <div>
                 <div className="text-2xl">
@@ -28,7 +28,7 @@ export default function About() {
               </div>
             </div>
             <div className="mb-10">
-              <p className="text-justify">
+              <p className="lg:text-justify">
                 25th years ago Phaung Daw Oo monastic education school was
                 established by the two brothers, Ven Nayaka and Ven Jotika.
                 During eight years times the school has been developed from
@@ -70,7 +70,7 @@ export default function About() {
               </div>
             </div>
             <div className="my-3">
-              <p className="text-justify">
+              <p className="lg:text-justify">
                 As the education in Myanmar is lasting behind so do every
                 aspect of Myanmar. Therefore, it is desperately needed to lift
                 the status of education in Myanmar. We can see that the
@@ -93,7 +93,7 @@ export default function About() {
               </p>
             </div>
           </div>
-          <div className="lg:w-1/3 font-robotoSlab text-center text-slate-500">
+          <div className="lg:w-4/12 font-robotoSlab text-center text-slate-500">
             <Link to="/team/vennayaka">
               <img src={Principal} alt="" className="object-cover" />
               <p className="text-xl">Ven.Nayaka</p>
@@ -167,7 +167,10 @@ export default function About() {
               <div className="w-12 border-b-2 border-slate-700" />
             </div>
             <p>
-            To be a globally recognized center of excellence in education, research, and innovation, empowering individuals to contribute to the sustainable socio-economic development of Myanmar and the world.
+              To be a globally recognized center of excellence in education,
+              research, and innovation, empowering individuals to contribute
+              to the sustainable socio-economic development of Myanmar and the
+              world.
             </p>
           </div>
           <div className="lg:w-4/12 bg-green-100 px-5 lg:py-10 py-5">
@@ -177,15 +180,15 @@ export default function About() {
               <div className="w-12 border-b-2 border-slate-700" />
             </div>
             {/* <p> */}
-              <ul>
-                <li>1. Provide quality education</li>
-                <li>2. Cultivate global perspectives</li>
-                <li>3. Foster research and innovation</li>
-                <li>4. Collaboration and partnerships</li>
-                <li>5. Promote community engagement</li>
-                <li>6. Embrace technology advancements</li>
-                <li>7. Uphold ethical and professional standards</li>
-              </ul>
+            <ul className="list-decimal list-outside">
+              <li>Provide quality education</li>
+              <li>Cultivate global perspectives</li>
+              <li>Foster research and innovation</li>
+              <li>Collaboration and partnerships</li>
+              <li>Promote community engagement</li>
+              <li>Embrace technology advancements</li>
+              <li>Uphold ethical and professional standards</li>
+            </ul>
             {/* </p> */}
           </div>
         </div>
