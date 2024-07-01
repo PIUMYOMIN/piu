@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import Principal from "../../assets/Principal.jpg";
+import Principal from "../../assets/president.jpg";
 import { FaFacebook, FaYoutube, FaTelegram, FaUsers } from "react-icons/fa";
 import CountUp from "react-countup";
 import Teams from "../../components/user/Teams";
