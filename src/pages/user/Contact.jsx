@@ -71,8 +71,7 @@ export default function Contact() {
       setErrors({ submit: error.message });
     }
   };
-  return (
-    <div className="w-full">
+  return <div className="w-full">
       <div className="max-w-7xl mx-auto bg-secondary-background">
         <div className="flex justify-center items-center h-64 bg-green-300">
           <div className="text-3xl font-oswald font-medium border-b border-black">
@@ -122,150 +121,71 @@ export default function Contact() {
             <div className="text-center text-xl font-merriweather">
               We love to hear from you.
             </div>
-            <form
-              className="w-full px-5 lg:mt-8 mx-auto"
-              onSubmit={submitContactForm}
-            >
+            <form className="w-full px-5 lg:mt-8 mx-auto" onSubmit={submitContactForm}>
               <div className="grid md:grid-cols-2 md:gap-6">
                 <div className="relative z-0 w-full mb-5 group">
-                  <label
-                    htmlFor="name"
-                    className="block mb-2 text-sm font-medium text-gray-700"
-                  >
+                  <label htmlFor="name" className="block mb-2 text-sm font-medium text-gray-700">
                     Your name
                   </label>
-                  <input
-                    type="text"
-                    id="name"
-                    aria-describedby="helper-text-explanation"
-                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                    required
-                    placeholder="Name"
-                    onChange={e => setName(e.target.value)}
-                  />
-                  {errors.name &&
-                    <p className="text-red-400 italic">
+                  <input type="text" id="name" aria-describedby="helper-text-explanation" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required placeholder="Name" onChange={e => setName(e.target.value)} />
+                  {errors.name && <p className="text-red-400 italic">
                       {errors.name}
                     </p>}
                 </div>
                 <div className="relative z-0 w-full mb-5 group">
-                  <label
-                    htmlFor="email"
-                    className="block mb-2 text-sm font-medium text-gray-700"
-                  >
+                  <label htmlFor="email" className="block mb-2 text-sm font-medium text-gray-700">
                     Your email
                   </label>
-                  <input
-                    type="email"
-                    id="email"
-                    aria-describedby="helper-text-explanation"
-                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                    required
-                    placeholder="name@mail.com"
-                    onChange={e => setEmail(e.target.value)}
-                  />
-                  {errors.email &&
-                    <p className="text-red-400 italic">
+                  <input type="email" id="email" aria-describedby="helper-text-explanation" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required placeholder="name@mail.com" onChange={e => setEmail(e.target.value)} />
+                  {errors.email && <p className="text-red-400 italic">
                       {errors.email}
                     </p>}
                 </div>
               </div>
               <div className="grid md:grid-cols-2 md:gap-6">
                 <div className="relative z-0 w-full mb-5 group">
-                  <label
-                    htmlFor="phone"
-                    className="block mb-2 text-sm font-medium text-gray-700"
-                  >
+                  <label htmlFor="phone" className="block mb-2 text-sm font-medium text-gray-700">
                     Your phone
                   </label>
-                  <input
-                    type="tel"
-                    id="phone"
-                    aria-describedby="helper-text-explanation"
-                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                    required
-                    placeholder="+00 012 345 6547"
-                    onChange={e => setPhone(e.target.value)}
-                  />
-                  {errors.phone &&
-                    <p className="text-red-400 italic">
+                  <input type="tel" id="phone" aria-describedby="helper-text-explanation" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required placeholder="+00 012 345 6547" onChange={e => setPhone(e.target.value)} />
+                  {errors.phone && <p className="text-red-400 italic">
                       {errors.phone}
                     </p>}
                 </div>
                 <div className="relative z-0 w-full mb-5 group">
-                  <label
-                    htmlFor="country"
-                    className="block mb-2 text-sm font-medium text-gray-700"
-                  >
+                  <label htmlFor="country" className="block mb-2 text-sm font-medium text-gray-700">
                     Your Country
                   </label>
-                  <input
-                    type="text"
-                    id="country"
-                    aria-describedby="helper-text-explanation"
-                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                    required
-                    placeholder="Country"
-                    onChange={e => setCountry(e.target.value)}
-                  />
-                  {errors.country &&
-                    <p className="text-red-400 italic">
+                  <input type="text" id="country" aria-describedby="helper-text-explanation" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required placeholder="Country" onChange={e => setCountry(e.target.value)} />
+                  {errors.country && <p className="text-red-400 italic">
                       {errors.country}
                     </p>}
                 </div>
               </div>
               <div>
-                <label
-                  htmlFor="message"
-                  className="block mb-2 text-sm font-medium text-gray-700"
-                >
+                <label htmlFor="message" className="block mb-2 text-sm font-medium text-gray-700">
                   Your message
                 </label>
-                <textarea
-                  id="message"
-                  rows="4"
-                  className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                  required
-                  placeholder="message..."
-                  onChange={e => setMessage(e.target.value)}
-                />
-                {errors.message &&
-                  <p className="text-red-400 italic">
+                <textarea id="message" rows="4" className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required placeholder="message..." onChange={e => setMessage(e.target.value)} />
+                {errors.message && <p className="text-red-400 italic">
                     {errors.message}
                   </p>}
               </div>
-              <div>
-                <ReCAPTCHA
-                  sitekey="6LcwADUpAAAAAH3ACDhfHCqVixn1fbB2Bjrro9tY"
-                  onChange={val => setReCapt(val)}
-                />
+              <div className="my-3">
+                <ReCAPTCHA sitekey="6LcwADUpAAAAAH3ACDhfHCqVixn1fbB2Bjrro9tY" onChange={val => setReCapt(val)} />
               </div>
-              <button
-                type="submit"
-                className="text-white mt-5 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                disabled={!reCapt}
-              >
+              <button type="submit" className="text-white mt-5 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" disabled={!reCapt}>
                 Submit
               </button>
-              {errors.submit &&
-                <p className="text-red-400 italic">
+              {errors.submit && <p className="text-red-400 italic">
                   {errors.submit}
                 </p>}
             </form>
           </div>
           <div className="h-auto">
-            <iframe
-              src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d29575.835549774383!2d96.278025!3d22.088602!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x30cb6f89b745f459%3A0x55a960cb1a2c6872!2sPhaung%20Daw%20Oo%20International%20University%20(PIU)!5e0!3m2!1sen!2smm!4v1719730784142!5m2!1sen!2smm"
-              width="100%"
-              height="100%"
-              style={{ border: 0 }}
-              allowFullScreen=""
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-            />
+            <iframe src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d29575.835549774383!2d96.278025!3d22.088602!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x30cb6f89b745f459%3A0x55a960cb1a2c6872!2sPhaung%20Daw%20Oo%20International%20University%20(PIU)!5e0!3m2!1sen!2smm!4v1719730784142!5m2!1sen!2smm" width="100%" height="100%" style={{ border: 0 }} allowFullScreen="" loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 }
