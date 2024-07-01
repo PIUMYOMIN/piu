@@ -144,7 +144,7 @@ export default function About() {
           </div>
         </div>
         <div className="w-full lg:flex flex-row">
-          {/* <div className="lg:w-2/3 bg-green-300 px-5 lg:py-10 py-5">
+          <div className="lg:w-2/3 bg-green-300 px-5 lg:py-10 py-5">
             <div className="text-2xl font-robotoSlab">Our Principle</div>
             <div className="flex gap-1">
               <div className="w-8 border-b-2 border-slate-500" />
@@ -159,7 +159,7 @@ export default function About() {
               reprehenderit labore. Et obcaecati distinctio reprehenderit
               totam dignissimos recusandae consequatur.
             </p>
-          </div> */}
+          </div>
           <div className="lg:w-4/12 bg-green-200 px-5 lg:py-10 py-5">
             <div className="text-2xl font-robotoSlab">Our Mission</div>
             <div className="flex gap-1">
