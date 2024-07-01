@@ -52,7 +52,6 @@ export default function Contact() {
     formData.append("country", country);
     formData.append("message", message);
     // const formData = { name, email, phone, country, message, reCapt };
-    console.log(formData);
 
     try {
       const response = await fetch(
