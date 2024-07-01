@@ -95,7 +95,7 @@ export default function Footer() {
                   <div className="flex flex-col px-3 w-full font-regular">
                     <strong>Phone</strong>
                     <Link to="tel:+95 0912345678">
-                      <p className="text-sm">+95 0912345678</p>
+                      <p className="text-sm">+959 767 1198 12</p>
                     </Link>
                   </div>
                 </div>
