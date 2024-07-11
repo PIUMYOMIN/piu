@@ -108,9 +108,21 @@ export default function Admission() {
         }
       );
 
+      console.log(response);
+
       if (!response.ok) {
         const data = await response.json();
         throw new Error(data.error);
+      }
+
+      // Check backend status
+      const submissionResponse = await response.json();
+      const { status } = submissionResponse;
+
+      if (status === "success") {
+        navigate("/admissions/application-form/successfully-submitted");
+      } else {
+        throw new Error("Submission failed");
       }
 
       navigate("/admissions/application-form/successfully-submitted");
