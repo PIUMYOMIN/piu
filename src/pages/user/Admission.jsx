@@ -99,6 +99,10 @@ export default function Admission() {
     formData.append("education_certificate", education_certificate);
     formData.append("other_document", other_document);
 
+    // for (var pair of formData.entries()) {
+    //   console.log(pair[0] + ": " + pair[1]);
+    // }
+
     try {
       const response = await fetch(
         "https://dashboard.piueducation.org/api/v1/application-form/submit",
@@ -108,30 +112,29 @@ export default function Admission() {
         }
       );
 
-      console.log(response);
+      if (response.ok) {
+        const responseData = await response.json();
+        console.log("Response Data:", responseData);
 
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error);
-      }
-
-      // Check backend status
-      const submissionResponse = await response.json();
-      const { status } = submissionResponse;
-
-      if (status === "success") {
+      if (responseData && responseData.status === 200) {
         navigate("/admissions/application-form/successfully-submitted");
       } else {
-        throw new Error("Submission failed");
+        throw new Error(
+          "Submission failed: " + (responseData.message || "Unknown error")
+        );
+      }
+      } else {
+        const data = await response.json();
+        console.error("Error Response Data:", data);
+        throw new Error(data.error || "Unknown error occurred");
       }
 
-      navigate("/admissions/application-form/successfully-submitted");
     } catch (error) {
       setError({
         form: "An error occurred while submitting the application form."
       });
     } finally {
-      setIsLoading(false); // Stop loading
+      setIsLoading(false);
     }
   };
 
