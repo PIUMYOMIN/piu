@@ -71,7 +71,7 @@ export default function Home() {
       {/* gallery section end  */}
 
       {/* gallery section start  */}
-      <President />
+      {/* <President /> */}
       {/* gallery section end  */}
     </div>;
 }

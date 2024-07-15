@@ -8,7 +8,7 @@ import Teams from "../../components/user/Teams";
 export default function About() {
   return <div className="max-w-7xl mx-auto font-robotoSlab">
       <div>
-        <div className="flex justify-center items-center h-64 bg-green-300">
+        <div className="flex justify-center items-center h-40 bg-green-300">
           <div className="text-3xl font-oswald font-medium border-b border-black">
             About Us
           </div>

@@ -46,13 +46,12 @@ export default function Course() {
       {loading
         ? <LoadingSpinner />
         : <div className="max-w-7xl mx-auto">
-            <div className="text-center bg-green-300 py-28">
+            <div className="text-center bg-green-300 py-9">
               <div className="text-3xl font-oswald">
-                Faculty of the Departments
+                All Courses
               </div>
               <p className="font-nato">
-                Lorem, ipsum dolor sit amet consectetur adipisicing elit. Illum
-                necessitatibus tempore quos perferendis, magnam illo.
+              Choose the Course That Aligns with Your Goals!
               </p>
             </div>
             <div className="grid lg:grid-cols-4 grid-cols-2 gap-2 mt-10">

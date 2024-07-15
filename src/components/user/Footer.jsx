@@ -19,9 +19,7 @@ export default function Footer() {
             <div className="pr-3">
               <h2 className="text-2xl">About Us</h2>
               <p className="text-sm">
-                Lorem ipsum dolor sit, amet consectetur adipisicing elit.
-                Alias repellat saepe ab nemo magnam eum ullam provident,
-                repudiandae nulla eos.
+              25th years ago Phaung Daw Oo monastic education school was established by the two brothers, Ven Nayaka and Ven Jotika.
               </p>
               <div className="flex flex-row gap-5 text-2xl mt-5">
                 <Link to="#!">
@@ -42,16 +40,16 @@ export default function Footer() {
               <h2 className="text-2xl">Useful Links</h2>
               <ul className="text-sm">
                 <li className="list-item">
-                  <Link to="#!">Home</Link>
+                  <Link to="/">Home</Link>
                 </li>
                 <li className="list-item">
-                  <Link to="#!">About Us</Link>
+                  <Link to="/about-us">About Us</Link>
                 </li>
                 <li className="list-item">
-                  <Link to="#!">Courses</Link>
+                  <Link to="/courses">Courses</Link>
                 </li>
                 <li className="list-item">
-                  <Link to="#!">Campus</Link>
+                  <Link to="/campus">Campus</Link>
                 </li>
               </ul>
             </div>
@@ -62,13 +60,13 @@ export default function Footer() {
                   <Link to="/courses/master-of-arts-in-social-entrepreneurship">Social Entrepreneurship</Link>
                 </li>
                 <li className="list-item">
-                  <Link to="#!">Business Administration</Link>
+                  <Link to="/courses/bachelor-of-arts-in-business-management">Business Administration</Link>
                 </li>
                 <li className="list-item">
-                  <Link to="#!">Information Technology</Link>
+                  <Link to="/courses/bachelor-of-science-in-information-technology">Information Technology</Link>
                 </li>
                 <li className="list-item">
-                  <Link to="#!">Social Science</Link>
+                  <Link to="/courses/bachelor-of-arts-in-social-sciences">Social Science</Link>
                 </li>
               </ul>
             </div>

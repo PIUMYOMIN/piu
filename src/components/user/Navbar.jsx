@@ -6,6 +6,7 @@ import Logo from "../../assets/logo.png";
 export default function Navbar() {
   return <nav>
       <div className="max-w-7xl mx-auto lg:flex justify-between items-center">
+      <Link to="/">
         <div className="flex items-center">
           <img src={Logo} alt="Logo" className="object-contain w-20" />
           <div className="flex flex-col justify-between gap-0">
@@ -17,6 +18,7 @@ export default function Navbar() {
             </span>
           </div>
         </div>
+        </Link>
         <div className="lg:flex flex-col block items-center lg:py-3 mt-2">
           <ul className="flex justify-around lg:flex-row items-center lg:gap-3">
             <li className="hover:border-b border-dark-purple transition-all delay-75 ease-in-out">
@@ -26,7 +28,7 @@ export default function Navbar() {
               <Link to="/courses">COURSES</Link>
             </li>
             <li className="hover:border-b border-dark-purple transition-all delay-75 ease-in-out">
-              <Link to="/campuses">CAMPUS</Link>
+              <Link to="/campus">CAMPUS</Link>
             </li>
             <li className="hover:border-b border-dark-purple transition-all delay-75 ease-in-out">
               <Link to="/about-us">ABOUT</Link>

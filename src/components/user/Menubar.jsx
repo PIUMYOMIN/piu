@@ -57,7 +57,7 @@ export default function Menu() {
                     tabIndex="-1"
                     id="menu-item-0"
                   >
-                    <Link to="/course1">Postgraduate Program</Link>
+                    <Link to="/courses">Postgraduate Program</Link>
                   </li>
                   <li
                     className="my-5 hover:text-gray-400"
@@ -65,7 +65,7 @@ export default function Menu() {
                     tabIndex="-1"
                     id="menu-item-1"
                   >
-                    <Link to="/course2">Undergraduate Program</Link>
+                    <Link to="/courses">Undergraduate Program</Link>
                   </li>
                   <li
                     className="my-5 hover:text-gray-400"
@@ -73,7 +73,7 @@ export default function Menu() {
                     tabIndex="-1"
                     id="menu-item-2"
                   >
-                    <Link to="/course3">Certificate Program</Link>
+                    <Link to="/courses">Certificate Program</Link>
                   </li>
                 </ul>
               </div>
@@ -108,7 +108,7 @@ export default function Menu() {
                     tabIndex="-1"
                     id="menu-item-0"
                   >
-                    <Link to="/course1">News & Events</Link>
+                    <Link to="/news/:slug">News & Events</Link>
                   </li>
                   <li
                     className="my-5 hover:text-gray-400"
