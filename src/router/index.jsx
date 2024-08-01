@@ -1,5 +1,5 @@
 import React from "react";
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter, Navigate } from "react-router-dom";
 import { AuthProvider } from "../contexts/AuthContext";
 import Home from "../pages/user/Home";
 import Contact from "../pages/user/Contact";
@@ -74,6 +74,10 @@ const router = createBrowserRouter([
       {
         path: "/register",
         element: <Register />
+      },
+      {
+        path: "*", //404 found and redirect to homepage//
+        element: <Navigate to="/" />
       }
       // {
       //   path: "/admissions/application-form",
