@@ -78,15 +78,15 @@ const router = createBrowserRouter([
       {
         path: "/admissions/application-form",
         element: <Admission />
-      },
-      {
-        path: "/admissions/application-form/successfully-submitted",
-        element: <ApplicationFormSubmitSuccessful />
-      },
-      {
-        path: "/contact/thank-you-for-contacting-us",
-        element: <ContactFormSubmittedSuccessful />
       }
+      // {
+      //   path: "/admissions/application-form/successfully-submitted",
+      //   element: <ApplicationFormSubmitSuccessful />
+      // },
+      // {
+      //   path: "/contact/thank-you-for-contacting-us",
+      //   element: <ContactFormSubmittedSuccessful />
+      // }
     ]
   },
   {

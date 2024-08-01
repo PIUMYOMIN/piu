@@ -28,13 +28,13 @@ export default function Menu() {
               transition-all duration-500 ease-in lg:pt-3 z-10`} role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabIndex="-1">
                 <ul className="px-2">
                   <li className="my-5 hover:text-gray-400" role="menuitem" tabIndex="-1" id="menu-item-0">
-                    <Link to="/courses">Postgraduate Program</Link>
+                    <Link to="#!">Postgraduate Program</Link>
                   </li>
                   <li className="my-5 hover:text-gray-400" role="menuitem" tabIndex="-1" id="menu-item-1">
-                    <Link to="/courses">Undergraduate Program</Link>
+                    <Link to="#!">Undergraduate Program</Link>
                   </li>
                   <li className="my-5 hover:text-gray-400" role="menuitem" tabIndex="-1" id="menu-item-2">
-                    <Link to="/courses">Certificate Program</Link>
+                    <Link to="#!">Certificate Program</Link>
                   </li>
                 </ul>
               </div>
@@ -49,7 +49,7 @@ export default function Menu() {
                     <Link to="/news/:slug">News & Events</Link>
                   </li>
                   <li className="my-5 hover:text-gray-400" role="menuitem" tabIndex="-1" id="menu-item-1">
-                    <Link to="/course2">Announcements</Link>
+                    <Link to="#!">Announcements</Link>
                   </li>
                 </ul>
               </div>
