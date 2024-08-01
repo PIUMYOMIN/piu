@@ -77,7 +77,7 @@ export default function CourseDetails() {
               </div>
             </div>
             <div />
-            <div className="my-3">
+            <div className="my-3 lg:pl-2">
               <h3 className="text-2xl">Course Overview</h3>
               <div className="font-montserrat font-normal">
                 <div className="font-montserrat font-normal" dangerouslySetInnerHTML={{ __html: courseDetails.description }} />
