@@ -46,7 +46,7 @@ export default function Menu() {
               <div className={`lg:absolute bg-dark-purple w-48 ${newsHovered ? "block" : "hidden"} transition-all duration-500 ease-in lg:pt-3 z-10`} role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabIndex="-1">
                 <ul className="px-2">
                   <li className="my-5 hover:text-gray-400" role="menuitem" tabIndex="-1" id="menu-item-0">
-                    <Link to="/news/:slug">News & Events</Link>
+                    <Link to="/news">News & Events</Link>
                   </li>
                   <li className="my-5 hover:text-gray-400" role="menuitem" tabIndex="-1" id="menu-item-1">
                     <Link to="#!">Announcements</Link>
