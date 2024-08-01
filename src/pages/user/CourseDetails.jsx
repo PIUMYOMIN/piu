@@ -125,11 +125,11 @@ export default function CourseDetails() {
                     <FaGlobe className="text-2xl text-orange-500" />
                     <div>Language : English</div>
                   </li>
-                  <li className="w-full bg-orange-400 text-center text-xl text-white font-oswald rounded-lg hover:bg-dark-purple transition duration-200 ease-in-out py-4">
+                  {/* <li className="w-full bg-orange-400 text-center text-xl text-white font-oswald rounded-lg hover:bg-dark-purple transition duration-200 ease-in-out py-4">
                     <Link to="/admissions/application-form" className="w-full">
                       ENROLL NOW
                     </Link>
-                  </li>
+                  </li> */}
                 </ul>
               </form>
             </div>
