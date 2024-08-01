@@ -74,11 +74,11 @@ const router = createBrowserRouter([
       {
         path: "/register",
         element: <Register />
-      },
-      {
-        path: "/admissions/application-form",
-        element: <Admission />
       }
+      // {
+      //   path: "/admissions/application-form",
+      //   element: <Admission />
+      // },
       // {
       //   path: "/admissions/application-form/successfully-submitted",
       //   element: <ApplicationFormSubmitSuccessful />
