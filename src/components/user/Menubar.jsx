@@ -92,7 +92,7 @@ export default function Menu() {
               </div>
             </li> */}
             <li className="lg:my-0 my-5">
-              <Link to="/about-us">ABOUT</Link>
+              <Link to="/admission">ADMISSION</Link>
             </li>
             <li className="md:hidden block lg:my-0 my-5">
               <Link to="https://dashboard.piueducation.org" target="_blank">

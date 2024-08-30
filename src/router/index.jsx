@@ -18,6 +18,7 @@ import AdminUsers from "../pages/admin/Users";
 import Register from "./../pages/user/Register";
 import CourseEdit from "../pages/admin/CourseEdit";
 import Admission from "../pages/user/Admission";
+import Admission2 from "../pages/user/Admission2";
 import ApplicationFormSubmitSuccessful from "../pages/user/ApplicationFormSubmitSuccessful";
 import TeamProfile from "../pages/user/TeamProfile";
 import ContactFormSubmittedSuccessful from "../pages/user/ContactFormSubmittedSuccessful";
@@ -38,6 +39,10 @@ const router = createBrowserRouter([
       {
         path: "/campus",
         element: <Campus />
+      },
+      {
+        path: "/admission",
+        element: <Admission2 />
       },
       {
         path: "/about-us",
