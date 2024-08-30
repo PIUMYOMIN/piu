@@ -9,17 +9,27 @@ function Admission2() {
     lastName: '',
     email: '',
     phone: '',
+    gender: '',
+    courses: '',
     dob: '',
+    nrc: '',
+    studentid: '',
+    materialStatus: '',
     country: '',
     city: '',
     postalCode: '',
-    gender: '',
-    courses: '',
+    picture: '',
     personalStatement: '',
     recommendationLetters: '',
     academicRecords: '',
     englishTest: '',
   });
+
+  const [open, setOpen] = useState(true);
+
+  const handleOpen = () => {
+    setOpen((prevState) => !prevState);
+  }
 
   const handleNext = () => {
     setPage((prevPage) => prevPage + 1);
@@ -67,6 +77,23 @@ function Admission2() {
 
             </div>
             <div className="w-1/2 p-5 shadow-lg rounded-lg bg-white">
+            {open === false && (
+                <div className='text-center'>
+                    <h3 className='font-bold text-2xl mb-5'>Application Guide</h3>
+                    <ul className='list-disc text-left ml-5 mb-5'>
+                        <li>Complete the application form.</li>
+                        <li>You will receive a reply via email within 7 days.</li>
+                        <li>If you do not have an IELTS or equivalent certification, you will need to take an entrance exam administered by PIU.</li>
+                        <li>Upon passing the exam, you will receive an acceptance email.</li>
+                        <li>If you decide to attend the school, please visit the campus in person to complete your registration.</li>
+
+                    </ul>
+                    <p className='py-2'>We are open now</p>
+                    <button className='bg-orange-500 hover:bg-orange-700 text-2xl text-white font-bold py-5 px-10 rounded' onClick={handleOpen}>Apply Now</button>
+                </div>
+            )}
+            {open === true && (
+                <>
                 <h2 className="text-center mb-5 text-xl font-bold">University Admission Form</h2>
                 <form onSubmit={handleSubmit}>
                 {page === 1 && (
@@ -101,13 +128,13 @@ function Admission2() {
                         </select>
                     </div>
                     <div className="form-group">
-                        <label htmlFor="gender" className="block mb-1">Courses:</label>
-                        <select id="gender" name="gender" value={formData.gender} onChange={handleChange} required className="w-full p-1 border border-gray-300 rounded text-sm">
+                        <label htmlFor="courses" className="block mb-1">Courses:</label>
+                        <select id="courses" name="courses" value={formData.courses} onChange={handleChange} required className="w-full p-1 border border-gray-300 rounded text-sm">
                             <option value="">Select Courses</option>
-                            <option value="male">Bachelor of Information Technology</option>
-                            <option value="male">Bachelor of Education</option>
-                            <option value="male">Bachelor of Nursing Science</option>
-                            <option value="male">Bachelor of Tourism</option>
+                            <option value="ict">Bachelor of Information Technology</option>
+                            <option value="edu">Bachelor of Education</option>
+                            <option value="nur">Bachelor of Nursing Science</option>
+                            <option value="tour">Bachelor of Tourism</option>
                         </select>
                     </div>
                     <button type="button" onClick={handleNext} className="mt-5 p-1 px-5 bg-blue-500 text-white rounded hover:bg-blue-600 float-right">Next</button>
@@ -120,56 +147,54 @@ function Admission2() {
                         <input type="date" id="dob" name="dob" value={formData.dob} onChange={handleChange} required className="w-full p-1 border border-gray-300 rounded text-sm" />
                     </div>
                     <div className="form-group">
+                        <label htmlFor="nrc" className="block mb-1">NRC or Passport</label>
+                        <input type="text" id="nrc" name="nrc" value={formData.nrc} onChange={handleChange} required className="w-full p-1 border border-gray-300 rounded text-sm" />
+                    </div>
+
+                    <div className="form-group">
+                        <label htmlFor="studentid" className="block mb-1">Student ID</label>
+                        <input type="text" id="studentid" name="studentid" value={formData.postalCode} onChange={handleChange} className="w-full p-1 border border-gray-300 rounded text-sm" placeholder="If you are alumni" />
+                    </div>
+
+                    <div className="form-group">
+                    <label htmlFor="materialStatus" className="block mb-1">Material Status</label>
+                    <select id="materialStatus" name="materialStatus" value={formData.materialStatus} onChange={handleChange} required className="w-full p-1 border border-gray-300 rounded text-sm">
+                        <option value="">Select Your Status</option>
+                        <option value="s">Single</option>
+                        <option value="m">Married</option>
+                        <option value="o">Others</option>
+                    </select>
+                    </div>
+
+
+                    <div className="form-group">
                         <label htmlFor="country" className="block mb-1">Country</label>
                         <input type="text" id="country" name="country" value={formData.country} onChange={handleChange} required className="w-full p-1 border border-gray-300 rounded text-sm" />
                     </div>
                     <div className="form-group">
-                        <label htmlFor="city" className="block mb-1">City</label>
+                        <label htmlFor="city" className="block mb-1">City and Address</label>
                         <input type="text" id="city" name="city" value={formData.city} onChange={handleChange} required className="w-full p-1 border border-gray-300 rounded text-sm" />
                     </div>
                     <div className="form-group">
                         <label htmlFor="postalCode" className="block mb-1">Postal Code</label>
                         <input type="text" id="postalCode" name="postalCode" value={formData.postalCode} onChange={handleChange} required className="w-full p-1 border border-gray-300 rounded text-sm" />
                     </div>
-                    <div className="form-group">
-                        <label htmlFor="personalStatement" className="block mb-1">Personal Statement: <small>(500 words of about yourself)</small></label>
-                        <input type="file" id="personalStatement" name="personalStatement" onChange={handleChange} required className="w-full p-1 border border-gray-300 rounded text-sm" />
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="recommendationLetters" className="block mb-1">Recommendation Letters:<small>(Two letters)</small></label>
-                        <input type="file" id="recommendationLetters" name="recommendationLetters" onChange={handleChange} required className="w-full p-1 border border-gray-300 rounded text-sm" />
-                        <input type="file" id="recommendationLetters" name="recommendationLetters" onChange={handleChange} required className="w-full p-1 border border-gray-300 rounded text-sm" />
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="academicRecords" className="block mb-1">Academic Records: <small>(Myanmar Matriculation Exam or GED or IGCSE)</small></label>
-                        <input type="file" id="academicRecords" name="academicRecords" onChange={handleChange} required className="w-full p-1 border border-gray-300 rounded text-sm" />
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="englishTest" className="block mb-1">English Level Test:</label>
-                        <input type="file" id="englishTest" name="englishTest" onChange={handleChange} required className="w-full p-1 border border-gray-300 rounded text-sm" />
-                    </div>
+                    
+                    
                     <div className="flex justify-between mt-5">
                         <button type="button" onClick={handleBack} className="p-1 px-5 bg-gray-500 text-white rounded hover:bg-gray-600">Back</button>
-                        <button type="button" onClick={handleNext} className="mt-5 p-1 px-5 bg-blue-500 text-white rounded hover:bg-blue-600 float-right">Next</button>
+                        <button type="button" onClick={handleNext} className="mt-5 p-1 px-5 bg-blue-500 text-white rounded hover:bg-blue-600">Next</button>
                     </div>
                     </div>
                 )}
                 {page === 3 && (
                     <div className="space-y-4">
                     <div className="form-group">
-                        <label htmlFor="country" className="block mb-1">Country:</label>
-                        <input type="text" id="country" name="country" value={formData.country} onChange={handleChange} required className="w-full p-1 border border-gray-300 rounded" />
+                        <label htmlFor="picture" className="block mb-1">Profile Picture</label>
+                        <input type="file" id="picture" name="picture" onChange={handleChange} required className="w-full p-1 border border-gray-300 rounded text-sm" />
                     </div>
                     <div className="form-group">
-                        <label htmlFor="city" className="block mb-1">City:</label>
-                        <input type="text" id="city" name="city" value={formData.city} onChange={handleChange} required className="w-full p-1 border border-gray-300 rounded" />
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="postalCode" className="block mb-1">Postal Code:</label>
-                        <input type="text" id="postalCode" name="postalCode" value={formData.postalCode} onChange={handleChange} required className="w-full p-1 border border-gray-300 rounded" />
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="personalStatement" className="block mb-1">Personal Statement: <small>(500 words of about yourself)</small></label>
+                        <label htmlFor="personalStatement" className="block mb-1">Personal Statement</label>
                         <input type="file" id="personalStatement" name="personalStatement" onChange={handleChange} required className="w-full p-1 border border-gray-300 rounded text-sm" />
                     </div>
                     <div className="form-group">
@@ -192,6 +217,8 @@ function Admission2() {
                     </div>
                 )}
                 </form>
+                </>
+            )}
             </div>
         </div>
     </div>
