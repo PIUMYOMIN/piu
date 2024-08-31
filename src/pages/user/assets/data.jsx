@@ -20,7 +20,7 @@ import ThantarHlaing from "./img/faculties/thantar-hlaing.png";
 
 
 export const facultyMembers = [
-    { id: 1, name: "U Nayaka Founder(President)", image: Nayaka, link:"/team/vennayaka", bio:"Ven. U Nayaka is a Buddhist monk. He was deeplyconcerned that his country would never be able to sustain democracybecause a large section of the population lacked access to basiceducation. So, in 1993, he set up a monastic school to educate poorchildren, monks, and nuns regardless of race, gender, ethnicity, andreligion, thus breaking the tradition that monastic schools normallyserve only monks and male students." },
+    { id: 1, name: "U Nayaka Founder(President)", image: Nayaka, phone: 959767119800, email:"pdoppg@gmail.com", link:"/team/vennayaka", bio:"Ven. U Nayaka is a Buddhist monk. He was deeplyconcerned that his country would never be able to sustain democracybecause a large section of the population lacked access to basiceducation. So, in 1993, he set up a monastic school to educate poorchildren, monks, and nuns regardless of race, gender, ethnicity, andreligion, thus breaking the tradition that monastic schools normallyserve only monks and male students." },
     { id: 2, name: "Dr.Karl A. Godwin-Dorning (Rector)", image: Rector },
     { id: 3, name: "Gustaaf Houtman", image: Gustaaf },
     { id: 4, name: "Aung Myint", image: AungMyint },
