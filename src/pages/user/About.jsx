@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import Principal from "../../assets/president.jpg";
 import { FaFacebook, FaYoutube, FaTelegram, FaUsers } from "react-icons/fa";
 import CountUp from "react-countup";
-import Teams from "../../components/user/Teams";
 
 export default function About() {
   return <div className="max-w-7xl mx-auto font-robotoSlab">
@@ -193,6 +192,5 @@ export default function About() {
           </div>
         </div>
       </div>
-      <Teams />
     </div>;
 }

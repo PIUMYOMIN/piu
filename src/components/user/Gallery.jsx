@@ -47,7 +47,7 @@ export default function Gallery() {
     setModalIsOpen(false);
   };
 
-  return !loading ? <div className="w-full bg-dark-purple text-white lg:py-8 overflow-hidden md:px-2">
+  return !loading ? <div className="max-w-7xl mx-auto font-robotoSlab bg-stone-200 lg:py-8 overflow-hidden md:px-2">
         <div className="max-w-7xl mx-auto font-montserrat">
           <div className="lg:grid grid-cols-2 gap-5 lg:py-8 px-2">
             <div className="lg:pr-2" data-aos="fade-up">

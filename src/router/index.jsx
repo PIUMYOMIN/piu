@@ -7,6 +7,8 @@ import President from "../pages/user/President";
 import Courses from "../pages/user/Courses";
 import AdminCourses from "../pages/admin/Courses";
 import Campus from "../pages/user/Campus";
+import Faculties from "../pages/user/Faculties";
+import FacultiesDetails from "../pages/user/FacultiesDetails";
 import About from "../pages/user/About";
 import Login from "../pages/user/Login";
 import AdminLayout from "../layouts/AdminLayout";
@@ -18,6 +20,7 @@ import AdminUsers from "../pages/admin/Users";
 import Register from "./../pages/user/Register";
 import CourseEdit from "../pages/admin/CourseEdit";
 import Admission from "../pages/user/Admission";
+import Admission2 from "../pages/user/Admission2";
 import ApplicationFormSubmitSuccessful from "../pages/user/ApplicationFormSubmitSuccessful";
 import TeamProfile from "../pages/user/TeamProfile";
 import ContactFormSubmittedSuccessful from "../pages/user/ContactFormSubmittedSuccessful";
@@ -38,6 +41,10 @@ const router = createBrowserRouter([
       {
         path: "/campus",
         element: <Campus />
+      },
+      {
+        path: "/admission",
+        element: <Admission2 />
       },
       {
         path: "/about-us",
@@ -78,7 +85,15 @@ const router = createBrowserRouter([
       {
         path: "*", //404 found and redirect to homepage//
         element: <Navigate to="/" />
-      }
+      },
+      {
+        path: "/faculties",
+        element: <Faculties />
+      },
+      {
+        path: "/faculties/:facultyName",
+        element: <FacultiesDetails />
+      },
       // {
       //   path: "/admissions/application-form",
       //   element: <Admission />
