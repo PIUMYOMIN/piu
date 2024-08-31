@@ -7,6 +7,8 @@ import President from "../pages/user/President";
 import Courses from "../pages/user/Courses";
 import AdminCourses from "../pages/admin/Courses";
 import Campus from "../pages/user/Campus";
+import Faculties from "../pages/user/Faculties";
+import FacultiesDetails from "../pages/user/FacultiesDetails";
 import About from "../pages/user/About";
 import Login from "../pages/user/Login";
 import AdminLayout from "../layouts/AdminLayout";
@@ -83,7 +85,15 @@ const router = createBrowserRouter([
       {
         path: "*", //404 found and redirect to homepage//
         element: <Navigate to="/" />
-      }
+      },
+      {
+        path: "/faculties",
+        element: <Faculties />
+      },
+      {
+        path: "/faculties/:facultyName",
+        element: <FacultiesDetails />
+      },
       // {
       //   path: "/admissions/application-form",
       //   element: <Admission />

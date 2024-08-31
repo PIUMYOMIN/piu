@@ -12,7 +12,7 @@ import {
 } from "react-icons/fa";
 
 export default function Footer() {
-  return <footer>
+  return <footer className="max-w-7xl mx-auto font-robotoSlab">
       <div className="w-full bg-dark-purple text-white font-montserrat px-2 lg:pt-20 py-5">
         <div className="max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-4 lg:gap-5 gap-8">
@@ -50,6 +50,9 @@ export default function Footer() {
                 </li>
                 <li className="list-item">
                   <Link to="/campus">Campus</Link>
+                </li>
+                <li className="list-item">
+                  <Link to="/faculties">Faculties</Link>
                 </li>
               </ul>
             </div>
