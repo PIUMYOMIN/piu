@@ -28,9 +28,9 @@ export default function News() {
 
   const maxNews = 3;
   const limitedNews = news.slice(0, maxNews);
-  return <div className="max-w-7xl mx-auto font-robotoSlab bg-secondary-background lg:py-8 px-2 overflow-hidden">
+  return <div className="max-w-7xl mx-auto font-robotoSlab bg-secondary-background lg:pt-5 px-2 overflow-hidden">
       {loading ? <LoadingSpinner /> : <div className="max-w-7xl mx-auto">
-            <div className="mt-8 mb-10">
+            <div>
               <h2 className="text-4xl my-3 font-oswald font-medium">
                 {" "}NEWS & EVENTS
               </h2>

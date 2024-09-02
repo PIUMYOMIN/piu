@@ -12,14 +12,15 @@ import {
 } from "react-icons/fa";
 
 export default function Footer() {
-  return <footer className="max-w-7xl mx-auto font-robotoSlab">
+  return <footer className="w-full font-robotoSlab">
       <div className="w-full bg-dark-purple text-white font-montserrat px-2 lg:pt-20 py-5">
         <div className="max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-4 lg:gap-5 gap-8">
             <div className="pr-3">
               <h2 className="text-2xl">About Us</h2>
               <p className="text-sm">
-              25th years ago Phaung Daw Oo monastic education school was established by the two brothers, Ven Nayaka and Ven Jotika.
+                25th years ago Phaung Daw Oo monastic education school was
+                established by the two brothers, Ven Nayaka and Ven Jotika.
               </p>
               <div className="flex flex-row gap-5 text-2xl mt-5">
                 <Link to="#!">
@@ -60,16 +61,24 @@ export default function Footer() {
               <h2 className="text-2xl">Popular Courses</h2>
               <ul className="text-sm">
                 <li className="list-item">
-                  <Link to="/courses/master-of-arts-in-social-entrepreneurship">Social Entrepreneurship</Link>
+                  <Link to="/courses/master-of-arts-in-social-entrepreneurship">
+                    Social Entrepreneurship
+                  </Link>
                 </li>
                 <li className="list-item">
-                  <Link to="/courses/bachelor-of-arts-in-business-management">Business Administration</Link>
+                  <Link to="/courses/bachelor-of-arts-in-business-management">
+                    Business Administration
+                  </Link>
                 </li>
                 <li className="list-item">
-                  <Link to="/courses/bachelor-of-science-in-information-technology">Information Technology</Link>
+                  <Link to="/courses/bachelor-of-science-in-information-technology">
+                    Information Technology
+                  </Link>
                 </li>
                 <li className="list-item">
-                  <Link to="/courses/bachelor-of-arts-in-social-sciences">Social Science</Link>
+                  <Link to="/courses/bachelor-of-arts-in-social-sciences">
+                    Social Science
+                  </Link>
                 </li>
               </ul>
             </div>
