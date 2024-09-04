@@ -27,12 +27,24 @@ export default function FacultiesDetails(){
                     <h5 className="mb-3">{selectedName.position}</h5>
                     <h3 className="text-xl uppercase font-bold mb-3">Contact</h3>
                     <ul>
-                        <li className="mb-3"><a href={`tel:+${selectedName.phone}`}><FaPhone className="inline mx-3"/>{selectedName.phone}</a></li>
+                        <li className="mb-3"><a href={`tel:${selectedName.phone}`}><FaPhone className="inline mx-3"/>+{selectedName.phone}</a></li>
                         <li><a href={`mailto:${selectedName.email}`}><FaEnvelope className="inline mx-3"/>{selectedName.email}</a></li>
                     </ul>
+                    {selectedName.id !== 1 && selectedName.id !== 2 && (
+                        <div className="mt-8">
+                            <h3 className="text-xl uppercase font-bold">Department</h3>
+                            <ul className="list-disc ml-5 mt-3">
+                                {selectedName.depts.map((dept, index) => (
+                                    <li key={index} className="ml-3">
+                                        {dept}
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
                 </div>
 
-                <div className="absolute right-2.5 bottom-2.5 rounded-full border-2 border-blue-400 p-2 bg-white">
+                <div className="absolute right-2.5 bottom-2.5 rounded-full border-2 border-blue-400 p-2 bg-white hover:animate-bounce">
                     <Link to="/faculties"><FaArrowLeft className="text-blue-500"/></Link>
                 </div>
 
@@ -42,10 +54,11 @@ export default function FacultiesDetails(){
                 <h3 className="text-2xl font-bold uppercase m-5 ml-12">Biography</h3>
                 <p className="m-5 ml-12">{selectedName.bio}</p>
 
-
-                <div className="absolute right-2.5 bottom-2.5 rounded-full border-2 border-blue-400 p-2 bg-white">
+                {selectedName.id === 1 && (
+                    <div className="absolute right-2.5 bottom-2.5 rounded-full border-2 border-blue-400 p-2 bg-white">
                     <Link to={selectedName.link}>More</Link>
                 </div>
+                )}
             </div>
             
             
