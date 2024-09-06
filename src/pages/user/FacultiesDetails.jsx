@@ -44,7 +44,7 @@ export default function FacultiesDetails(){
                     )}
                 </div>
 
-                <div className="absolute right-2.5 bottom-2.5 rounded-full border-2 border-blue-400 p-2 bg-white hover:animate-bounce">
+                <div className="absolute right-2.5 bottom-2.5 rounded-full border-2 border-blue-400 p-2 bg-white animate-bounce">
                     <Link to="/faculties"><FaArrowLeft className="text-blue-500"/></Link>
                 </div>
 
@@ -52,7 +52,7 @@ export default function FacultiesDetails(){
 
             <div className="bg-blue-50 py-5 relative">
                 <h3 className="text-2xl font-bold uppercase m-5 ml-12">Biography</h3>
-                <p className="m-5 ml-12">{selectedName.bio}</p>
+                <p className="mx-12 text-justify">{selectedName.bio}</p>
 
                 {selectedName.id === 1 && (
                     <div className="absolute right-2.5 bottom-2.5 rounded-full border-2 border-blue-400 p-2 bg-white">
