@@ -91,7 +91,7 @@ const router = createBrowserRouter([
         element: <Faculties />
       },
       {
-        path: "/faculties/:facultyName",
+        path: "/faculties/:slug",
         element: <FacultiesDetails />
       },
       // {
