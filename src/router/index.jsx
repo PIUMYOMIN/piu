@@ -17,8 +17,12 @@ import CourseDetails from "../pages/user/CourseDetails";
 import NewsDetails from "../pages/user/NewsDetails";
 import Dashboard from "../pages/admin/Dashboard";
 import AdminUsers from "../pages/admin/Users";
+import UserRoles from "../pages/admin/RolesPage";
+import UserPermissions from "../pages/admin/PermissionsPage";
 import Register from "./../pages/user/Register";
 import CourseEdit from "../pages/admin/CourseEdit";
+import ProfileSetting from "../pages/admin/ProfileSetting";
+import ChangePassword from "../pages/admin/ChangePassword";
 import Admission from "../pages/user/Admission";
 import Admission2 from "../pages/user/Admission2";
 import ApplicationFormSubmitSuccessful from "../pages/user/ApplicationFormSubmitSuccessful";
@@ -121,8 +125,24 @@ const router = createBrowserRouter([
         element: <Dashboard />
       },
       {
+        path: "/piu/admin/profile",
+        element: <ProfileSetting />
+      },
+      {
+        path: "/piu/admin/change-password",
+        element: <ChangePassword />
+      },
+      {
         path: "/piu/admin/users",
         element: <AdminUsers />
+      },
+      {
+        path: "/piu/admin/users-role",
+        element: <UserRoles />
+      },
+      {
+        path: "/piu/admin/user-permission",
+        element: <UserPermissions />
       },
       {
         path: "/piu/admin/courses",
