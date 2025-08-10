@@ -5,28 +5,30 @@ import AdminSidebar from "../components/admin/AdminSidebar";
 import { useAuth } from "../contexts/AuthContext";
 
 export default function AdminLayout() {
-  const navigate = useNavigate();
-  const { isAuthenticated, isLoading } = useAuth();
+  // const navigate = useNavigate();
+  // const { isAuthenticated, isLoading } = useAuth();
 
-  useEffect(
-    () => {
-      if (!isLoading && !isAuthenticated) {
-        navigate("/piu/login");
-      }
-    },
-    [isAuthenticated, isLoading]
-  );
+  // useEffect(
+  //   () => {
+  //     if (!isLoading && !isAuthenticated) {
+  //       navigate("/piu/login");
+  //     }
+  //   },
+  //   [isAuthenticated, isLoading]
+  // );
 
   return (
     <div className="font-roboto">
-      <div className="w-full mx-auto box-border overflow-hidden">
-        <AdminNavbar />
-        <AdminSidebar />
-        <div className="p-4 sm:ml-64">
-          <div className="rounded-lg dark:border-gray-700 mt-14">
-            <Outlet />
-          </div>
-        </div>
+      <AdminNavbar />
+
+      <div className="flex pt-[84px]">
+        <aside className="fixed top-[84px] left-0 bottom-0 w-96 bg-[#001933] text-white z-40 overflow-y-auto scrollbar-hide">
+          <AdminSidebar />
+        </aside>
+        
+        <main className="ml-96 flex-1 p-6 min-h-[calc(100vh-84px)] overflow-auto bg-gray-100">
+          <Outlet />
+        </main>
       </div>
     </div>
   );

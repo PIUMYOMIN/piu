@@ -16,7 +16,7 @@ export default function Home() {
   }, []);
   return <div>
       {/* carosel section start  */}
-      <Carousel />
+      {/* <Carousel /> */}
       {/* carousel section end  */}
 
       {/* about section start  */}
@@ -53,21 +53,21 @@ export default function Home() {
       {/* about section end  */}
 
       {/* courses section start */}
-      <Courses />
+      {/* <Courses /> */}
       {/* course section end */}
 
       {/* follower section start  */}
 
-      <Followers />
+      {/* <Followers /> */}
 
       {/* follower section end  */}
 
       {/* news section start  */}
-      <News />
+      {/* <News /> */}
       {/* news section end  */}
 
       {/* gallery section start  */}
-      <Gallery />
+      {/* <Gallery /> */}
       {/* gallery section end  */}
 
       {/* gallery section start  */}

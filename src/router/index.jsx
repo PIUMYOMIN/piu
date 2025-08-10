@@ -111,9 +111,9 @@ const router = createBrowserRouter([
   {
     path: "piu/admin",
     element: (
-      <AuthProvider>
+      // <AuthProvider>
         <AdminLayout />
-      </AuthProvider>
+      // </AuthProvider>
     ),
     children: [
       {
