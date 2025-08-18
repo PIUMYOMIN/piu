@@ -21,19 +21,13 @@ export const menuItems = [
     ]
   },
   {
-    title: "Admission", icon: <FaGraduationCap />,
-    sub: [
-      { name: "All Admissions", path: "/piu/admin/all-admissions" },
-      { name: "Pending Admissions", path: "/piu/admin/pending-admissions" },
-      { name: "Rejected Admissions", path: "/piu/admin/rejected-admissions" }
-    ]
+    title: "Admission", icon: <FaGraduationCap />, path: "piu/admin/admission",
   },
   {
     title: "All Courses", icon: <FaBookOpen />,
     sub: [
-      { name: "Course List", path: "/piu/admin/courses" },
-      { name: "Add Course", path: "/piu/admin/add-course" },
-      { name: "Course Categories", path: "/piu/admin/course-categories" }
+      { name: "Course List", path: "/piu/admin/list" },
+      { name: "Add Course", path: "/piu/admin/new" },
     ]
   },
   {

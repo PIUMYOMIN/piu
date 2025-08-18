@@ -5,7 +5,6 @@ import Home from "../pages/user/Home";
 import Contact from "../pages/user/Contact";
 import President from "../pages/user/President";
 import Courses from "../pages/user/Courses";
-import AdminCourses from "../pages/admin/Courses";
 import Campus from "../pages/user/Campus";
 import Faculties from "../pages/user/Faculties";
 import FacultiesDetails from "../pages/user/FacultiesDetails";
@@ -19,8 +18,10 @@ import Dashboard from "../pages/admin/Dashboard";
 import AdminUsers from "../pages/admin/Users";
 import UserRoles from "../pages/admin/RolesPage";
 import UserPermissions from "../pages/admin/PermissionsPage";
+import AdmissionPage from "../pages/admin/Admission";
+import CourseList from "../pages/admin/CourseList";
+import NewCourse from "../pages/admin/NewCourse";
 import Register from "./../pages/user/Register";
-import CourseEdit from "../pages/admin/CourseEdit";
 import ProfileSetting from "../pages/admin/ProfileSetting";
 import ChangePassword from "../pages/admin/ChangePassword";
 import Admission from "../pages/user/Admission";
@@ -145,13 +146,25 @@ const router = createBrowserRouter([
         element: <UserPermissions />
       },
       {
-        path: "/piu/admin/courses",
-        element: <AdminCourses />
+        path: "piu/admin/admission",
+        element: <AdmissionPage />
       },
       {
-        path: "/piu/admin/courses/:slug/edit",
-        element: <CourseEdit />
+        path: "/piu/admin/list",
+        element: <CourseList />
+      },
+      {
+        path: "/piu/admin/new",
+        element: <NewCourse />
       }
+      // {
+      //   path: "/piu/admin/courses",
+      //   element: <AdminCourses />
+      // },
+      // {
+      //   path: "/piu/admin/courses/:slug/edit",
+      //   element: <CourseEdit />
+      // }
     ]
   }
 ]);
