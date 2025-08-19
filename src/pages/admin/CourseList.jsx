@@ -15,7 +15,7 @@ const CourseList = () => {
       endDate: "2029-05-30",
       seats: 60,
       active: true,
-      applicantOpen: true
+      applicantOpen: true,
     },
     {
       id: 2,
@@ -27,13 +27,30 @@ const CourseList = () => {
       endDate: "2027-08-31",
       seats: 30,
       active: false,
-      applicantOpen: false
-    }
+      applicantOpen: false,
+    },
   ]);
+
+  const handleDelete = (id) => {
+    setCourses(courses.filter((course) => course.id !== id));
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
-      <h2 className="text-lg font-bold text-white p-4 rounded-t" style={{ backgroundColor: "#002147" }}>Course List</h2>
+      <h2
+        className="text-lg font-bold text-white p-4 rounded-t"
+        style={{ backgroundColor: "#002147" }}
+      >
+        Course List
+      </h2>
+      <div className="flex justify-end my-4">
+        <button
+          onClick={() => navigate("/piu/admin/new")}
+          className="px-4 py-2 bg-green-600 text-white rounded"
+        >
+          + New Course
+        </button>
+      </div>
       <div className="overflow-x-auto bg-white shadow-md rounded-lg p-4">
         <table className="w-full border-collapse border border-gray-300">
           <thead>
@@ -48,6 +65,7 @@ const CourseList = () => {
               <th className="border p-2">Active</th>
               <th className="border p-2">Applicant On/Off</th>
               <th className="border p-2">Edit</th>
+              <th className="border p-2">Delete</th>
             </tr>
           </thead>
           <tbody>
@@ -68,11 +86,7 @@ const CourseList = () => {
                 <td className="border p-2">{course.seats}</td>
                 <td className="border p-2">{course.active ? "Yes" : "No"}</td>
                 <td className="border p-2">
-                  <input
-                    type="checkbox"
-                    checked={course.applicantOpen}
-                    readOnly
-                  />
+                  <input type="checkbox" checked={course.applicantOpen} readOnly />
                 </td>
                 <td className="border p-2">
                   <button
@@ -82,6 +96,14 @@ const CourseList = () => {
                     }
                   >
                     Edit
+                  </button>
+                </td>
+                <td className="border p-2">
+                  <button
+                    className="px-3 py-1 bg-red-600 text-white rounded"
+                    onClick={() => handleDelete(course.id)}
+                  >
+                    Delete
                   </button>
                 </td>
               </tr>

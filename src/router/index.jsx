@@ -21,6 +21,10 @@ import UserPermissions from "../pages/admin/PermissionsPage";
 import AdmissionPage from "../pages/admin/Admission";
 import CourseList from "../pages/admin/CourseList";
 import NewCourse from "../pages/admin/NewCourse";
+import BlogsForm from "../pages/admin/BlogsForm";
+import BlogsList from "../pages/admin/BlogsList";
+import NewsList from "../pages/admin/NewsList";
+import NewsForm from "../pages/admin/NewsForm";
 import Register from "./../pages/user/Register";
 import ProfileSetting from "../pages/admin/ProfileSetting";
 import ChangePassword from "../pages/admin/ChangePassword";
@@ -151,20 +155,34 @@ const router = createBrowserRouter([
       },
       {
         path: "/piu/admin/list",
-        element: <CourseList />
+        element: <CourseList />,
       },
       {
-        path: "/piu/admin/new",
-        element: <NewCourse />
+        path: "/piu/admin/new/:id?",
+        element: <NewCourse />,
+      },
+      {
+        path: "/piu/admin/blog-list",
+        element: <BlogsList />
+      },
+      {
+        path: "/piu/admin/add-blog",
+        element: <BlogsForm />
+      },
+      { path: "add-blog/edit/:id", 
+        element: <BlogsForm /> 
+      },
+      {
+        path: "/piu/admin/news",
+        element: <NewsList />
+      },
+      {
+        path: "/piu/admin/add-news",
+        element: <NewsForm />
+      },
+      { path: "add-news/edit/:id", 
+        element: <NewsForm /> 
       }
-      // {
-      //   path: "/piu/admin/courses",
-      //   element: <AdminCourses />
-      // },
-      // {
-      //   path: "/piu/admin/courses/:slug/edit",
-      //   element: <CourseEdit />
-      // }
     ]
   }
 ]);

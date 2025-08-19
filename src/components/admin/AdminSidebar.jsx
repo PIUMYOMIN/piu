@@ -35,7 +35,6 @@ export const menuItems = [
     sub: [
       { name: "Blog List", path: "/piu/admin/blog-list" },
       { name: "Add Blog", path: "/piu/admin/add-blog" },
-      { name: "Blog Categories", path: "/piu/admin/blog-categories" }
     ]
   },
   {
@@ -49,9 +48,8 @@ export const menuItems = [
   {
     title: "All News", icon: <FaNewspaper />,
     sub: [
-      { name: "News List", path: "/piu/admin/news-list" },
+      { name: "News List", path: "/piu/admin/news" },
       { name: "Add News", path: "/piu/admin/add-news" },
-      { name: "News Categories", path: "/piu/admin/news-categories" }
     ]
   },
   {
