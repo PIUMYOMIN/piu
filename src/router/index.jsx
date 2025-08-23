@@ -25,6 +25,21 @@ import BlogsForm from "../pages/admin/BlogsForm";
 import BlogsList from "../pages/admin/BlogsList";
 import NewsList from "../pages/admin/NewsList";
 import NewsForm from "../pages/admin/NewsForm";
+import CampusForm from "../pages/admin/CampusForm";
+import CampusList from "../pages/admin/CampusList";
+import AddTeam from "../pages/admin/AddTeam";
+import TeamList from "../pages/admin/TeamList";
+import AddEvent from "../pages/admin/AddEvent";
+import EventList from "../pages/admin/EventList";
+import AddCurriculum from "../pages/admin/AddCurriculum";
+import CurriculumList from "../pages/admin/CurriculumList";
+import SliderList from "../pages/admin/SliderList";
+import MOUList from "../pages/admin/MOUList";
+import AddMOU from "../pages/admin/AddMOU";
+import DepartmentList from "../pages/admin/DepartmentsList";
+import AddDepartment from "../pages/admin/AddDepartment";
+import PositionList from "../pages/admin/PositionList";
+import AddPosition from "../pages/admin/AddPosition";
 import Register from "./../pages/user/Register";
 import ProfileSetting from "../pages/admin/ProfileSetting";
 import ChangePassword from "../pages/admin/ChangePassword";
@@ -182,7 +197,91 @@ const router = createBrowserRouter([
       },
       { path: "add-news/edit/:id", 
         element: <NewsForm /> 
-      }
+      },
+      {
+        path: "/piu/admin/campus-list",
+        element: <CampusList />
+      },
+      {
+        path: "/piu/admin/new-campus",
+        element: <CampusForm />
+      },
+      {
+        path: "/piu/admin/campus/:id/edit",
+        element: <CampusForm />
+      },
+      {
+        path: "/piu/admin/team-list",
+        element: <TeamList />
+      },
+      {
+        path: "/piu/admin/add-team",
+        element: <AddTeam />
+      },
+      {
+        path: "/piu/admin/add-team/edit/:id",
+        element: <AddTeam />
+      },
+      {
+        path: "/piu/admin/event-list",
+        element: <EventList />
+      },
+      {
+        path: "/piu/admin/add-event",
+        element: <AddEvent />
+      },
+      {
+        path: "/piu/admin/events/edit/:id",
+        element: <AddEvent />
+      },
+      {
+        path: "/piu/admin/curriculum-list",
+        element: <CurriculumList />,
+      },
+      {
+        path: "/piu/admin/add-curriculum",
+        element: <AddCurriculum />,
+      },
+      {
+        path: "/piu/admin/add-curriculum/edit/:id",
+        element: <AddCurriculum />,
+      },
+      {
+        path: "/piu/admin/slider",
+        element: <SliderList />
+      },
+      {
+        path: "/piu/admin/mou",
+        element: <MOUList />
+      },
+      {
+        path: "/piu/admin/mou/add",
+        element: <AddMOU />
+      },
+      {
+        path: "/piu/admin/departments",
+        element: <DepartmentList />
+      },
+      {
+        path: "/piu/admin/departments/new",
+        element: <AddDepartment />
+      },
+      {
+        path: "/piu/admin/departments/edit/:id",
+        element: <AddDepartment />
+      },
+      {
+        path: "/piu/admin/positions",
+        element: <PositionList />
+      },
+      {
+        path: "/piu/admin/positions/new",
+        element: <AddPosition />
+      },
+      {
+        path: "/piu/admin/positions/edit/:id",
+        element: <AddPosition />
+      },
     ]
   }
 ]);

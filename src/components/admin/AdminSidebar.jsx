@@ -38,14 +38,6 @@ export const menuItems = [
     ]
   },
   {
-    title: "All Campus", icon: <FaUniversity />,
-    sub: [
-      { name: "Campus List", path: "/piu/admin/campus-list" },
-      { name: "Add Campus", path: "/piu/admin/add-campus" },
-      { name: "Campus Departments", path: "/piu/admin/campus-departments" }
-    ]
-  },
-  {
     title: "All News", icon: <FaNewspaper />,
     sub: [
       { name: "News List", path: "/piu/admin/news" },
@@ -53,11 +45,24 @@ export const menuItems = [
     ]
   },
   {
+    title: "Events", icon: <FaCalendarAlt />,
+    sub: [
+      { name: "Event List", path: "/piu/admin/event-list" },
+      { name: "Add Event", path: "/piu/admin/add-event" },
+    ]
+  },
+  {
+    title: "All Campus", icon: <FaUniversity />,
+    sub: [
+      { name: "Campus List", path: "/piu/admin/campus-list" },
+      { name: "Add Campus", path: "/piu/admin/new-campus" },
+    ]
+  },
+  {
     title: "Curriculums", icon: <FaListAlt />,
     sub: [
       { name: "Curriculum List", path: "/piu/admin/curriculum-list" },
       { name: "Add Curriculum", path: "/piu/admin/add-curriculum" },
-      { name: "Curriculum Categories", path: "/piu/admin/curriculum-categories" }
     ]
   },
   {
@@ -65,47 +70,30 @@ export const menuItems = [
     sub: [
       { name: "Team List", path: "/piu/admin/team-list" },
       { name: "Add Team", path: "/piu/admin/add-team" },
-      { name: "Team Roles", path: "/piu/admin/team-roles" }
     ]
   },
   {
-    title: "Slider", icon: <FaSlidersH />,
-    sub: [
-      { name: "Slider List", path: "/piu/admin/slider-list" },
-      { name: "Add Slider", path: "/piu/admin/add-slider" },
-      { name: "Slider Settings", path: "/piu/admin/slider-settings" }
-    ]
+    title: "Slider", icon: <FaSlidersH />, path: "/piu/admin/slider"
   },
   {
     title: "MOU Partnership", icon: <FaHandshake />,
     sub: [
-      { name: "All MOU", path: "/piu/admin/all-mou" },
-      { name: "Add MOU", path: "/piu/admin/add-mou" },
-      { name: "MOU Categories", path: "/piu/admin/mou-categories" }
-    ]
-  },
-  {
-    title: "Events", icon: <FaCalendarAlt />,
-    sub: [
-      { name: "Event List", path: "/piu/admin/event-list" },
-      { name: "Add Event", path: "/piu/admin/add-event" },
-      { name: "Event Categories", path: "/piu/admin/event-categories" }
+      { name: "All MOU", path: "/piu/admin/mou" },
+      { name: "Add MOU", path: "/piu/admin/mou/add" },
     ]
   },
   {
     title: "Departments", icon: <FaBuilding />,
     sub: [
-      { name: "Department List", path: "/piu/admin/department-list" },
-      { name: "Add Department", path: "/piu/admin/add-department" },
-      { name: "Department Heads", path: "/piu/admin/department-heads" }
+      { name: "Department List", path: "/piu/admin/departments" },
+      { name: "Add Department", path: "/piu/admin/departments/new" },
     ]
   },
   {
     title: "Positions", icon: <FaBriefcase />,
     sub: [
-      { name: "Position List", path: "/piu/admin/position-list" },
-      { name: "Add Position", path: "/piu/admin/add-position" },
-      { name: "Position Categories", path: "/piu/admin/position-categories" }
+      { name: "Position List", path: "/piu/admin/positions" },
+      { name: "Add Position", path: "/piu/admin/positions/new" },
     ]
   },
   {
