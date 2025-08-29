@@ -99,9 +99,8 @@ export const menuItems = [
   {
     title: "Seminar", icon: <FaChalkboardTeacher />,
     sub: [
-      { name: "Seminar List", path: "/piu/admin/seminar-list" },
-      { name: "Add Seminar", path: "/piu/admin/add-seminar" },
-      { name: "Seminar Categories", path: "/piu/admin/seminar-categories" }
+      { name: "Seminar List", path: "/piu/admin/seminars" },
+      { name: "Add Seminar", path: "/piu/admin/seminars/add" },
     ]
   },
   {
@@ -115,9 +114,8 @@ export const menuItems = [
   {
     title: "Gallery", icon: <FaImages />,
     sub: [
-      { name: "Gallery List", path: "/piu/admin/gallery-list" },
-      { name: "Add Gallery", path: "/piu/admin/add-gallery" },
-      { name: "Gallery Categories", path: "/piu/admin/gallery-categories" }
+      { name: "Gallery List", path: "/piu/admin/gallery" },
+      { name: "Add Gallery", path: "/piu/admin/gallery/add" },
     ]
   },
   {
@@ -131,9 +129,8 @@ export const menuItems = [
   {
     title: "Students", icon: <FaUserGraduate />,
     sub: [
-      { name: "Student List", path: "/piu/admin/student-list" },
-      { name: "Add Student", path: "/piu/admin/add-student" },
-      { name: "Student Categories", path: "/piu/admin/student-categories" }
+      { name: "All Students", path: "/piu/admin/students" },
+      { name: "Add Student", path: "/piu/admin/students/add" },
     ]
   },
   {

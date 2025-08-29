@@ -40,6 +40,13 @@ import DepartmentList from "../pages/admin/DepartmentsList";
 import AddDepartment from "../pages/admin/AddDepartment";
 import PositionList from "../pages/admin/PositionList";
 import AddPosition from "../pages/admin/AddPosition";
+import SeminarList from "../pages/admin/SeminarList";
+import AddSeminar from "../pages/admin/AddSeminar";
+import GalleryList from "../pages/admin/GalleryList";
+import AddGallery from "../pages/admin/AddGallery";
+import AllStudents from "../pages/admin/AllStudents";
+import AddStudent from "../pages/admin/AddStudent";
+import StudentDetails from "../pages/admin/StudentDetails";
 import Register from "./../pages/user/Register";
 import ProfileSetting from "../pages/admin/ProfileSetting";
 import ChangePassword from "../pages/admin/ChangePassword";
@@ -282,6 +289,46 @@ const router = createBrowserRouter([
         path: "/piu/admin/positions/edit/:id",
         element: <AddPosition />
       },
+      {
+        path: "/piu/admin/seminars",
+        element: <SeminarList />
+      },
+      {
+        path: "/piu/admin/seminars/add",
+        element: <AddSeminar />
+      },
+      {
+        path: "/piu/admin/seminars/edit/:id",
+        element: <AddSeminar />
+      },
+      {
+        path: "/piu/admin/gallery",
+        element: <GalleryList />
+      },
+      {
+        path: "/piu/admin/gallery/add",
+        element: <AddGallery />
+      },
+      {
+        path: "/piu/admin/gallery/add/:id",
+        element: <AddGallery />
+      },
+      {
+        path: "/piu/admin/students",
+        element: <AllStudents />
+      },
+      {
+        path: "/piu/admin/students/add",
+        element: <AddStudent />
+      },
+      {
+        path: "/piu/admin/students/edit/:id",
+        element: <AddStudent />
+      },
+      {
+        path: "/piu/admin/students/:id/details",
+        element: <StudentDetails />
+      }
     ]
   }
 ]);
