@@ -19,6 +19,7 @@ import AdminUsers from "../pages/admin/Users";
 import UserRoles from "../pages/admin/RolesPage";
 import UserPermissions from "../pages/admin/PermissionsPage";
 import AdmissionPage from "../pages/admin/Admission";
+import AdmissionDetails from "../pages/admin/AdmissionDetails";
 import CourseList from "../pages/admin/CourseList";
 import NewCourse from "../pages/admin/NewCourse";
 import BlogsForm from "../pages/admin/BlogsForm";
@@ -174,6 +175,10 @@ const router = createBrowserRouter([
       {
         path: "piu/admin/admission",
         element: <AdmissionPage />
+      },
+      {
+        path: "/piu/admin/admission/details",
+        element: <AdmissionDetails />
       },
       {
         path: "/piu/admin/list",
