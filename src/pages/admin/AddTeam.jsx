@@ -1,8 +1,41 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 
+const dummyTeams = [
+  {
+    id: 1,
+    name: "John Doe",
+    email: "john@example.com",
+    phone: "0912345678",
+    address: "Yangon, Myanmar",
+    social1: "https://linkedin.com/in/john",
+    social2: "https://twitter.com/john",
+    department: "Engineering",
+    position: "Senior Developer",
+    education: "PhD in Software Engineering",
+    image: null,
+  },
+  {
+    id: 2,
+    name: "Jane Smith",
+    email: "jane@example.com",
+    phone: "0987654321",
+    address: "Mandalay, Myanmar",
+    social1: "https://linkedin.com/in/jane",
+    social2: "https://twitter.com/jane",
+    department: "Marketing",
+    position: "Manager",
+    education: "MBA in Marketing",
+    image: null,
+  },
+];
+
 const AddTeam = ({ onSubmit }) => {
+  const { id } = useParams(); // get id from route
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -19,6 +52,18 @@ const AddTeam = ({ onSubmit }) => {
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [imagePreview, setImagePreview] = useState("");
+
+  useEffect(() => {
+    if (id) {
+      const existing = dummyTeams.find((t) => t.id === parseInt(id));
+      if (existing) {
+        setFormData(existing);
+        if (existing.image) {
+          setImagePreview(existing.image);
+        }
+      }
+    }
+  }, [id]);
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -90,13 +135,16 @@ const AddTeam = ({ onSubmit }) => {
     
     // Simulate API call
     setTimeout(() => {
-      if (onSubmit) {
-        onSubmit(formData);
+      if (id) {
+        console.log("Updated Team:", formData);
+        alert("Team member updated successfully!");
+      } else {
+        console.log("New Team Added:", formData);
+        alert("Team member added successfully!");
       }
-      console.log("Team Data Submitted:", formData);
       setIsSubmitting(false);
-      alert("Team member added successfully!");
-    }, 1500);
+      navigate("/piu/admin/team"); // go back to team list
+    }, 1200);
   };
 
   const modules = {
@@ -361,15 +409,9 @@ const AddTeam = ({ onSubmit }) => {
               }`}
             >
               {isSubmitting ? (
-                <>
-                  <i className="fas fa-spinner fa-spin mr-2"></i>
-                  Adding Team Member...
-                </>
+                <><i className="fas fa-spinner fa-spin mr-2"></i>{id ? "Updating..." : "Adding Team Member..."}</>
               ) : (
-                <>
-                  <i className="fas fa-user-plus mr-2"></i>
-                  Add Team Member
-                </>
+                <><i className="fas fa-user-plus mr-2"></i>{id ? "Update Team Member" : "Add Team Member"}</>
               )}
             </button>
           </div>

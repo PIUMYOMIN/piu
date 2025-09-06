@@ -9,7 +9,7 @@ function RolesPage() {
 
   return (
     <div className="bg-white rounded shadow p-4">
-      <h2 className="bg-blue-600 text-white px-4 py-2 rounded-t">User Roles</h2>
+      <h2 className="bg-[#002147] text-white px-4 py-2 rounded-t">User Roles</h2>
       <table className="w-full border-collapse">
         <thead>
           <tr className="border-b">

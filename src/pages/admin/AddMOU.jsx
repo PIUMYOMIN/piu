@@ -12,11 +12,11 @@ function AddMOU() {
     name: "",
     description: "",
     file: null,
-    status: "draft",
+    status: "inactive",
     startDate: "",
     endDate: "",
     partner: "",
-    category: ""
+    category: "",
   });
 
   const [errors, setErrors] = useState({});
@@ -29,27 +29,27 @@ function AddMOU() {
         name: editingMou.name || "",
         description: editingMou.description || "",
         file: null,
-        status: editingMou.status || "draft",
+        status: editingMou.status || "inactive",
         startDate: editingMou.startDate || "",
         endDate: editingMou.endDate || "",
         partner: editingMou.partner || "",
-        category: editingMou.category || ""
+        category: editingMou.category || "",
       });
-      
-      if (editingMou.imageUrl) {
-        setPreviewUrl(editingMou.imageUrl);
+
+      // ✅ use image instead of imageUrl
+      if (editingMou.image) {
+        setPreviewUrl(editingMou.image);
       }
     }
   }, [editingMou]);
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
-    
+
     if (name === "file" && files && files[0]) {
       const file = files[0];
       setFormData({ ...formData, file });
-      
-      // Create preview for image
+
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreviewUrl(reader.result);
@@ -58,8 +58,7 @@ function AddMOU() {
     } else {
       setFormData({ ...formData, [name]: value });
     }
-    
-    // Clear error when user types
+
     if (errors[name]) {
       setErrors({
         ...errors,
@@ -70,46 +69,45 @@ function AddMOU() {
 
   const handleDescriptionChange = (value) => {
     setFormData({ ...formData, description: value });
-    
     if (errors.description) {
-      setErrors({
-        ...errors,
-        description: "",
-      });
+      setErrors({ ...errors, description: "" });
     }
   };
 
   const validateForm = () => {
     const newErrors = {};
-    
+
     if (!formData.name.trim()) {
       newErrors.name = "MOU name is required";
     }
-    
+
     if (!formData.description.trim()) {
       newErrors.description = "Description is required";
     }
-    
+
     if (!formData.partner.trim()) {
       newErrors.partner = "Partner organization is required";
     }
-    
-    if (formData.startDate && formData.endDate && new Date(formData.startDate) > new Date(formData.endDate)) {
+
+    if (
+      formData.startDate &&
+      formData.endDate &&
+      new Date(formData.startDate) > new Date(formData.endDate)
+    ) {
       newErrors.endDate = "End date must be after start date";
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) return;
-    
+
     setIsSubmitting(true);
-    
-    // Simulate API call
+
     setTimeout(() => {
       console.log("MOU submitted:", formData);
       setIsSubmitting(false);
@@ -124,11 +122,11 @@ function AddMOU() {
 
   const modules = {
     toolbar: [
-      [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-      ['bold', 'italic', 'underline', 'strike'],
-      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-      ['link', 'image'],
-      ['clean']
+      [{ header: [1, 2, 3, 4, 5, 6, false] }],
+      ["bold", "italic", "underline", "strike"],
+      [{ list: "ordered" }, { list: "bullet" }],
+      ["link", "image"],
+      ["clean"],
     ],
   };
 
@@ -140,10 +138,9 @@ function AddMOU() {
           {editingMou ? "Edit MOU" : "Add New MOU"}
         </h2>
         <p className="text-blue-100 mt-1">
-          {editingMou 
-            ? "Update the Memorandum of Understanding details" 
-            : "Create a new Memorandum of Understanding with partner organizations"
-          }
+          {editingMou
+            ? "Update the Memorandum of Understanding details"
+            : "Create a new Memorandum of Understanding with partner organizations"}
         </p>
       </div>
 
@@ -151,7 +148,10 @@ function AddMOU() {
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* MOU Name */}
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="name"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
               MOU Name <span className="text-red-500">*</span>
             </label>
             <input
@@ -161,8 +161,8 @@ function AddMOU() {
               value={formData.name}
               onChange={handleChange}
               className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:outline-none ${
-                errors.name 
-                  ? "border-red-500 focus:ring-red-200" 
+                errors.name
+                  ? "border-red-500 focus:ring-red-200"
                   : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
               }`}
               placeholder="Enter MOU name"
@@ -174,10 +174,13 @@ function AddMOU() {
               </p>
             )}
           </div>
-            
+
           {/* Description */}
           <div>
-            <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="description"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
               Description <span className="text-red-500">*</span>
             </label>
             <ReactQuill
@@ -185,7 +188,9 @@ function AddMOU() {
               onChange={handleDescriptionChange}
               theme="snow"
               modules={modules}
-              className={`h-48 mb-12 ${errors.description ? 'ql-error' : ''}`}
+              className={`h-48 mb-12 ${
+                errors.description ? "ql-error" : ""
+              }`}
             />
             {errors.description && (
               <p className="mt-1 text-sm text-red-600 flex items-center">
@@ -197,7 +202,10 @@ function AddMOU() {
 
           {/* File Upload */}
           <div>
-            <label htmlFor="file" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="file"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
               Upload MOU Document/Image
             </label>
             <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg">
@@ -209,9 +217,7 @@ function AddMOU() {
                       alt="MOU preview"
                       className="mx-auto h-32 w-auto object-contain"
                     />
-                    <p className="text-xs text-gray-500 mt-2">
-                      Image preview
-                    </p>
+                    <p className="text-xs text-gray-500 mt-2">Image preview</p>
                   </div>
                 ) : (
                   <>
@@ -265,7 +271,11 @@ function AddMOU() {
                 </>
               ) : (
                 <>
-                  <i className={`fas ${editingMou ? "fa-save" : "fa-file-contract"} mr-2`}></i>
+                  <i
+                    className={`fas ${
+                      editingMou ? "fa-save" : "fa-file-contract"
+                    } mr-2`}
+                  ></i>
                   {editingMou ? "Update MOU" : "Add MOU"}
                 </>
               )}

@@ -95,25 +95,21 @@ const DashboardPage = () => {
           title="Total Students" 
           value={mockStats.totalStudents} 
           icon={studentIcon}
-          trend={{ value: 12, label: 'from last month' }}
         />
         <Card 
           title="New Admissions" 
           value={mockStats.newAdmissions} 
           icon={admissionIcon}
-          trend={{ value: 5, label: 'this week' }}
         />
         <Card 
           title="Active Courses" 
           value={mockStats.activeCourses} 
           icon={courseIcon}
-          trend={{ value: 3, label: 'new courses' }}
         />
         <Card 
           title="Pending Queries" 
           value={mockStats.pendingQueries} 
           icon={queryIcon}
-          trend={{ value: -2, label: 'since yesterday' }}
         />
       </div>
 
