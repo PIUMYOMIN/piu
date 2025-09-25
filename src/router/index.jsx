@@ -87,6 +87,11 @@ import ChangePassword from "../pages/admin/ChangePassword";
 import Admission2 from "../pages/user/Admission2";
 import TeamProfile from "../pages/user/TeamProfile";
 
+
+//pages/student
+// Student Profile
+import StudentProfile from "../pages/student/StudentProfile";
+
 const router = createBrowserRouter([
   {
     path: "/",
@@ -115,6 +120,11 @@ const router = createBrowserRouter([
   },
   {
     path: "piu/admin",
+    // element: (
+    //   <AuthProvider>
+    //     <AdminLayout />
+    //   </AuthProvider>
+    // ),
     element: <AdminLayout />,
     children: [
       { path: "", element: <Dashboard /> },
@@ -183,10 +193,12 @@ const router = createBrowserRouter([
        {path:"/piu/admin/assignments/edit/:id", element:<AddAssignment />},
 
       //  Modules Code
-
       {path: "/piu/admin/modules", element: <ModulesList />},
       {path: "/piu/admin/modules/add", element: <ModuleForm />},
-      {path: "/piu/admin/modules/edit/:id", element: <ModuleForm />}
+      {path: "/piu/admin/modules/edit/:id", element: <ModuleForm />},
+
+      //Student Profile
+      {path: "/piu/admin/student", element: <StudentProfile />}
     ]
   }
 ]);

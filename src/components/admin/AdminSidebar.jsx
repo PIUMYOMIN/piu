@@ -8,7 +8,9 @@ import {
   FaTimes
 } from "react-icons/fa";
 
-export const menuItems = [
+
+// ----------------- ADMIN MENU -----------------
+export const adminMenu = [
   { title: "Dashboard", icon: <FaTachometerAlt />, path: "/piu/admin" },
   { title: "Profile Setting", icon: <FaUserCog />, path: "/piu/admin/profile" },
   { title: "Change Password", icon: <FaKey />, path: "/piu/admin/change-password" },
@@ -109,8 +111,8 @@ export const menuItems = [
     sub: [
       { name: "All Students", path: "/piu/admin/students" },
       { name: "Add Student", path: "/piu/admin/students/add" },
-      {name: "Add Student Grading", path: "/piu/admin/students/add-grading"},
-      {name: "Student Grading", path: "/piu/admin/students/grading"}
+      { name: "Add Student Grading", path: "/piu/admin/students/add-grading" },
+      { name: "Student Grading", path: "/piu/admin/students/grading" }
     ]
   },
   {
@@ -168,8 +170,73 @@ export const menuItems = [
   }
 ];
 
+
+// ----------------- TEACHER MENU (sample) -----------------
+export const teacherMenu = [
+  { title: "Dashboard", icon: <FaTachometerAlt />, path: "/piu/teacher" },
+  { title: "Teacher Profile", icon: <FaUserCog />, path: "/piu/teacher/profile" },
+  {
+    title: "Courses", icon: <FaBookOpen />,
+    sub: [
+      { name: "My Courses", path: "/piu/teacher/courses" },
+      { name: "Create Assignment", path: "/piu/teacher/assignments/create" },
+      { name: "Grade Students", path: "/piu/teacher/grades" },
+    ]
+  },
+  {
+    title: "Attendance", icon: <FaClock />,
+    sub: [
+      { name: "Mark Attendance", path: "/piu/teacher/attendance" },
+      { name: "Attendance Reports", path: "/piu/teacher/attendance-reports" },
+    ]
+  },
+  {
+    title: "Messages", icon: <FaEnvelope />,
+    sub: [
+      { name: "Inbox", path: "/piu/teacher/inbox" },
+      { name: "Sent", path: "/piu/teacher/sent" },
+    ]
+  }
+];
+
+
+// ----------------- STUDENT MENU (sample) -----------------
+export const studentMenu = [
+  { title: "Dashboard", icon: <FaTachometerAlt />, path: "/piu/student" },
+  { title: "Student Profile", icon: <FaUserCog />, path: "/piu/admin/student" },
+  {
+    title: "My Courses", icon: <FaBookReader />,
+    sub: [
+      { name: "Enrolled Courses", path: "/piu/student/courses" },
+      { name: "Assignments", path: "/piu/student/assignments" },
+      { name: "Grades", path: "/piu/student/grades" },
+    ]
+  },
+  {
+    title: "Attendance", icon: <FaClock />,
+    path: "/piu/student/attendance"
+  },
+  {
+    title: "Messages", icon: <FaEnvelope />,
+    sub: [
+      { name: "Inbox", path: "/piu/student/inbox" },
+      { name: "Sent", path: "/piu/student/sent" },
+    ]
+  }
+];
+
+
+// ----------------- SIDEBAR COMPONENT -----------------
 const AdminSidebar = ({ isSidebarOpen, toggleSidebar }) => {
   const [openMenu, setOpenMenu] = useState(null);
+
+  const role = "student"
+
+  // Pick menu based on role
+  let menuItems = [];
+  if (role === "admin") menuItems = adminMenu;
+  if (role === "teacher") menuItems = teacherMenu;
+  if (role === "student") menuItems = studentMenu;
 
   const toggleMenu = (index) => {
     setOpenMenu(openMenu === index ? null : index);

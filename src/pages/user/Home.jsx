@@ -49,29 +49,29 @@ export default function Home() {
       {/* about section end  */}
 
       {/* carosel section start  */}
-      {/* <Carousel /> */}
+      <Carousel />
       {/* carousel section end  */}
 
       {/* courses section start */}
-      {/* <Courses /> */}
+      <Courses />
       {/* course section end */}
 
       {/* follower section start  */}
 
-      {/* <Followers /> */}
+      <Followers />
 
       {/* follower section end  */}
 
       {/* news section start  */}
-      {/* <News /> */}
+      <News />
       {/* news section end  */}
 
       {/* gallery section start  */}
-      {/* <Gallery /> */}
+      <Gallery />
       {/* gallery section end  */}
 
       {/* gallery section start  */}
-      {/* <President /> */}
+      <President />
       {/* gallery section end  */}
     </div>;
 }
