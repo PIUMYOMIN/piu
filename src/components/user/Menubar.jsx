@@ -95,7 +95,7 @@ export default function Menu() {
               <Link to="/about-us">ABOUT</Link>
             </li>
             <li className="md:hidden block lg:my-0 my-5">
-              <Link to="https://dashboard.piueducation.org" target="_blank">
+              <Link to="https://api.piueducation.org" target="_blank">
                 LOGIN
               </Link>
             </li>

@@ -13,7 +13,7 @@ export default function NewsDetails() {
       const fetchNewsDetails = async () => {
         try {
           const response = await fetch(
-            `https://dashboard.piueducation.org/api/v1/news/${slug}`
+            `https://api.piueducation.org/api/v1/news/${slug}`
           );
           if (!response.ok) {
             throw new Error("Failed to fetch news details.");
@@ -38,20 +38,7 @@ export default function NewsDetails() {
 
   const createdDate = new Date(newsDetails.updated_at);
   const day = createdDate.getDate().toString().padStart(2, "0");
-  const monthNames = [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec"
-  ];
+  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   const month = monthNames[createdDate.getMonth()];
   const year = createdDate.getFullYear();
   const formattedDate = `${day}-${month}-${year}`;
@@ -62,7 +49,7 @@ export default function NewsDetails() {
           {newsDetails.title}
         </div>
         <div>
-          <img src={`https://dashboard.piueducation.org/storage/${newsDetails.image}`} alt={newsDetails.title} />
+          <img src={`https://api.piueducation.org/storage/${newsDetails.image}`} alt={newsDetails.title} />
           <p className="lg:ml-24">
             {formattedDate}
           </p>

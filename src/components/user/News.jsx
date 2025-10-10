@@ -10,7 +10,7 @@ export default function News() {
   useEffect(() => {
     const fetchNews = async () => {
       try {
-        const response = await fetch("https://dashboard.piueducation.org/api/v1/news");
+        const response = await fetch("https://api.piueducation.org/api/v1/news");
         if (!response.ok) {
           throw new Error("Failed to fetch news.");
         } else {
@@ -45,7 +45,7 @@ export default function News() {
                 >
                   <div className="overflow-hidden h-60">
                     <img
-                      src={`https://dashboard.piueducation.org/storage/${newItem.image}`}
+                      src={`https://api.piueducation.org/storage/${newItem.image}`}
                       alt=""
                       className="object-fit w-full hover:scale-105 transition duration-300 ease-out h-full"
                     />

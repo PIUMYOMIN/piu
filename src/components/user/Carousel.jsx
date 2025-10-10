@@ -11,7 +11,7 @@ const Carousel = () => {
   useEffect(() => {
     const fetchSlides = async () => {
       try {
-        const response = await fetch("https://dashboard.piueducation.org/api/v1/slides");
+        const response = await fetch("https://api.piueducation.org/api/v1/slides");
         if (!response.ok) {
           throw new Error("Failed to fetch slides");
         }
@@ -56,7 +56,7 @@ const Carousel = () => {
             {slides.map((slide, index) =>
               <div key={slide.id} className="swiper-slide">
                 <img
-                  src={`https://dashboard.piueducation.org/storage/${slide.slide_image}`}
+                  src={`https://api.piueducation.org/storage/${slide.slide_image}`}
                   alt=""
                   className="w-full"
                 />

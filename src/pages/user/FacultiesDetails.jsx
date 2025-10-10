@@ -12,7 +12,7 @@ export default function FacultiesDetails() {
         const fetchProfileDetails = async () => {
             try {
                 const response = await fetch(
-                    `https://dashboard.piueducation.org/api/v1/team/${slug}`
+                    `https://api.piueducation.org/api/v1/team/${slug}`
                 );
                 if (!response.ok) {
                     throw new Error("Failed to fetch faculty details.");
@@ -38,7 +38,7 @@ export default function FacultiesDetails() {
             <div className="flex justify-start items-start py-5 bg-gradient-to-b from-blue-200 to-white relative">
                 <div className="m-5 ml-12">
                     <img
-                        src={`https://dashboard.piueducation.org/storage/${profileDetails.profile}`}
+                        src={`https://api.piueducation.org/storage/${profileDetails.profile}`}
                         alt={profileDetails.name}
                         className="w-full object-cover"
                     />

@@ -12,7 +12,7 @@ export default function TeamProfile() {
       const fetchTeamProfile = async () => {
         try {
           const response = await fetch(
-            `https://dashboard.piueducation.org/api/v1/team/${slug}`
+            `https://api.piueducation.org/api/v1/team/${slug}`
           );
 
           if (!response.ok) {
@@ -39,7 +39,7 @@ export default function TeamProfile() {
   return <div className="max-w-7xl mx-auto">
       <div className="lg:flex py-10" key="">
         <div className="lg:w-1/2 lg:px-0 px-2">
-          <img src={`https://dashboard.piueducation.org/storage/${teamProfileDetails.profile}`} alt="" className="w-96" />
+          <img src={`https://api.piueducation.org/storage/${teamProfileDetails.profile}`} alt="" className="w-96" />
           <div className="w-96 text-center">
             <div className="text-xl text-slate-600">
               {teamProfileDetails.name}

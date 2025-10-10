@@ -67,7 +67,7 @@ export default function Contact() {
 
     try {
       const response = await fetch(
-        "https://dashboard.piueducation.org/api/v1/contact/form-submit",
+        "https://api.piueducation.org/api/v1/contact/form-submit",
         {
           method: "POST",
           headers: {

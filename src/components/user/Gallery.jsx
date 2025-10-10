@@ -17,7 +17,7 @@ export default function Gallery() {
   useEffect(() => {
     const fetchGallery = async () => {
       try {
-        const response = await fetch("https://dashboard.piueducation.org/api/v1/gallery");
+        const response = await fetch("https://api.piueducation.org/api/v1/gallery");
 
         if (!response.ok) {
           throw new Error("message", "Failed to fetch gallery.");
@@ -67,7 +67,7 @@ export default function Gallery() {
                 <Masonry>
                   {limitedGalleries.map((gallery, index) =>
                     <img
-                      src={`https://dashboard.piueducation.org/storage/${gallery.image}`}
+                      src={`https://api.piueducation.org/storage/${gallery.image}`}
                       alt={gallery.image_tag}
                       key={index}
                       className="cursor-pointer"
@@ -87,7 +87,7 @@ export default function Gallery() {
             {galleries.map((gallery, index) =>
               <div className="bg-blue-500" key={index}>
                 <img
-                  src={`https://dashboard.piueducation.org/storage/${gallery.image}`}
+                  src={`https://api.piueducation.org/storage/${gallery.image}`}
                   alt={gallery.image_tag}
                 />
                 <p className="image_tag">

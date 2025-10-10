@@ -6,18 +6,18 @@ import Logo from "../../assets/logo.png";
 export default function Navbar() {
   return <nav>
       <div className="max-w-7xl mx-auto lg:flex justify-between items-center">
-      <Link to="/">
-        <div className="flex items-center">
-          <img src={Logo} alt="Logo" className="object-contain w-20" />
-          <div className="flex flex-col justify-between gap-0">
-            <h2 className="text-3xl font-roboto text-green-700">
-              Phaung Daw Oo
-            </h2>
-            <span className="text-2xl text-yellow-600">
-              International University
-            </span>
+        <Link to="/">
+          <div className="flex items-center">
+            <img src={Logo} alt="Logo" className="object-contain w-20" />
+            <div className="flex flex-col justify-between gap-0">
+              <h2 className="text-3xl font-roboto text-green-700">
+                Phaung Daw Oo
+              </h2>
+              <span className="text-2xl text-yellow-600">
+                International University
+              </span>
+            </div>
           </div>
-        </div>
         </Link>
         <div className="lg:flex flex-col block items-center lg:py-3 mt-2">
           <ul className="flex justify-around lg:flex-row items-center lg:gap-3">
@@ -37,7 +37,7 @@ export default function Navbar() {
               <Link to="/contact-us">CONTACT US</Link>
             </li>
             <li className="md:block hidden text-xl text-dark-purple border-dark-purple transition-all delay-75 ease-in-out">
-              <Link to="https://dashboard.piueducation.org" target="_blank">
+              <Link to="https://api.piueducation.org" target="_blank">
                 <FaUserCircle />
               </Link>
             </li>
