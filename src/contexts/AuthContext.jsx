@@ -2,39 +2,46 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 
 const AuthContext = createContext();
 
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
-  return context;
-};
+export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(true);
+  const [role, setRole] = useState(null); // "admin" | "student" | "teacher"
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    if (token) {
+    const savedRole = localStorage.getItem("role");
+
+    if (token && savedRole) {
       setIsAuthenticated(true);
+      setRole(savedRole);
     }
+
     setIsLoading(false);
   }, []);
 
-  const login = () => {
+  const login = (token, userRole) => {
+    localStorage.setItem("token", token);
+    localStorage.setItem("role", userRole);
+
     setIsAuthenticated(true);
-    localStorage.setItem("token", "your_token_here");
+    setRole(userRole);
   };
 
   const logout = () => {
-    setIsAuthenticated(false);
     localStorage.removeItem("token");
+    localStorage.removeItem("role");
+
+    setIsAuthenticated(false);
+    setRole(null);
   };
 
-  const value = { isAuthenticated, setIsAuthenticated, login, logout, isLoading };
-
-  return <AuthContext.Provider value={value}>
-      {isLoading ? <div>Loading...</div> : children}
-    </AuthContext.Provider>;
+  return (
+    <AuthContext.Provider
+      value={{ isAuthenticated, role, login, logout, isLoading }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
 };

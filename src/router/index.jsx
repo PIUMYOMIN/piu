@@ -13,6 +13,8 @@ import About from "../pages/user/About";
 import Login from "../pages/user/Login";
 import AdminLayout from "../layouts/AdminLayout";
 import UserLayout from "../layouts/UserLayout";
+import StudentLayout from "../layouts/StudentLayout";
+import TeacherLayout from "../layouts/TeacherLayout"
 import CourseDetails from "../pages/user/CourseDetails";
 import NewsDetails from "../pages/user/NewsDetails";
 
@@ -87,6 +89,9 @@ import ChangePassword from "../pages/admin/ChangePassword";
 import Admission2 from "../pages/user/Admission2";
 import TeamProfile from "../pages/user/TeamProfile";
 
+// Auth
+import PrivateRoute from "./../components/PrivateRoute"
+
 
 //pages/student
 // Student Profile
@@ -118,14 +123,20 @@ const router = createBrowserRouter([
       { path: "*", element: <Navigate to="/" /> }
     ]
   },
+
+  // ---------------------------
+  // Admin Routes
+  // ---------------------------
   {
     path: "piu/admin",
-    // element: (
-    //   <AuthProvider>
-    //     <AdminLayout />
-    //   </AuthProvider>
-    // ),
-    element: <AdminLayout />,
+    element: (
+      // <AuthProvider>
+        // <PrivateRoute role="admin">
+          <AdminLayout />
+        // </PrivateRoute>
+      // </AuthProvider>
+    ),
+    // element: <AdminLayout />,
     children: [
       { path: "", element: <Dashboard /> },
       { path: "/piu/admin/profile", element: <ProfileSetting /> },
@@ -200,7 +211,37 @@ const router = createBrowserRouter([
       //Student Profile
       {path: "/piu/admin/student", element: <StudentProfile />}
     ]
-  }
-]);
+  },
+
+  // ---------------------------
+  // STUDENT ROUTES
+  // ---------------------------
+  {
+    path: "piu/student",
+      element: (
+        // <PrivateRoute role="student">
+          <StudentLayout />
+        // </PrivateRoute>
+      ),
+      children: [
+        
+      ],
+    },
+
+    // ---------------------------
+    // TEACHER ROUTES
+    // ---------------------------
+    {
+      path: "piu/teacher",
+      element: (
+        // <PrivateRoute role="teacher">
+          <TeacherLayout />
+        // </PrivateRoute>
+      ),
+      children: [
+        
+      ],
+    },
+  ]);
 
 export default router;
