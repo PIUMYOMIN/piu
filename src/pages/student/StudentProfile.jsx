@@ -1,7 +1,10 @@
 // StudentProfile.jsx
 import React, { useState } from 'react';
+import { useOutletContext } from 'react-router-dom';
 
 const StudentProfile = () => {
+  const {studentName} = useOutletContext();
+
   const [student] = useState({
     name: "Alex Johnson",
     studentId: "S12345678",
@@ -61,7 +64,7 @@ const StudentProfile = () => {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Student Profile</h1>
+          <h1 className="text-3xl font-bold text-gray-900">{studentName}</h1>
           <p className="text-gray-600 mt-2">Academic information and performance metrics</p>
         </div>
 

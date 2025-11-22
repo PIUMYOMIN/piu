@@ -1,30 +1,34 @@
-import React from "react";
+import { useState, useEffect } from "react";
 import StudentNavbar from "./../components/student/StudentNavbar"
 import StudentSidebar from "./../components/student/StudentSidebar"
 import { Outlet } from "react-router-dom";
 
-// export default function StudentLayout() {
-//   return (
-//     <div className="font-roboto">
-//       <div className="p-4 bg-blue-600 text-white">
-//         <h1 className="text-xl font-bold">Student Dashboard</h1>
-//       </div>
-
-//       <main className="p-4 bg-gray-100 min-h-screen">
-//         <Outlet />
-//       </main>
-//     </div>
-//   );
-// }
-
 export default function StudentLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [studentName, setStudentName] = useState("");
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
-  // Auto-close sidebar on desktop screens
+  // Fetch student name from free API
+  useEffect(() => {
+    async function fetchName() {
+      try {
+        const res = await fetch("https://randomuser.me/api/");
+        const data = await res.json();
+
+        const firstName = data.results[0].name.first;
+        setStudentName(firstName);
+      } catch (error) {
+        console.log("Error loading student name", error);
+      }
+    }
+
+    fetchName();
+  }, []);
+
+  // Auto-close sidebar on desktop
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 1024) {
@@ -38,7 +42,10 @@ export default function StudentLayout() {
 
   return (
     <div className="font-roboto">
-      <StudentNavbar toggleSidebar={toggleSidebar} />
+      <StudentNavbar
+        toggleSidebar={toggleSidebar}
+        studentName={studentName}
+      />
 
       <div className="flex pt-[84px]">
         <StudentSidebar
@@ -47,7 +54,7 @@ export default function StudentLayout() {
         />
 
         <main className="flex-1 p-4 sm:p-6 min-h-[calc(100vh-84px)] overflow-auto bg-gray-100 lg:ml-80 transition-all duration-300">
-          <Outlet />
+          <Outlet context={{studentName}}/>
         </main>
       </div>
     </div>

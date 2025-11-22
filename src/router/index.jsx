@@ -144,7 +144,7 @@ const router = createBrowserRouter([
       { path: "/piu/admin/users", element: <AdminUsers /> },
       { path: "/piu/admin/users-role", element: <UserRoles /> },
       { path: "/piu/admin/user-permission", element: <UserPermissions /> },
-      { path: "piu/admin/admission", element: <AdmissionPage /> },
+      { path: "/piu/admin/admission", element: <AdmissionPage /> },
       { path: "/piu/admin/admission/details", element: <AdmissionDetails /> },
       { path: "/piu/admin/list", element: <CourseList /> },
       { path: "/piu/admin/new/:id?", element: <NewCourse /> },
@@ -207,9 +207,7 @@ const router = createBrowserRouter([
       {path: "/piu/admin/modules", element: <ModulesList />},
       {path: "/piu/admin/modules/add", element: <ModuleForm />},
       {path: "/piu/admin/modules/edit/:id", element: <ModuleForm />},
-
-      //Student Profile
-      {path: "/piu/admin/student", element: <StudentProfile />}
+      
     ]
   },
 
@@ -224,7 +222,7 @@ const router = createBrowserRouter([
         // </PrivateRoute>
       ),
       children: [
-        
+        {path: "/piu/student", element: <StudentProfile />}
       ],
     },
 
