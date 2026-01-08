@@ -31,7 +31,7 @@ export default function Admission() {
     const fetchCourses = async () => {
       try {
         const response = await fetch(
-          "https://dashboard.piueducation.org/api/v1/courses"
+          "https://api.piueducation.org/api/v1/courses"
         );
         const data = await response.json();
         setCourses(data);
@@ -105,7 +105,7 @@ export default function Admission() {
 
     try {
       const response = await fetch(
-        "https://dashboard.piueducation.org/api/v1/application-form/submit",
+        "https://api.piueducation.org/api/v1/application-form/submit",
         {
           method: "POST",
           body: formData

@@ -10,7 +10,7 @@ import Campus from "../pages/user/Campus";
 import Faculties from "../pages/user/Faculties";
 import FacultiesDetails from "../pages/user/FacultiesDetails";
 import About from "../pages/user/About";
-import Login from "../pages/user/Login";
+import Login from "../auth/Login";
 import AdminLayout from "../layouts/AdminLayout";
 import UserLayout from "../layouts/UserLayout";
 import StudentLayout from "../layouts/StudentLayout";
@@ -83,7 +83,7 @@ import AddAssignment from "../pages/admin/AddAssignment";
 import ModulesList from "../pages/admin/ModulesList";
 import ModuleForm from "../pages/admin/ModuleForm";
 
-import Register from "./../pages/user/Register";
+import Register from "../auth/Register";
 import ProfileSetting from "../pages/admin/ProfileSetting";
 import ChangePassword from "../pages/admin/ChangePassword";
 import Admission2 from "../pages/user/Admission2";
@@ -91,20 +91,41 @@ import TeamProfile from "../pages/user/TeamProfile";
 
 // Auth
 import PrivateRoute from "./../components/PrivateRoute"
-
+import PublicRoute from "./../components/PublicRoute"
 
 //pages/student
-// Student Profile
 import StudentProfile from "../pages/student/StudentProfile";
 
+const AppWrapper = () => {
+  return (
+    <AuthProvider>
+      <UserLayout />
+    </AuthProvider>
+  );
+};
+
 const router = createBrowserRouter([
+
+  {
+        path: "/login",
+        element: (
+          <PublicRoute>
+            <Login />
+          </PublicRoute>
+        )
+      },
+      {
+        path: "/register",
+        element: (
+          <PublicRoute>
+            <Register />
+          </PublicRoute>
+        )
+  },
   {
     path: "/",
-    element: (
-      <AuthProvider>
-        <UserLayout />
-      </AuthProvider>
-    ),
+    element:
+        <UserLayout />,
     children: [
       { path: "/", element: <Home /> },
       { path: "/campus", element: <Campus /> },
@@ -116,8 +137,6 @@ const router = createBrowserRouter([
       { path: "/news/:slug", element: <NewsDetails /> },
       { path: "/contact-us", element: <Contact /> },
       { path: "/president-of-piu", element: <President /> },
-      { path: "/login", element: <Login /> },
-      { path: "/register", element: <Register /> },
       { path: "/faculties", element: <Faculties /> },
       { path: "/faculties/:slug", element: <FacultiesDetails /> },
       { path: "*", element: <Navigate to="/" /> }
@@ -130,83 +149,80 @@ const router = createBrowserRouter([
   {
     path: "piu/admin",
     element: (
-      // <AuthProvider>
-        // <PrivateRoute role="admin">
+        <PrivateRoute role="admin">
           <AdminLayout />
-        // </PrivateRoute>
-      // </AuthProvider>
+        </PrivateRoute>
     ),
     // element: <AdminLayout />,
     children: [
-      { path: "", element: <Dashboard /> },
-      { path: "/piu/admin/profile", element: <ProfileSetting /> },
+      { index: true, element: <Dashboard /> },
+      { path: "profile", element: <ProfileSetting /> },
       { path: "/piu/admin/change-password", element: <ChangePassword /> },
-      { path: "/piu/admin/users", element: <AdminUsers /> },
-      { path: "/piu/admin/users-role", element: <UserRoles /> },
-      { path: "/piu/admin/user-permission", element: <UserPermissions /> },
-      { path: "/piu/admin/admission", element: <AdmissionPage /> },
-      { path: "/piu/admin/admission/details", element: <AdmissionDetails /> },
-      { path: "/piu/admin/list", element: <CourseList /> },
-      { path: "/piu/admin/new/:id?", element: <NewCourse /> },
-      { path: "/piu/admin/blog-list", element: <BlogsList /> },
-      { path: "/piu/admin/add-blog", element: <BlogsForm /> },
+      { path: "users", element: <AdminUsers /> },
+      { path: "users-role", element: <UserRoles /> },
+      { path: "user-permission", element: <UserPermissions /> },
+      { path: "admission", element: <AdmissionPage /> },
+      { path: "admission/details", element: <AdmissionDetails /> },
+      { path: "list", element: <CourseList /> },
+      { path: "new/:id?", element: <NewCourse /> },
+      { path: "blog-list", element: <BlogsList /> },
+      { path: "add-blog", element: <BlogsForm /> },
       { path: "add-blog/edit/:id", element: <BlogsForm /> },
-      { path: "/piu/admin/news", element: <NewsList /> },
-      { path: "/piu/admin/add-news", element: <NewsForm /> },
-      { path: "add-news/edit/:id", element: <NewsForm /> },
-      { path: "/piu/admin/campus-list", element: <CampusList /> },
-      { path: "/piu/admin/new-campus", element: <CampusForm /> },
-      { path: "/piu/admin/campus/:id/edit", element: <CampusForm /> },
-      { path: "/piu/admin/team-list", element: <TeamList /> },
-      { path: "/piu/admin/add-team", element: <AddTeam /> },
-      { path: "/piu/admin/add-team/edit/:id", element: <AddTeam /> },
-      { path: "/piu/admin/event-list", element: <EventList /> },
-      { path: "/piu/admin/add-event", element: <AddEvent /> },
-      { path: "/piu/admin/events/edit/:id", element: <AddEvent /> },
-      { path: "/piu/admin/curriculum-list", element: <CurriculumList /> },
-      { path: "/piu/admin/add-curriculum", element: <AddCurriculum /> },
-      { path: "/piu/admin/add-curriculum/edit/:id", element: <AddCurriculum /> },
-      { path: "/piu/admin/slider", element: <SliderList /> },
-      { path: "/piu/admin/mou", element: <MOUList /> },
-      { path: "/piu/admin/mou/add", element: <AddMOU /> },
-      { path: "/piu/admin/departments", element: <DepartmentList /> },
-      { path: "/piu/admin/departments/new", element: <AddDepartment /> },
-      { path: "/piu/admin/departments/edit/:id", element: <AddDepartment /> },
-      { path: "/piu/admin/positions", element: <PositionList /> },
-      { path: "/piu/admin/positions/new", element: <AddPosition /> },
-      { path: "/piu/admin/positions/edit/:id", element: <AddPosition /> },
-      { path: "/piu/admin/seminars", element: <SeminarList /> },
-      { path: "/piu/admin/seminars/add", element: <AddSeminar /> },
-      { path: "/piu/admin/seminars/edit/:id", element: <AddSeminar /> },
-      { path: "/piu/admin/gallery", element: <GalleryList /> },
-      { path: "/piu/admin/gallery/add", element: <AddGallery /> },
-      { path: "/piu/admin/gallery/add/:id", element: <AddGallery /> },
+      { path: "news", element: <NewsList /> },
+      { path: "add-news", element: <NewsForm /> },
+      { path: "edit/:id", element: <NewsForm /> },
+      { path: "campus-list", element: <CampusList /> },
+      { path: "new-campus", element: <CampusForm /> },
+      { path: "campus/:id/edit", element: <CampusForm /> },
+      { path: "team-list", element: <TeamList /> },
+      { path: "add-team", element: <AddTeam /> },
+      { path: "add-team/edit/:id", element: <AddTeam /> },
+      { path: "event-list", element: <EventList /> },
+      { path: "add-event", element: <AddEvent /> },
+      { path: "events/edit/:id", element: <AddEvent /> },
+      { path: "curriculum-list", element: <CurriculumList /> },
+      { path: "add-curriculum", element: <AddCurriculum /> },
+      { path: "add-curriculum/edit/:id", element: <AddCurriculum /> },
+      { path: "slider", element: <SliderList /> },
+      { path: "mou", element: <MOUList /> },
+      { path: "mou/add", element: <AddMOU /> },
+      { path: "departments", element: <DepartmentList /> },
+      { path: "departments/new", element: <AddDepartment /> },
+      { path: "departments/edit/:id", element: <AddDepartment /> },
+      { path: "positions", element: <PositionList /> },
+      { path: "positions/new", element: <AddPosition /> },
+      { path: "positions/edit/:id", element: <AddPosition /> },
+      { path: "seminars", element: <SeminarList /> },
+      { path: "seminars/add", element: <AddSeminar /> },
+      { path: "seminars/edit/:id", element: <AddSeminar /> },
+      { path: "gallery", element: <GalleryList /> },
+      { path: "gallery/add", element: <AddGallery /> },
+      { path: "gallery/add/:id", element: <AddGallery /> },
 
       // Students
-      { path: "/piu/admin/students", element: <AllStudents /> },
-      { path: "/piu/admin/students/add", element: <AddStudent /> },
-      { path: "/piu/admin/students/edit/:id", element: <AddStudent /> },
-      { path: "/piu/admin/students/:id/details", element: <StudentDetails /> },
-
-      { path: "/piu/admin/students/add-grading", element: <AddStudentGrading /> },
-      { path: "/piu/admin/students/grading", element: <StudentGradingList /> },
-      { path: "/piu/admin/students/:id/grading", element: <StudentYearView /> },
-      { path: "/piu/admin/students/:studentId/grading/:year", element: <StudentSemesterView /> },
+      { path: "students", element: <AllStudents /> },
+      { path: "students/add", element: <AddStudent /> },
+      { path: "students/edit/:id", element: <AddStudent /> },
+      { path: "students/:id/details", element: <StudentDetails /> },
+      { path: "students/add-grading", element: <AddStudentGrading /> },
+      { path: "students/grading", element: <StudentGradingList /> },
+      { path: "students/:id/grading", element: <StudentYearView /> },
+      { path: "students/:studentId/grading/:year", element: <StudentSemesterView /> },
 
       // Semester + Grade form (KEEP SAME SHAPE)
-      { path: "/piu/admin/students/:studentId/:year/:semester", element: <StudentGradeView /> },
-      { path: "/piu/admin/students/:studentId/:year/:semester/new", element: <GradeForm /> },
-      { path: "/piu/admin/students/:studentId/:year/:semester/edit/:gradeId", element: <GradeForm /> },
+      { path: "students/:studentId/:year/:semester", element: <StudentGradeView /> },
+      { path: "students/:studentId/:year/:semester/new", element: <GradeForm /> },
+      { path: "students/:studentId/:year/:semester/edit/:gradeId", element: <GradeForm /> },
 
       // Assignments
-       {path:"/piu/admin/assignments", element:<AssignmentsList />}, 
-       {path:"/piu/admin/assignments/add", element:<AddAssignment />}, 
-       {path:"/piu/admin/assignments/edit/:id", element:<AddAssignment />},
+       {path:"assignments", element:<AssignmentsList />}, 
+       {path:"assignments/add", element:<AddAssignment />}, 
+       {path:"assignments/edit/:id", element:<AddAssignment />},
 
       //  Modules Code
-      {path: "/piu/admin/modules", element: <ModulesList />},
-      {path: "/piu/admin/modules/add", element: <ModuleForm />},
-      {path: "/piu/admin/modules/edit/:id", element: <ModuleForm />},
+      {path: "modules", element: <ModulesList />},
+      {path: "modules/add", element: <ModuleForm />},
+      {path: "modules/edit/:id", element: <ModuleForm />},
       
     ]
   },
@@ -217,9 +233,7 @@ const router = createBrowserRouter([
   {
     path: "piu/student",
       element: (
-        // <PrivateRoute role="student">
           <StudentLayout />
-        // </PrivateRoute>
       ),
       children: [
         {path: "/piu/student", element: <StudentProfile />}
@@ -232,9 +246,7 @@ const router = createBrowserRouter([
     {
       path: "piu/teacher",
       element: (
-        // <PrivateRoute role="teacher">
           <TeacherLayout />
-        // </PrivateRoute>
       ),
       children: [
         

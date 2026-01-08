@@ -37,7 +37,7 @@ export default function Navbar() {
               <Link to="/contact-us">CONTACT US</Link>
             </li>
             <li className="md:block hidden text-xl text-dark-purple border-dark-purple transition-all delay-75 ease-in-out">
-              <Link to="https://api.piueducation.org" target="_blank">
+              <Link to="/login">
                 <FaUserCircle />
               </Link>
             </li>

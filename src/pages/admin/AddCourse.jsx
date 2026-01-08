@@ -2,6 +2,9 @@ import React, { useState, useEffect } from "react";
 import { useLocation, useParams, useNavigate } from "react-router-dom";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import api from "../../api/axios";
 
 export default function NewCourse() {
   const location = useLocation();
@@ -13,56 +16,91 @@ export default function NewCourse() {
     description: "",
     eligibility: "",
     requirement: "",
-    fee: "",
-    process: "",
-    startDate: "",
-    endDate: "",
+    fees: "",
+    apply: "",
+    start_date: "",
+    end_date: "",
     duration: "",
-    seats: "",
-    category: "",
+    total_seat: "",
+    ic_name: "",
+    ic_phone: "",
+    course_category_id: "",
     image: null,
-    status: "draft",
-    instructor: "",
-    level: "beginner",
-    language: "English"
+    is_active: true,
+    application_sts: true
   });
 
+  const [categories, setCategories] = useState([]);
   const [preview, setPreview] = useState("");
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  // Load data if editing
+  // Load categories and course data
   useEffect(() => {
-    if (params.id && location.state) {
-      setFormData({
-        title: location.state.title || "",
-        description: location.state.description || "",
-        eligibility: location.state.eligibility || "",
-        requirement: location.state.requirement || "",
-        fee: location.state.fee || "",
-        process: location.state.process || "",
-        startDate: location.state.startDate || "",
-        endDate: location.state.endDate || "",
-        duration: location.state.duration || "",
-        seats: location.state.seats || "",
-        category: location.state.category || "",
-        image: null,
-        status: location.state.status || "draft",
-        instructor: location.state.instructor || "",
-        level: location.state.level || "beginner",
-        language: location.state.language || "English"
-      });
-      if (location.state.image) {
-        setPreview(location.state.image);
-      }
+    loadCategories();
+    
+    if (params.id) {
+      loadCourseData();
     }
-  }, [params.id, location.state]);
+  }, [params.id]);
+
+  const loadCategories = async () => {
+    try {
+      const response = await api.get("/api/v2/course-categories");
+      setCategories(response.data.data || response.data);
+    } catch (error) {
+      console.error("Failed to load categories:", error);
+      toast.error("Failed to load categories");
+    }
+  };
+
+  const loadCourseData = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get(`/api/v2/courses/${params.id}`);
+      const course = response.data.data || response.data;
+      
+      setFormData({
+        title: course.title || "",
+        description: course.description || "",
+        eligibility: course.eligibility || "",
+        requirement: course.requirement || "",
+        fees: course.fees || "",
+        apply: course.apply || "",
+        start_date: course.start_date ? course.start_date.split(' ')[0] : "", // Format for date input
+        end_date: course.end_date ? course.end_date.split(' ')[0] : "",
+        duration: course.duration || "",
+        total_seat: course.total_seat || "",
+        ic_name: course.ic_name || "",
+        ic_phone: course.ic_phone || "",
+        course_category_id: course.course_category_id || "",
+        image: null,
+        is_active: course.is_active || true,
+        application_sts: course.application_sts || true
+      });
+      
+      if (course.image) {
+        setPreview(course.image);
+      }
+    } catch (error) {
+      console.error("Failed to load course:", error);
+      toast.error("Failed to load course data");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleChange = (e) => {
-    const { name, value, files } = e.target;
+    const { name, value, type, checked } = e.target;
     
-    if (name === "image" && files && files[0]) {
-      const file = files[0];
+    if (type === "checkbox") {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: checked
+      }));
+    } else if (name === "image" && e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
       setFormData((prev) => ({
         ...prev,
         [name]: file
@@ -112,48 +150,103 @@ export default function NewCourse() {
       newErrors.description = "Description is required";
     }
     
-    if (!formData.category) {
-      newErrors.category = "Category is required";
+    if (!formData.course_category_id) {
+      newErrors.course_category_id = "Category is required";
     }
     
-    if (!formData.startDate) {
-      newErrors.startDate = "Start date is required";
+    if (!formData.start_date) {
+      newErrors.start_date = "Start date is required";
     }
     
-    if (formData.endDate && new Date(formData.endDate) < new Date(formData.startDate)) {
-      newErrors.endDate = "End date cannot be before start date";
+    if (formData.end_date && new Date(formData.end_date) < new Date(formData.start_date)) {
+      newErrors.end_date = "End date cannot be before start date";
     }
     
-    if (formData.seats && formData.seats < 1) {
-      newErrors.seats = "Seats must be at least 1";
+    if (formData.total_seat && formData.total_seat < 1) {
+      newErrors.total_seat = "Seats must be at least 1";
     }
     
-    if (formData.fee && formData.fee < 0) {
-      newErrors.fee = "Fee cannot be negative";
+    if (formData.fees && parseFloat(formData.fees) < 0) {
+      newErrors.fees = "Fee cannot be negative";
+    }
+    
+    if (formData.ic_phone && !/^\d{10,15}$/.test(formData.ic_phone)) {
+      newErrors.ic_phone = "Please enter a valid phone number (10-15 digits)";
     }
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     if (!validateForm()) return;
     
     setIsSubmitting(true);
     
-    // Simulate API call
-    setTimeout(() => {
-      console.log("Form Submitted", formData);
+    try {
+      const formDataToSend = new FormData();
+      
+      // Append all form data
+      Object.keys(formData).forEach(key => {
+        if (key === 'image' && formData[key] instanceof File) {
+          formDataToSend.append(key, formData[key]);
+        } else if (key === 'image' && !formData[key]) {
+          // Skip if no image
+        } else {
+          formDataToSend.append(key, formData[key]);
+        }
+      });
+
+      let response;
+      if (params.id) {
+        // Update existing course
+        response = await api.post(`/api/v2/courses/${params.id}?_method=PUT`, formDataToSend, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+        toast.success("Course updated successfully!");
+      } else {
+        // Create new course
+        response = await api.post("/api/v2/courses", formDataToSend, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+        toast.success("Course created successfully!");
+      }
+
+      // Navigate back after a short delay
+      setTimeout(() => {
+        navigate("/piu/admin/list");
+      }, 1500);
+      
+    } catch (error) {
+      console.error("Error saving course:", error);
+      
+      // Handle validation errors from server
+      if (error.response?.data?.errors) {
+        const serverErrors = error.response.data.errors;
+        const errorMessages = {};
+        
+        Object.keys(serverErrors).forEach(key => {
+          errorMessages[key] = serverErrors[key][0];
+        });
+        
+        setErrors(errorMessages);
+        toast.error("Please fix the errors in the form");
+      } else {
+        toast.error(error.response?.data?.message || "Failed to save course");
+      }
+    } finally {
       setIsSubmitting(false);
-      alert(params.id ? "Course updated successfully!" : "Course created successfully!");
-      navigate("/piu/admin/courses");
-    }, 1500);
+    }
   };
 
   const handleCancel = () => {
-    navigate("/piu/admin/courses");
+    navigate("/piu/admin/list");
   };
 
   const modules = {
@@ -166,34 +259,18 @@ export default function NewCourse() {
     ],
   };
 
-  const categories = [
-    "Bachelor",
-    "Master",
-    "Diploma",
-    "Certificate",
-    "Workshop",
-    "Short Course",
-    "Online Course"
-  ];
-
-  const levels = [
-    "beginner",
-    "intermediate",
-    "advanced",
-    "expert"
-  ];
-
-  const languages = [
-    "English",
-    "Spanish",
-    "French",
-    "German",
-    "Chinese",
-    "Japanese"
-  ];
+  if (loading && params.id) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
+      <ToastContainer position="top-right" autoClose={3000} />
+      
       {/* Header */}
       <div className="bg-[#002147] p-6 text-white">
         <h2 className="text-2xl font-bold">
@@ -242,11 +319,11 @@ export default function NewCourse() {
                 Category <span className="text-red-500">*</span>
               </label>
               <select
-                name="category"
-                value={formData.category}
+                name="course_category_id"
+                value={formData.course_category_id}
                 onChange={handleChange}
                 className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:outline-none ${
-                  errors.category 
+                  errors.course_category_id 
                     ? "border-red-500 focus:ring-red-200" 
                     : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                 }`}
@@ -254,83 +331,86 @@ export default function NewCourse() {
               >
                 <option value="">Select Category</option>
                 {categories.map((category) => (
-                  <option key={category} value={category}>{category}</option>
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
                 ))}
               </select>
-              {errors.category && (
+              {errors.course_category_id && (
                 <p className="mt-1 text-sm text-red-600 flex items-center">
                   <i className="fas fa-exclamation-circle mr-1"></i>
-                  {errors.category}
+                  {errors.course_category_id}
                 </p>
               )}
             </div>
 
-            {/* Instructor */}
+            {/* Instructor Name */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Instructor
+                Instructor Name
               </label>
               <input
                 type="text"
-                name="instructor"
-                value={formData.instructor}
+                name="ic_name"
+                value={formData.ic_name}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                 placeholder="Enter instructor name"
               />
             </div>
 
-            {/* Level */}
+            {/* Instructor Phone */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Difficulty Level
+                Instructor Phone
               </label>
-              <select
-                name="level"
-                value={formData.level}
+              <input
+                type="tel"
+                name="ic_phone"
+                value={formData.ic_phone}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-              >
-                {levels.map((level) => (
-                  <option key={level} value={level}>
-                    {level.charAt(0).toUpperCase() + level.slice(1)}
-                  </option>
-                ))}
-              </select>
+                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:outline-none ${
+                  errors.ic_phone 
+                    ? "border-red-500 focus:ring-red-200" 
+                    : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                }`}
+                placeholder="Enter phone number"
+              />
+              {errors.ic_phone && (
+                <p className="mt-1 text-sm text-red-600 flex items-center">
+                  <i className="fas fa-exclamation-circle mr-1"></i>
+                  {errors.ic_phone}
+                </p>
+              )}
             </div>
 
-            {/* Language */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Language
-              </label>
-              <select
-                name="language"
-                value={formData.language}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-              >
-                {languages.map((language) => (
-                  <option key={language} value={language}>{language}</option>
-                ))}
-              </select>
-            </div>
-
-            {/* Status */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Status
-              </label>
-              <select
-                name="status"
-                value={formData.status}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-              >
-                <option value="draft">Draft</option>
-                <option value="published">Published</option>
-                <option value="archived">Archived</option>
-              </select>
+            {/* Status Checkboxes */}
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  name="is_active"
+                  checked={formData.is_active}
+                  onChange={handleChange}
+                  className="h-4 w-4 text-blue-600 rounded focus:ring-blue-500"
+                />
+                <label className="ml-2 text-sm font-medium text-gray-700">
+                  Active
+                </label>
+              </div>
+              
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  name="application_sts"
+                  checked={formData.application_sts}
+                  onChange={handleChange}
+                  className="h-4 w-4 text-blue-600 rounded focus:ring-blue-500"
+                />
+                <label className="ml-2 text-sm font-medium text-gray-700">
+                  Accepting Applications
+                </label>
+              </div>
             </div>
 
             {/* Duration */}
@@ -348,55 +428,53 @@ export default function NewCourse() {
               />
             </div>
 
-            {/* Fee */}
+            {/* Fees */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Course Fee ($)
+                Course Fee
               </label>
               <input
-                type="number"
-                name="fee"
-                value={formData.fee}
+                type="text"
+                name="fees"
+                value={formData.fees}
                 onChange={handleChange}
-                min="0"
-                step="0.01"
                 className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:outline-none ${
-                  errors.fee 
+                  errors.fees 
                     ? "border-red-500 focus:ring-red-200" 
                     : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                 }`}
-                placeholder="0.00"
+                placeholder="e.g., $1000 or Free"
               />
-              {errors.fee && (
+              {errors.fees && (
                 <p className="mt-1 text-sm text-red-600 flex items-center">
                   <i className="fas fa-exclamation-circle mr-1"></i>
-                  {errors.fee}
+                  {errors.fees}
                 </p>
               )}
             </div>
 
-            {/* Seats */}
+            {/* Total Seats */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Total Seats
               </label>
               <input
                 type="number"
-                name="seats"
-                value={formData.seats}
+                name="total_seat"
+                value={formData.total_seat}
                 onChange={handleChange}
                 min="1"
                 className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:outline-none ${
-                  errors.seats 
+                  errors.total_seat 
                     ? "border-red-500 focus:ring-red-200" 
                     : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                 }`}
                 placeholder="Number of available seats"
               />
-              {errors.seats && (
+              {errors.total_seat && (
                 <p className="mt-1 text-sm text-red-600 flex items-center">
                   <i className="fas fa-exclamation-circle mr-1"></i>
-                  {errors.seats}
+                  {errors.total_seat}
                 </p>
               )}
             </div>
@@ -408,20 +486,20 @@ export default function NewCourse() {
               </label>
               <input
                 type="date"
-                name="startDate"
-                value={formData.startDate}
+                name="start_date"
+                value={formData.start_date}
                 onChange={handleChange}
                 className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:outline-none ${
-                  errors.startDate 
+                  errors.start_date 
                     ? "border-red-500 focus:ring-red-200" 
                     : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                 }`}
                 required
               />
-              {errors.startDate && (
+              {errors.start_date && (
                 <p className="mt-1 text-sm text-red-600 flex items-center">
                   <i className="fas fa-exclamation-circle mr-1"></i>
-                  {errors.startDate}
+                  {errors.start_date}
                 </p>
               )}
             </div>
@@ -433,19 +511,19 @@ export default function NewCourse() {
               </label>
               <input
                 type="date"
-                name="endDate"
-                value={formData.endDate}
+                name="end_date"
+                value={formData.end_date}
                 onChange={handleChange}
                 className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:outline-none ${
-                  errors.endDate 
+                  errors.end_date 
                     ? "border-red-500 focus:ring-red-200" 
                     : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                 }`}
               />
-              {errors.endDate && (
+              {errors.end_date && (
                 <p className="mt-1 text-sm text-red-600 flex items-center">
                   <i className="fas fa-exclamation-circle mr-1"></i>
-                  {errors.endDate}
+                  {errors.end_date}
                 </p>
               )}
             </div>
@@ -510,8 +588,8 @@ export default function NewCourse() {
                 Application Process
               </label>
               <textarea
-                name="process"
-                value={formData.process}
+                name="apply"
+                value={formData.apply}
                 onChange={handleChange}
                 rows={3}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
@@ -555,14 +633,15 @@ export default function NewCourse() {
             <button
               type="button"
               onClick={handleCancel}
-              className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-200 transition-colors"
+              disabled={isSubmitting}
+              className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className={`px-4 py-2 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors ${
+              className={`px-4 py-2 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors flex items-center justify-center min-w-[120px] ${
                 isSubmitting
                   ? "bg-blue-400 cursor-not-allowed"
                   : "bg-blue-600 hover:bg-blue-700 focus:ring-blue-500"
@@ -570,13 +649,29 @@ export default function NewCourse() {
             >
               {isSubmitting ? (
                 <>
-                  <i className="fas fa-spinner fa-spin mr-2"></i>
+                  <svg className="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
                   {params.id ? "Updating..." : "Creating..."}
                 </>
               ) : (
                 <>
-                  <i className={`fas ${params.id ? "fa-save" : "fa-plus-circle"} mr-2`}></i>
-                  {params.id ? "Update Course" : "Create Course"}
+                  {params.id ? (
+                    <>
+                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      Update Course
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                      Create Course
+                    </>
+                  )}
                 </>
               )}
             </button>

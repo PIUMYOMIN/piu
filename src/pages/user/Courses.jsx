@@ -10,7 +10,7 @@ export default function Course() {
     const fetchCourses = async () => {
       try {
         const response = await fetch(
-          "https://dashboard.piueducation.org/api/v1/courses"
+          "https://api.piueducation.org/api/v1/courses"
         );
         if (!response.ok) {
           throw new Error("Failed to fetch course.");

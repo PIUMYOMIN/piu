@@ -26,7 +26,7 @@ export default function CourseDetails() {
       const fetchCourseDetails = async () => {
         try {
           const response = await fetch(
-            `https://dashboard.piueducation.org/api/v1/courses/${slug}`
+            `https://api.piueducation.org/api/v1/courses/${slug}`
           );
           if (!response.ok) {
             throw new Error("Failed to fetch course details.");
@@ -55,7 +55,7 @@ export default function CourseDetails() {
         <main className="w-fulll lg:w-8/12">
           <div className="flex flex-col">
             <div>
-              <img src={`https://dashboard.piueducation.org/storage/${courseDetails.image}`} alt="" />
+              <img src={`https://api.piueducation.org/storage/${courseDetails.image}`} alt="" />
             </div>
             <div>
               <div className="flex flex-row justify-between items-center">
