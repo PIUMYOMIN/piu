@@ -6,6 +6,7 @@ import Home from "../pages/user/Home";
 import Contact from "../pages/user/Contact";
 import President from "../pages/user/President";
 import Courses from "../pages/user/Courses";
+import CourseCategories from "../pages/admin/CourseCategories";
 import Campus from "../pages/user/Campus";
 import Faculties from "../pages/user/Faculties";
 import FacultiesDetails from "../pages/user/FacultiesDetails";
@@ -163,7 +164,8 @@ const router = createBrowserRouter([
       { path: "user-permission", element: <UserPermissions /> },
       { path: "admission", element: <AdmissionPage /> },
       { path: "admission/details", element: <AdmissionDetails /> },
-      { path: "list", element: <CourseList /> },
+      { path: "course-list", element: <CourseList /> },
+      { path: "course-categories", element: <CourseCategories /> },
       { path: "new/:id?", element: <NewCourse /> },
       { path: "blog-list", element: <BlogsList /> },
       { path: "add-blog", element: <BlogsForm /> },

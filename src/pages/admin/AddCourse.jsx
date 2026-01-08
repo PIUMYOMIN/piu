@@ -39,7 +39,7 @@ export default function NewCourse() {
   // Load categories and course data
   useEffect(() => {
     loadCategories();
-    
+
     if (params.id) {
       loadCourseData();
     }
@@ -60,7 +60,7 @@ export default function NewCourse() {
       setLoading(true);
       const response = await api.get(`/api/v2/courses/${params.id}`);
       const course = response.data.data || response.data;
-      
+
       setFormData({
         title: course.title || "",
         description: course.description || "",
@@ -79,7 +79,7 @@ export default function NewCourse() {
         is_active: course.is_active || true,
         application_sts: course.application_sts || true
       });
-      
+
       if (course.image) {
         setPreview(course.image);
       }
@@ -93,7 +93,7 @@ export default function NewCourse() {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    
+
     if (type === "checkbox") {
       setFormData((prev) => ({
         ...prev,
@@ -105,7 +105,7 @@ export default function NewCourse() {
         ...prev,
         [name]: file
       }));
-      
+
       // Create preview
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -118,7 +118,7 @@ export default function NewCourse() {
         [name]: value
       }));
     }
-    
+
     // Clear error when user types
     if (errors[name]) {
       setErrors({
@@ -130,7 +130,7 @@ export default function NewCourse() {
 
   const handleDescriptionChange = (value) => {
     setFormData((prev) => ({ ...prev, description: value }));
-    
+
     if (errors.description) {
       setErrors({
         ...errors,
@@ -141,59 +141,62 @@ export default function NewCourse() {
 
   const validateForm = () => {
     const newErrors = {};
-    
+
     if (!formData.title.trim()) {
       newErrors.title = "Course title is required";
     }
-    
+
     if (!formData.description.trim() || formData.description === "<p><br></p>") {
       newErrors.description = "Description is required";
     }
-    
+
     if (!formData.course_category_id) {
       newErrors.course_category_id = "Category is required";
     }
-    
+
     if (!formData.start_date) {
       newErrors.start_date = "Start date is required";
     }
-    
+
     if (formData.end_date && new Date(formData.end_date) < new Date(formData.start_date)) {
       newErrors.end_date = "End date cannot be before start date";
     }
-    
+
     if (formData.total_seat && formData.total_seat < 1) {
       newErrors.total_seat = "Seats must be at least 1";
     }
-    
+
     if (formData.fees && parseFloat(formData.fees) < 0) {
       newErrors.fees = "Fee cannot be negative";
     }
-    
+
     if (formData.ic_phone && !/^\d{10,15}$/.test(formData.ic_phone)) {
       newErrors.ic_phone = "Please enter a valid phone number (10-15 digits)";
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) return;
-    
+
     setIsSubmitting(true);
-    
+
     try {
       const formDataToSend = new FormData();
-      
+
       // Append all form data
       Object.keys(formData).forEach(key => {
-        if (key === 'image' && formData[key] instanceof File) {
+        if (key === "image" && formData[key] instanceof File) {
           formDataToSend.append(key, formData[key]);
-        } else if (key === 'image' && !formData[key]) {
-          // Skip if no image
+        } else if (key === "image" && !formData[key]) {
+          // skip if no image
+        } else if (key === "is_active" || key === "application_sts") {
+          // Convert booleans to 1/0 for Laravel
+          formDataToSend.append(key, formData[key] ? 1 : 0);
         } else {
           formDataToSend.append(key, formData[key]);
         }
@@ -222,19 +225,19 @@ export default function NewCourse() {
       setTimeout(() => {
         navigate("/piu/admin/list");
       }, 1500);
-      
+
     } catch (error) {
       console.error("Error saving course:", error);
-      
+
       // Handle validation errors from server
       if (error.response?.data?.errors) {
         const serverErrors = error.response.data.errors;
         const errorMessages = {};
-        
+
         Object.keys(serverErrors).forEach(key => {
           errorMessages[key] = serverErrors[key][0];
         });
-        
+
         setErrors(errorMessages);
         toast.error("Please fix the errors in the form");
       } else {
@@ -253,7 +256,7 @@ export default function NewCourse() {
     toolbar: [
       [{ 'header': [1, 2, 3, false] }],
       ['bold', 'italic', 'underline'],
-      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+      [{ 'list': 'ordered' }, { 'list': 'bullet' }],
       ['link'],
       ['clean']
     ],
@@ -270,15 +273,15 @@ export default function NewCourse() {
   return (
     <div className="max-w-7xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
       <ToastContainer position="top-right" autoClose={3000} />
-      
+
       {/* Header */}
       <div className="bg-[#002147] p-6 text-white">
         <h2 className="text-2xl font-bold">
           {params.id ? "Edit Course" : "Create New Course"}
         </h2>
         <p className="text-blue-100 mt-1">
-          {params.id 
-            ? "Update the course details below" 
+          {params.id
+            ? "Update the course details below"
             : "Add a new course to your institution's offerings"
           }
         </p>
@@ -297,11 +300,10 @@ export default function NewCourse() {
                 name="title"
                 value={formData.title}
                 onChange={handleChange}
-                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:outline-none ${
-                  errors.title 
-                    ? "border-red-500 focus:ring-red-200" 
+                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:outline-none ${errors.title
+                    ? "border-red-500 focus:ring-red-200"
                     : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                }`}
+                  }`}
                 placeholder="Enter course title"
                 required
               />
@@ -322,11 +324,10 @@ export default function NewCourse() {
                 name="course_category_id"
                 value={formData.course_category_id}
                 onChange={handleChange}
-                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:outline-none ${
-                  errors.course_category_id 
-                    ? "border-red-500 focus:ring-red-200" 
+                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:outline-none ${errors.course_category_id
+                    ? "border-red-500 focus:ring-red-200"
                     : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                }`}
+                  }`}
                 required
               >
                 <option value="">Select Category</option>
@@ -369,11 +370,10 @@ export default function NewCourse() {
                 name="ic_phone"
                 value={formData.ic_phone}
                 onChange={handleChange}
-                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:outline-none ${
-                  errors.ic_phone 
-                    ? "border-red-500 focus:ring-red-200" 
+                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:outline-none ${errors.ic_phone
+                    ? "border-red-500 focus:ring-red-200"
                     : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                }`}
+                  }`}
                 placeholder="Enter phone number"
               />
               {errors.ic_phone && (
@@ -398,7 +398,7 @@ export default function NewCourse() {
                   Active
                 </label>
               </div>
-              
+
               <div className="flex items-center">
                 <input
                   type="checkbox"
@@ -438,11 +438,10 @@ export default function NewCourse() {
                 name="fees"
                 value={formData.fees}
                 onChange={handleChange}
-                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:outline-none ${
-                  errors.fees 
-                    ? "border-red-500 focus:ring-red-200" 
+                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:outline-none ${errors.fees
+                    ? "border-red-500 focus:ring-red-200"
                     : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                }`}
+                  }`}
                 placeholder="e.g., $1000 or Free"
               />
               {errors.fees && (
@@ -464,11 +463,10 @@ export default function NewCourse() {
                 value={formData.total_seat}
                 onChange={handleChange}
                 min="1"
-                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:outline-none ${
-                  errors.total_seat 
-                    ? "border-red-500 focus:ring-red-200" 
+                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:outline-none ${errors.total_seat
+                    ? "border-red-500 focus:ring-red-200"
                     : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                }`}
+                  }`}
                 placeholder="Number of available seats"
               />
               {errors.total_seat && (
@@ -489,11 +487,10 @@ export default function NewCourse() {
                 name="start_date"
                 value={formData.start_date}
                 onChange={handleChange}
-                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:outline-none ${
-                  errors.start_date 
-                    ? "border-red-500 focus:ring-red-200" 
+                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:outline-none ${errors.start_date
+                    ? "border-red-500 focus:ring-red-200"
                     : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                }`}
+                  }`}
                 required
               />
               {errors.start_date && (
@@ -514,11 +511,10 @@ export default function NewCourse() {
                 name="end_date"
                 value={formData.end_date}
                 onChange={handleChange}
-                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:outline-none ${
-                  errors.end_date 
-                    ? "border-red-500 focus:ring-red-200" 
+                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:outline-none ${errors.end_date
+                    ? "border-red-500 focus:ring-red-200"
                     : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                }`}
+                  }`}
               />
               {errors.end_date && (
                 <p className="mt-1 text-sm text-red-600 flex items-center">
@@ -641,11 +637,10 @@ export default function NewCourse() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className={`px-4 py-2 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors flex items-center justify-center min-w-[120px] ${
-                isSubmitting
+              className={`px-4 py-2 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors flex items-center justify-center min-w-[120px] ${isSubmitting
                   ? "bg-blue-400 cursor-not-allowed"
                   : "bg-blue-600 hover:bg-blue-700 focus:ring-blue-500"
-              }`}
+                }`}
             >
               {isSubmitting ? (
                 <>
