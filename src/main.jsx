@@ -3,7 +3,7 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import router from "./router";
 import "./index.css";
-import "./custom.css";
+// import "./custom.css";
 import { RouterProvider } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ToastContainer } from 'react-toastify';

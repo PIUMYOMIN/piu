@@ -15,7 +15,11 @@ export default function Home() {
     Aos.init({ duration: 2000 });
   }, []);
   return <div>
-      {/* about section start  */}
+      {/* carosel section start  */}
+      <Carousel />
+    {/* carousel section end  */}
+    
+    {/* about section start  */}
       <div className="w-full">
         <div className=" max-w-7xl mx-auto lg:p-10 p-2 bg-secondary-background">
           <div className="max-w-4xl mx-auto lg:grid grid-cols-2">
@@ -48,10 +52,6 @@ export default function Home() {
       </div>
       {/* about section end  */}
 
-      {/* carosel section start  */}
-      <Carousel />
-      {/* carousel section end  */}
-
       {/* courses section start */}
       <Courses />
       {/* course section end */}
@@ -71,7 +71,7 @@ export default function Home() {
       {/* gallery section end  */}
 
       {/* gallery section start  */}
-      <President />
+      {/* <President /> */}
       {/* gallery section end  */}
     </div>;
 }
