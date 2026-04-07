@@ -37,8 +37,6 @@ export default function Contact() {
       .getAttribute("content");
   };
 
-  console.log(getCsrfToken);
-
   const submitContactForm = async e => {
     e.preventDefault();
 
@@ -55,14 +53,6 @@ export default function Contact() {
     formData.append("phone", phone);
     formData.append("country", country);
     formData.append("message", message);
-
-    console.log({
-      name,
-      email,
-      phone,
-      country,
-      message
-    });
 
     try {
       const res = await v1.submitContactForm(formData);

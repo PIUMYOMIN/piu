@@ -109,7 +109,6 @@ function AddMOU() {
     setIsSubmitting(true);
 
     setTimeout(() => {
-      console.log("MOU submitted:", formData);
       setIsSubmitting(false);
       alert(editingMou ? "MOU Updated Successfully!" : "MOU Added Successfully!");
       navigate("/piu/admin/mous");

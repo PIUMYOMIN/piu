@@ -69,7 +69,6 @@ const AddDepartment = () => {
     
     // Simulate API call
     setTimeout(() => {
-      console.log("Submitted:", formData);
       setIsSubmitting(false);
       navigate("/piu/admin/departments");
     }, 1000);

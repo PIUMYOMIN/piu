@@ -150,7 +150,6 @@ function CampusForm() {
         campusData.append("image", formData.image);
       }
 
-      console.log(id ? "Updating campus:" : "Creating new campus:", campusData);
       setIsSubmitting(false);
       navigate("/piu/admin/campus-list");
     }, 1500);

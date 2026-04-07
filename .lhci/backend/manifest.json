@@ -1,0 +1,14 @@
+[
+  {
+    "url": "https://www.piueducation.org/",
+    "isRepresentativeRun": true,
+    "htmlPath": "D:\\React Projects\\PIU-Web-Project\\.lhci\\backend\\www_piueducation_org--2026_04_07_14_11_13.report.html",
+    "jsonPath": "D:\\React Projects\\PIU-Web-Project\\.lhci\\backend\\www_piueducation_org--2026_04_07_14_11_13.report.json",
+    "summary": {
+      "performance": 0.49,
+      "accessibility": 0.74,
+      "best-practices": 1,
+      "seo": 0.91
+    }
+  }
+]

@@ -151,7 +151,6 @@ const NewsForm = () => {
     
     // Simulate API call
     setTimeout(() => {
-      console.log(editingNew ? "Updating news:" : "Creating new news:", formData);
       setIsSubmitting(false);
       alert(editingNew ? "News updated successfully!" : "News created successfully!");
       navigate("/piu/admin/news");

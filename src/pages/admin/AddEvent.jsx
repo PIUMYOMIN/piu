@@ -157,7 +157,6 @@ const AddEvent = () => {
     
     // Simulate API call
     setTimeout(() => {
-      console.log(id ? "Updated Event:" : "New Event Submitted:", formData);
       setIsSubmitting(false);
       alert(id ? "Event updated successfully!" : "New event added successfully!");
       navigate("/piu/admin/event-list");

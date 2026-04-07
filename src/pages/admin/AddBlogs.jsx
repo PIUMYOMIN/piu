@@ -155,7 +155,6 @@ const BlogsForm = () => {
     
     // Simulate API call
     setTimeout(() => {
-      console.log(editingBlog ? "Updating blog:" : "Creating new blog:", formData);
       setIsSubmitting(false);
       alert(editingBlog ? "Blog updated successfully!" : "Blog created successfully!");
       navigate("/piu/admin/blogs");

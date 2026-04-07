@@ -58,7 +58,6 @@ const AddPosition = () => {
     
     // Simulate API call
     setTimeout(() => {
-      console.log("Submitted:", formData);
       setIsSubmitting(false);
       navigate("/piu/admin/positions");
     }, 1000);

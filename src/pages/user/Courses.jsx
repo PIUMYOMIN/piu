@@ -18,8 +18,6 @@ export default function Course() {
 
         const data = await v2.getCourses();
 
-        console.log("Raw API Data:", data); // Debug
-
         // If API already returns full URLs, use them directly
         // If not, construct the URL properly
         const processedCourses = data.map(course => {
@@ -40,7 +38,6 @@ export default function Course() {
           course.is_active === true || course.is_active === 1 || course.is_active === undefined
         );
 
-        console.log("Processed courses:", activeCourses); // Debug
         setCourses(activeCourses);
       } catch (error) {
         console.error("Error fetching courses:", error);
@@ -170,8 +167,6 @@ export default function Course() {
 
         <div className="grid lg:grid-cols-4 grid-cols-2 gap-4 mt-10">
           {filteredCourses.map((course, index) => {
-            console.log(`Course ${index}:`, course); // Debug each course
-
             return (
               <Link
                 to={`/courses/${course.slug || course.id}`}
