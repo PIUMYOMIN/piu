@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { adminApi } from "../../api/admin";
-import { toStorageUrl } from "../../api/axios";
+import { toStorageUrl } from "../../utils/api";
 
 const AddTeam = () => {
   const { id } = useParams(); // get id from route

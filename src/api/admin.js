@@ -1,6 +1,6 @@
-import api, { apiV2 } from './axios';
+import apiClient from '../utils/api';
 
-const client = apiV2 || api;
+const client = apiClient;
 
 function unwrap(data) {
   // Some endpoints return {success, data}, others return raw arrays/objects

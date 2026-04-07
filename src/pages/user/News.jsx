@@ -1,8 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import LoadingSpinner from "../../components/user/LoadingSpinner";
-import { v2 } from "../../api/v2";
-import { toStorageUrl } from "../../api/axios";
+import { v2, toStorageUrl } from "../../utils/api";
 
 function formatDate(dateString) {
   if (!dateString) return "N/A";

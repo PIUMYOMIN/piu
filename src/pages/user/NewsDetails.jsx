@@ -2,8 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useLocation } from "react-router-dom";
 import LoadingSpinner from "../../components/user/LoadingSpinner";
 import { FaCalendarAlt, FaUser, FaArrowLeft, FaShareAlt, FaPrint, FaFacebook, FaTwitter, FaLinkedin, FaWhatsapp } from "react-icons/fa";
-import { v2 } from "../../api/v2";
-import { toStorageUrl } from "../../api/axios";
+import { v2, toStorageUrl } from "../../utils/api";
 
 export default function NewsDetails() {
   const { slug } = useParams();

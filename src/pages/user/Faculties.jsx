@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import LoadingSpinner from "../../components/user/LoadingSpinner";
-import { v1 } from "../../api/v1";
-import { toStorageUrl } from "../../api/axios";
+import { v1, toStorageUrl } from "../../utils/api";
 
 export default function Faculties() {
     const [facultyMembers, setFacultyMembers] = useState([]);

@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { adminApi } from "../../api/admin";
-import { toStorageUrl } from "../../api/axios";
+import { toStorageUrl } from "../../utils/api";
 
 const emptyForm = {
   title: "",

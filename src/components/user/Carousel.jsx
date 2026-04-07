@@ -3,8 +3,7 @@ import Swiper from "swiper";
 import { Autoplay, Navigation, Pagination } from "swiper/modules";
 import LoadingSpinner from "./LoadingSpinner";
 import "swiper/swiper-bundle.css";
-import { v2 } from "../../api/v2";
-import { toStorageUrl } from "../../api/axios";
+import { v2, toStorageUrl } from "../../utils/api";
 
 const Carousel = () => {
   const [slides, setSlides] = useState([]);

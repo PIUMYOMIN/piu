@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { adminApi } from "../../api/admin";
-import { toStorageUrl } from "../../api/axios";
+import { toStorageUrl } from "../../utils/api";
 
 const AddGallery = () => {
   const { id } = useParams();

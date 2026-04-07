@@ -2,8 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { FaCalendarCheck, FaUser, FaTag } from "react-icons/fa";
 import LoadingSpinner from "./LoadingSpinner";
-import { v2 } from "../../api/v2";
-import { toStorageUrl } from "../../api/axios";
+import { v2, toStorageUrl } from "../../utils/api";
 
 export default function News() {
   const [news, setNews] = useState([]);

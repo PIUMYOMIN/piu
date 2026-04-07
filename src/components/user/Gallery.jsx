@@ -5,8 +5,7 @@ import "react-responsive-carousel/lib/styles/carousel.min.css";
 import Modal from "react-modal";
 import LoadingSpinner from "../../components/user/LoadingSpinner";
 import { Link } from "react-router-dom";
-import { v2 } from "../../api/v2";
-import { toStorageUrl } from "../../api/axios";
+import { v2, toStorageUrl } from "../../utils/api";
 import {
   FaTag,
   FaCalendar,

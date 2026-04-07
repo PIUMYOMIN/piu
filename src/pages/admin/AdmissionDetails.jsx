@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import adminApi from "../../api/admin";
-import { toStorageUrl } from "../../api/axios";
+import { toStorageUrl } from "../../utils/api";
 
 function AdmissionDetails() {
   const location = useLocation();

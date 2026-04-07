@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { FaLock, FaEye, FaEyeSlash, FaSpinner, FaSave } from "react-icons/fa";
 import { toast } from "react-toastify";
-import { v2 } from "../../api/v2";
+import { v2 } from "../../utils/api";
 
 function ChangePassword() {
   const [formData, setFormData] = useState({

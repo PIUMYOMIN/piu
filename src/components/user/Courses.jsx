@@ -12,8 +12,7 @@ import {
   FaTimes
 } from "react-icons/fa";
 import LoadingSpinner from "./LoadingSpinner";
-import { v2 } from "../../api/v2";
-import { toStorageUrl } from "../../api/axios";
+import { v2, toStorageUrl } from "../../utils/api";
 
 export default function Course() {
   const [courses, setCourses] = useState([]);

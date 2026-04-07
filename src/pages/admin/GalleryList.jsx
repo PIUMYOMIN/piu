@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { adminApi } from "../../api/admin";
-import { toStorageUrl } from "../../api/axios";
+import { toStorageUrl } from "../../utils/api";
 
 const GalleryList = () => {
   const navigate = useNavigate();

@@ -7,7 +7,7 @@ import {
   FaPhoneAlt
 } from "react-icons/fa";
 import { Link } from "react-router-dom";
-import { v1 } from "../../api/v1";
+import { v1 } from "../../utils/api";
 
 export default function Contact() {
   const [name, setName] = useState("");

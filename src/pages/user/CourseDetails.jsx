@@ -16,8 +16,7 @@ import {
   FaExclamationTriangle
 } from "react-icons/fa";
 import LoadingSpinner from "../../components/user/LoadingSpinner";
-import { v2 } from "../../api/v2";
-import { toStorageUrl } from "../../api/axios";
+import { v2, toStorageUrl } from "../../utils/api";
 
 export default function CourseDetails() {
   const { slug } = useParams();
