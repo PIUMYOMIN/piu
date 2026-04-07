@@ -13,7 +13,7 @@ import {
 
 export default function Footer() {
   return <footer className="w-full font-robotoSlab">
-      <div className="w-full bg-dark-purple text-white font-montserrat px-2 lg:pt-20 py-5">
+      <div className="w-full bg-zinc-900 text-white font-montserrat px-2 lg:pt-20 py-5">
         <div className="max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-4 lg:gap-5 gap-8">
             <div className="pr-3">
@@ -130,7 +130,7 @@ export default function Footer() {
               </p>
             </div>
             <div>
-              <Link to="#!">Powered by PIU-Webdeveloper Team</Link>
+              <Link to="#!">Developed by PIU-Webdeveloper Team</Link>
             </div>
           </div>
         </div>

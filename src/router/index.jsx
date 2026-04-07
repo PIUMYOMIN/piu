@@ -1,7 +1,5 @@
-// src/routes/index.jsx
-import React from "react";
+// src/router/index.jsx
 import { createBrowserRouter, Navigate } from "react-router-dom";
-import { AuthProvider } from "../contexts/AuthContext";
 import Home from "../pages/user/Home";
 import Contact from "../pages/user/Contact";
 import President from "../pages/user/President";
@@ -12,10 +10,11 @@ import Faculties from "../pages/user/Faculties";
 import FacultiesDetails from "../pages/user/FacultiesDetails";
 import About from "../pages/user/About";
 import Login from "../auth/Login";
+import Register from "../auth/Register";
 import AdminLayout from "../layouts/AdminLayout";
 import UserLayout from "../layouts/UserLayout";
 import StudentLayout from "../layouts/StudentLayout";
-import TeacherLayout from "../layouts/TeacherLayout"
+import TeacherLayout from "../layouts/TeacherLayout";
 import CourseDetails from "../pages/user/CourseDetails";
 import NewsDetails from "../pages/user/NewsDetails";
 
@@ -24,48 +23,33 @@ import Dashboard from "../pages/admin/Dashboard";
 import AdminUsers from "../pages/admin/Users";
 import UserRoles from "../pages/admin/UserRoles";
 import UserPermissions from "../pages/admin/PermissionsPage";
-// Admission
 import AdmissionPage from "../pages/admin/Admission";
 import AdmissionDetails from "../pages/admin/AdmissionDetails";
-// Courses
 import CourseList from "../pages/admin/CourseList";
 import NewCourse from "../pages/admin/AddCourse";
-// Blogs
 import BlogsForm from "../pages/admin/AddBlogs";
 import BlogsList from "../pages/admin/BlogsList";
-// News
 import NewsList from "../pages/admin/NewsList";
 import NewsForm from "../pages/admin/AddNews";
-// campus
 import CampusForm from "../pages/admin/AddCampus";
 import CampusList from "../pages/admin/CampusList";
-// team
 import AddTeam from "../pages/admin/AddTeam";
 import TeamList from "../pages/admin/TeamList";
-// event
 import AddEvent from "../pages/admin/AddEvent";
 import EventList from "../pages/admin/EventList";
-// curriculum
 import AddCurriculum from "../pages/admin/AddCurriculum";
 import CurriculumList from "../pages/admin/CurriculumList";
-// slider
 import SliderList from "../pages/admin/SliderList";
-// MOU
 import MOUList from "../pages/admin/MOUList";
 import AddMOU from "../pages/admin/AddMOU";
-// Department
 import DepartmentList from "../pages/admin/DepartmentsList";
 import AddDepartment from "../pages/admin/AddDepartment";
-// Position
 import PositionList from "../pages/admin/PositionList";
 import AddPosition from "../pages/admin/AddPosition";
-// Seminar
 import SeminarList from "../pages/admin/SeminarList";
 import AddSeminar from "../pages/admin/AddSeminar";
-// Gallery
 import GalleryList from "../pages/admin/GalleryList";
 import AddGallery from "../pages/admin/AddGallery";
-// Students
 import AllStudents from "../pages/admin/AllStudents";
 import AddStudent from "../pages/admin/AddStudent";
 import StudentDetails from "../pages/admin/StudentDetails";
@@ -75,58 +59,40 @@ import StudentGradingList from "../pages/admin/StudentGradingList";
 import StudentYearView from "../pages/admin/StudentYearView";
 import StudentSemesterView from "../pages/admin/StudentSemesterView";
 import StudentGradeView from "../pages/admin/StudentGradeView";
-
-// Assignment
 import AssignmentsList from "../pages/admin/AssignmentList";
 import AddAssignment from "../pages/admin/AddAssignment";
-
-// Modules Code
 import ModulesList from "../pages/admin/ModulesList";
 import ModuleForm from "../pages/admin/ModuleForm";
-
-import Register from "../auth/Register";
 import ProfileSetting from "../pages/admin/ProfileSetting";
 import ChangePassword from "../pages/admin/ChangePassword";
 import Admission2 from "../pages/user/Admission2";
 import TeamProfile from "../pages/user/TeamProfile";
-
-// Auth
-import PrivateRoute from "./../components/PrivateRoute"
-import PublicRoute from "./../components/PublicRoute"
-
-//pages/student
 import StudentProfile from "../pages/student/StudentProfile";
 
-const AppWrapper = () => {
-  return (
-    <AuthProvider>
-      <UserLayout />
-    </AuthProvider>
-  );
-};
+// Auth Components
+import PrivateRoute from "../components/PrivateRoute";
+import PublicRoute from "../components/PublicRoute";
 
 const router = createBrowserRouter([
-
   {
-        path: "/login",
-        element: (
-          <PublicRoute>
-            <Login />
-          </PublicRoute>
-        )
-      },
-      {
-        path: "/register",
-        element: (
-          <PublicRoute>
-            <Register />
-          </PublicRoute>
-        )
+    path: "/login",
+    element: (
+      <PublicRoute>
+        <Login />
+      </PublicRoute>
+    ),
+  },
+  {
+    path: "/register",
+    element: (
+      <PublicRoute>
+        <Register />
+      </PublicRoute>
+    ),
   },
   {
     path: "/",
-    element:
-        <UserLayout />,
+    element: <UserLayout />,
     children: [
       { path: "/", element: <Home /> },
       { path: "/campus", element: <Campus /> },
@@ -140,25 +106,20 @@ const router = createBrowserRouter([
       { path: "/president-of-piu", element: <President /> },
       { path: "/faculties", element: <Faculties /> },
       { path: "/faculties/:slug", element: <FacultiesDetails /> },
-      { path: "*", element: <Navigate to="/" /> }
-    ]
+      { path: "*", element: <Navigate to="/" /> },
+    ],
   },
-
-  // ---------------------------
-  // Admin Routes
-  // ---------------------------
   {
     path: "piu/admin",
     element: (
-        <PrivateRoute role="admin">
-          <AdminLayout />
-        </PrivateRoute>
+      <PrivateRoute requiredRole="admin">
+        <AdminLayout />
+      </PrivateRoute>
     ),
-    // element: <AdminLayout />,
     children: [
       { index: true, element: <Dashboard /> },
       { path: "profile", element: <ProfileSetting /> },
-      { path: "/piu/admin/change-password", element: <ChangePassword /> },
+      { path: "change-password", element: <ChangePassword /> },
       { path: "users", element: <AdminUsers /> },
       { path: "users-role", element: <UserRoles /> },
       { path: "user-permission", element: <UserPermissions /> },
@@ -200,8 +161,6 @@ const router = createBrowserRouter([
       { path: "gallery", element: <GalleryList /> },
       { path: "gallery/add", element: <AddGallery /> },
       { path: "gallery/add/:id", element: <AddGallery /> },
-
-      // Students
       { path: "students", element: <AllStudents /> },
       { path: "students/add", element: <AddStudent /> },
       { path: "students/edit/:id", element: <AddStudent /> },
@@ -210,50 +169,35 @@ const router = createBrowserRouter([
       { path: "students/grading", element: <StudentGradingList /> },
       { path: "students/:id/grading", element: <StudentYearView /> },
       { path: "students/:studentId/grading/:year", element: <StudentSemesterView /> },
-
-      // Semester + Grade form (KEEP SAME SHAPE)
       { path: "students/:studentId/:year/:semester", element: <StudentGradeView /> },
       { path: "students/:studentId/:year/:semester/new", element: <GradeForm /> },
       { path: "students/:studentId/:year/:semester/edit/:gradeId", element: <GradeForm /> },
-
-      // Assignments
-       {path:"assignments", element:<AssignmentsList />}, 
-       {path:"assignments/add", element:<AddAssignment />}, 
-       {path:"assignments/edit/:id", element:<AddAssignment />},
-
-      //  Modules Code
-      {path: "modules", element: <ModulesList />},
-      {path: "modules/add", element: <ModuleForm />},
-      {path: "modules/edit/:id", element: <ModuleForm />},
-      
-    ]
+      { path: "assignments", element: <AssignmentsList /> },
+      { path: "assignments/add", element: <AddAssignment /> },
+      { path: "assignments/edit/:id", element: <AddAssignment /> },
+      { path: "modules", element: <ModulesList /> },
+      { path: "modules/add", element: <ModuleForm /> },
+      { path: "modules/edit/:id", element: <ModuleForm /> },
+    ],
   },
-
-  // ---------------------------
-  // STUDENT ROUTES
-  // ---------------------------
   {
     path: "piu/student",
-      element: (
-          <StudentLayout />
-      ),
-      children: [
-        {path: "/piu/student", element: <StudentProfile />}
-      ],
-    },
-
-    // ---------------------------
-    // TEACHER ROUTES
-    // ---------------------------
-    {
-      path: "piu/teacher",
-      element: (
-          <TeacherLayout />
-      ),
-      children: [
-        
-      ],
-    },
-  ]);
+    element: (
+      <PrivateRoute requiredRole="student">
+        <StudentLayout />
+      </PrivateRoute>
+    ),
+    children: [{ path: "/piu/student", element: <StudentProfile /> }],
+  },
+  {
+    path: "piu/teacher",
+    element: (
+      <PrivateRoute requiredRole="teacher">
+        <TeacherLayout />
+      </PrivateRoute>
+    ),
+    children: [],
+  },
+]);
 
 export default router;

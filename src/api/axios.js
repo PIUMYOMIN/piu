@@ -1,35 +1,38 @@
 // src/api/axios.js
-import axios from "axios";
+import axios from 'axios';
+import config from '../config';
+
+// Vite uses import.meta.env instead of process.env
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v2';
 
 const api = axios.create({
-  baseURL: "https://api.piueducation.org",
+  baseURL: config.apiUrl,
   headers: {
-    "Content-Type": "application/json",
-    "Accept": "application/json",
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
   },
-  // withCredentials: false is the default, so we don't need to specify it
+  withCredentials: false, // Set to true if you need cookies
 });
 
+// Request interceptor to add auth token
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
-// Optional: Add response interceptor for handling auth errors
+// Response interceptor to handle token expiration
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      console.log("🔐 Unauthorized, clearing auth data");
-      localStorage.clear();
+      localStorage.removeItem('token');
+      // Use navigate from react-router instead of window.location for better UX
       window.location.href = '/login';
     }
     return Promise.reject(error);
