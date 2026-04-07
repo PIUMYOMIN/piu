@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { FaCalendarCheck, FaUser, FaTag } from "react-icons/fa";
 import LoadingSpinner from "./LoadingSpinner";
+import { v2 } from "../../api/v2";
+import { toStorageUrl } from "../../api/axios";
 
 export default function News() {
   const [news, setNews] = useState([]);
@@ -14,12 +16,7 @@ export default function News() {
         setLoading(true);
         setError(null);
         
-        const response = await fetch("https://api.piueducation.org/api/v2/news");
-        if (!response.ok) {
-          throw new Error(`Failed to fetch news: ${response.status}`);
-        }
-        
-        const data = await response.json();
+        const data = await v2.getNews();
         
         // No need to filter by is_active since API handles it or column doesn't exist
         setNews(data);
@@ -50,13 +47,7 @@ export default function News() {
       return "https://images.unsplash.com/photo-1588681664899-f142ff2dc9b1?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80";
     }
     
-    if (imagePath.startsWith('http')) {
-      return imagePath;
-    }
-    
-    // Remove any leading slash or storage/ prefix
-    const cleanPath = imagePath.replace(/^\/|^storage\//, '');
-    return `https://api.piueducation.org/storage/${cleanPath}`;
+    return toStorageUrl(imagePath) || imagePath;
   };
 
   const maxNews = 3;

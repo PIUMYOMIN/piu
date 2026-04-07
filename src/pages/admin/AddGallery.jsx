@@ -1,36 +1,62 @@
-import { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { adminApi } from "../../api/admin";
+import { toStorageUrl } from "../../api/axios";
 
 const AddGallery = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
-    tag: "",
+    image_tag: "",
     link1: "",
     link2: "",
     image: null,
-    active: true,
+    is_active: true,
   });
+
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [imagePreview, setImagePreview] = useState("");
 
   // Prefill when editing
   useEffect(() => {
-    if (id) {
-      const existing = {
-        tag: "Sample Tag",
-        link1: "https://example.com/1",
-        link2: "https://example.com/2",
-        image: null,
-        active: true,
-      };
-      setFormData(existing);
+    let mounted = true;
+    async function load() {
+      setLoading(true);
+      setError("");
+      try {
+        if (id) {
+          const g = await adminApi.gallery.get(id);
+          if (!mounted) return;
+          setFormData({
+            image_tag: g?.image_tag || "",
+            link1: g?.link1 || "",
+            link2: g?.link2 || "",
+            image: null,
+            is_active: typeof g?.is_active === "boolean" ? g.is_active : true,
+          });
+          setImagePreview(toStorageUrl(g?.image) || g?.image || "");
+        }
+      } catch (e) {
+        if (!mounted) return;
+        setError(e?.response?.data?.message || e?.message || "Failed to load gallery item");
+      } finally {
+        if (mounted) setLoading(false);
+      }
     }
+    load();
+    return () => {
+      mounted = false;
+    };
   }, [id]);
 
   const handleChange = (e) => {
     const { name, value, type, checked, files } = e.target;
     if (type === "file") {
-      setFormData({ ...formData, [name]: files[0] });
+      const file = files?.[0] || null;
+      setFormData({ ...formData, [name]: file });
+      if (file) setImagePreview(URL.createObjectURL(file));
     } else if (type === "checkbox") {
       setFormData({ ...formData, [name]: checked });
     } else {
@@ -38,14 +64,24 @@ const AddGallery = () => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (id) {
-      console.log("Updating Gallery Item:", formData);
-    } else {
-      console.log("Adding New Gallery Item:", formData);
+    setError("");
+    try {
+      const fd = new FormData();
+      fd.append("image_tag", formData.image_tag);
+      if (formData.link1) fd.append("link1", formData.link1);
+      if (formData.link2) fd.append("link2", formData.link2);
+      fd.append("is_active", formData.is_active ? "1" : "0");
+      if (formData.image instanceof File) fd.append("image", formData.image);
+
+      if (id) await adminApi.gallery.update(id, fd);
+      else await adminApi.gallery.create(fd);
+
+      navigate("/piu/admin/gallery");
+    } catch (e2) {
+      setError(e2?.response?.data?.message || e2?.message || "Failed to save gallery item");
     }
-    navigate("/piu/admin/gallery");
   };
 
   return (
@@ -60,7 +96,16 @@ const AddGallery = () => {
 
       {/* Form Container */}
       <div className="bg-white rounded-b-lg shadow-md p-6">
-        <form onSubmit={handleSubmit} className="space-y-6">
+        {error && (
+          <div className="mb-4 p-3 rounded-lg border border-red-200 bg-red-50 text-red-700 text-sm">
+            {error}
+          </div>
+        )}
+
+        {loading ? (
+          <div className="py-10 text-center text-gray-500">Loading form...</div>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-6">
           {/* Image Tag */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -68,8 +113,8 @@ const AddGallery = () => {
             </label>
             <input
               type="text"
-              name="tag"
-              value={formData.tag}
+              name="image_tag"
+              value={formData.image_tag}
               onChange={handleChange}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               placeholder="Enter a descriptive tag for this image"
@@ -115,6 +160,20 @@ const AddGallery = () => {
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Upload Image <span className="text-red-500">*</span>
             </label>
+
+            {imagePreview && (
+              <div className="mb-3">
+                <img
+                  src={imagePreview}
+                  alt="Preview"
+                  className="h-28 w-full max-w-md object-cover rounded-lg border border-gray-200"
+                  onError={(e) => {
+                    e.target.src = "https://via.placeholder.com/800x400?text=PIU";
+                  }}
+                />
+              </div>
+            )}
+
             <div className="flex items-center justify-center w-full">
               <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-blue-50 transition-colors">
                 <div className="flex flex-col items-center justify-center pt-5 pb-6">
@@ -149,8 +208,8 @@ const AddGallery = () => {
             <div className="flex items-center h-5">
               <input
                 type="checkbox"
-                name="active"
-                checked={formData.active}
+                name="is_active"
+                checked={formData.is_active}
                 onChange={handleChange}
                 className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
@@ -178,7 +237,8 @@ const AddGallery = () => {
               {id ? "Update Gallery Item" : "Add Gallery Item"}
             </button>
           </div>
-        </form>
+          </form>
+        )}
       </div>
     </div>
   );

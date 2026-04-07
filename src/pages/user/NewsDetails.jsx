@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useParams, useLocation } from "react-router-dom";
 import LoadingSpinner from "../../components/user/LoadingSpinner";
 import { FaCalendarAlt, FaUser, FaArrowLeft, FaShareAlt, FaPrint, FaFacebook, FaTwitter, FaLinkedin, FaWhatsapp } from "react-icons/fa";
+import { v2 } from "../../api/v2";
+import { toStorageUrl } from "../../api/axios";
 
 export default function NewsDetails() {
   const { slug } = useParams();
@@ -17,48 +19,18 @@ export default function NewsDetails() {
         setLoading(true);
         setError(null);
         
-        // Try both endpoints - by slug and by ID
-        const response = await fetch(
-          `https://api.piueducation.org/api/v2/news/slug/${slug}`
-        );
-        
-        if (!response.ok) {
-          // If slug endpoint fails, try the regular endpoint
-          const newsResponse = await fetch(`https://api.piueducation.org/api/v2/news`);
-          if (!newsResponse.ok) {
-            throw new Error("Failed to fetch news details.");
-          }
-          
-          const allNews = await newsResponse.json();
-          // Find news by slug in the array
-          const foundNews = allNews.find(news => news.slug === slug);
-          if (!foundNews) {
-            throw new Error("News not found.");
-          }
-          setNewsDetails(foundNews);
-          
-          // Get related news (same category or recent)
+        const data = await v2.getNewsBySlug(slug);
+        setNewsDetails(data);
+
+        // Fetch related news (best-effort)
+        try {
+          const allNews = await v2.getNews();
           const related = allNews
-            .filter(news => news.id !== foundNews.id)
+            .filter((n) => n.id !== data.id)
             .slice(0, 3);
           setRelatedNews(related);
-        } else {
-          const data = await response.json();
-          setNewsDetails(data);
-          
-          // Fetch related news
-          try {
-            const relatedResponse = await fetch("https://api.piueducation.org/api/v2/news");
-            if (relatedResponse.ok) {
-              const allNews = await relatedResponse.json();
-              const related = allNews
-                .filter(news => news.id !== data.id)
-                .slice(0, 3);
-              setRelatedNews(related);
-            }
-          } catch (e) {
-            console.log("Could not fetch related news:", e);
-          }
+        } catch (e) {
+          console.log("Could not fetch related news:", e);
         }
       } catch (error) {
         console.error("Error fetching news details:", error);
@@ -133,7 +105,7 @@ export default function NewsDetails() {
             {error || "News Not Found"}
           </h1>
           <p className="text-gray-600 mb-6">
-            The news article you're looking for doesn't exist or has been removed.
+            The news article you&apos;re looking for doesn&apos;t exist or has been removed.
           </p>
           <a
             href="/news"
@@ -239,9 +211,7 @@ export default function NewsDetails() {
           {newsDetails.image && (
             <div className="mb-8">
               <img
-                src={newsDetails.image.startsWith('http') 
-                  ? newsDetails.image 
-                  : `https://api.piueducation.org/storage/${newsDetails.image}`}
+                src={toStorageUrl(newsDetails.image) || newsDetails.image}
                 alt={newsDetails.title}
                 className="w-full h-auto rounded-xl shadow-lg"
                 onError={(e) => {
@@ -299,9 +269,7 @@ export default function NewsDetails() {
                       {news.image && (
                         <div className="flex-shrink-0 w-20 h-20">
                           <img
-                            src={news.image.startsWith('http') 
-                              ? news.image 
-                              : `https://api.piueducation.org/storage/${news.image}`}
+                            src={toStorageUrl(news.image) || news.image}
                             alt={news.title}
                             className="w-full h-full object-cover rounded-lg"
                           />

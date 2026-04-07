@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaSearch, FaTag, FaUserCheck, FaPlusCircle, FaEdit, FaTrash, FaToggleOn, FaToggleOff, FaCalendarAlt, FaUserTie, FaDollarSign, FaGraduationCap, FaBook, FaUsers, FaSpinner, FaCheckCircle, FaTimesCircle, FaInfoCircle } from "react-icons/fa";
-import api from "../../api/axios";
+import { adminApi } from "../../api/admin";
 
 const CourseList = () => {
   const navigate = useNavigate();
@@ -45,8 +45,8 @@ const CourseList = () => {
   const fetchCategories = async () => {
     try {
       setLoadingCategories(true);
-      const response = await api.get("/api/v2/course-categories");
-      setCategories(response.data);
+      const data = await adminApi.categories.list();
+      setCategories(data);
     } catch (error) {
       console.error("❌ Error fetching categories:", error);
       showToast("Failed to load categories. Using default categories.", "error");
@@ -68,10 +68,10 @@ const CourseList = () => {
       setLoading(true);
       setError(null);
 
-      const response = await api.get("/api/v2/courses");
+      const coursesData = await adminApi.courses.list();
 
       // Transform API data to match frontend format
-      const transformedCourses = response.data.map(course => ({
+      const transformedCourses = coursesData.map(course => ({
         id: course.id,
         title: course.title,
         slug: course.slug,
@@ -154,7 +154,7 @@ const CourseList = () => {
     }
 
     try {
-      await api.delete(`/api/v2/courses/${id}`);
+      await adminApi.courses.remove(id);
 
       // Remove from local state
       setCourses(courses.filter((course) => course.id !== id));
@@ -178,7 +178,7 @@ const CourseList = () => {
       // Use the correct API endpoint based on the field
       if (field === 'active') {
         // Toggle active status using isActive endpoint
-        await api.post(`/api/v2/courses/${id}/isActive`);
+        await adminApi.courses.toggleActive(id);
 
         // Update local state
         setCourses(courses.map(course =>
@@ -196,7 +196,7 @@ const CourseList = () => {
 
       } else if (field === 'applicantOpen') {
         // Toggle application status using application endpoint
-        await api.post(`/api/v2/courses/${id}/application`);
+        await adminApi.courses.toggleApplication(id);
 
         // Update local state
         setCourses(courses.map(course =>

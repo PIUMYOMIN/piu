@@ -7,7 +7,6 @@ import {
   FaTelegram,
   FaMapMarkerAlt,
   FaPhoneAlt,
-  FaEvernote,
   FaEnvelope
 } from "react-icons/fa";
 
@@ -23,18 +22,18 @@ export default function Footer() {
                 established by the two brothers, Ven Nayaka and Ven Jotika.
               </p>
               <div className="flex flex-row gap-5 text-2xl mt-5">
-                <Link to="#!">
+                <a href="#" aria-label="Facebook">
                   <FaFacebook />
-                </Link>
-                <Link to="#!">
+                </a>
+                <a href="#" aria-label="Twitter">
                   <FaTwitter />
-                </Link>
-                <Link to="#!">
+                </a>
+                <a href="#" aria-label="YouTube">
                   <FaYoutube />
-                </Link>
-                <Link to="#!">
+                </a>
+                <a href="#" aria-label="Telegram">
                   <FaTelegram />
-                </Link>
+                </a>
               </div>
             </div>
             <div>
@@ -104,9 +103,9 @@ export default function Footer() {
                   </div>
                   <div className="flex flex-col px-3 w-full font-regular">
                     <strong>Phone</strong>
-                    <Link to="tel:+95 0912345678">
+                    <a href="tel:+959767119812">
                       <p className="text-sm">+959 767 1198 12</p>
-                    </Link>
+                    </a>
                   </div>
                 </div>
                 <div className="flex flex-row items">
@@ -115,9 +114,9 @@ export default function Footer() {
                   </div>
                   <div className="flex flex-col px-3 w-full font-regular">
                     <strong>Email</strong>
-                    <Link to="mail:piu.edu2014@gmail.com">
+                    <a href="mailto:piu.edu2014@gmail.com">
                       <p className="text-sm">piu.edu2014@gmail.com</p>
-                    </Link>
+                    </a>
                   </div>
                 </div>
               </div>

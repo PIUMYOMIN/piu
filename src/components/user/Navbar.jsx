@@ -4,10 +4,23 @@ import { FaSearch, FaUserCircle, FaCaretDown, FaSignOutAlt } from "react-icons/f
 import Logo from "../../assets/logo.png";
 import { useAuth } from "../../contexts/AuthContext";
 
+function getUserRole(user) {
+  const raw = user?.role ?? (Array.isArray(user?.roles) ? user.roles[0] : "");
+  return String(raw || "").toLowerCase();
+}
+
+function getProfilePathByRole(role) {
+  if (role === "admin") return "/piu/admin/profile";
+  if (role === "student") return "/piu/student";
+  if (role === "teacher") return "/piu/teacher";
+  return "/login";
+}
+
 export default function Navbar() {
   const { isAuthenticated, user, logout } = useAuth();
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const dropdownRef = useRef(null);
+  const role = getUserRole(user);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -97,6 +110,26 @@ export default function Navbar() {
                       )}
                       
                       <div className="border-t border-gray-100">
+                        <Link
+                          to={getProfilePathByRole(role)}
+                          onClick={() => setShowUserDropdown(false)}
+                          className="flex items-center w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-150"
+                        >
+                          <FaUserCircle className="mr-2 text-gray-500" />
+                          Profile
+                        </Link>
+
+                        {role === "admin" && (
+                          <Link
+                            to="/piu/admin"
+                            onClick={() => setShowUserDropdown(false)}
+                            className="flex items-center w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-150"
+                          >
+                            <i className="fas fa-gauge mr-2 text-gray-500"></i>
+                            Dashboard
+                          </Link>
+                        )}
+
                         <button
                           onClick={handleLogout}
                           className="flex items-center w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-50 transition-colors duration-150"

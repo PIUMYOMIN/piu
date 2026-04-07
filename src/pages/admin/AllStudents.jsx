@@ -1,31 +1,79 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { adminApi } from "../../api/admin";
+import { toStorageUrl } from "../../api/axios";
+
+function getInitials(name) {
+  const parts = String(name || "")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+  const first = parts[0]?.[0] || "P";
+  const last = parts.length > 1 ? parts[parts.length - 1][0] : "I";
+  return (first + last).toUpperCase();
+}
 
 const AllStudents = () => {
   const navigate = useNavigate();
 
-  // Dummy data
-  const [students] = useState([
-    { id: 1, name: "Lucifer Morningstar", studentId: "ST001", program: "ICT", email: "lucifer@piu.edu", status: "Active", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=100&q=80" },
-    { id: 2, name: "Alice Johnson", studentId: "ST002", program: "Business", email: "alice@piu.edu", status: "Active", avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=100&q=80" },
-    { id: 3, name: "Michael Smith", studentId: "ST003", program: "Engineering", email: "michael@piu.edu", status: "Inactive", avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=100&q=80" },
-    { id: 4, name: "Sarah Williams", studentId: "ST004", program: "ICT", email: "sarah@piu.edu", status: "Active", avatar: "https://images.unsplash.com/photo-1554151228-14d9def656e4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=100&q=80" },
-  ]);
+  const [students, setStudents] = useState([]);
+  const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   const [filter, setFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
 
-  const filteredStudents = students.filter((student) => {
-    const matchesProgram = filter ? student.program === filter : true;
-    const matchesStatus = statusFilter !== "all" ? student.status === statusFilter : true;
-    const matchesSearch = searchTerm 
-      ? student.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-        student.studentId.toLowerCase().includes(searchTerm.toLowerCase())
-      : true;
-    
-    return matchesProgram && matchesStatus && matchesSearch;
-  });
+  const load = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const [studentsData, coursesData] = await Promise.all([
+        adminApi.students.list(),
+        adminApi.courses.list(),
+      ]);
+      setStudents(Array.isArray(studentsData) ? studentsData : []);
+      setCourses(Array.isArray(coursesData) ? coursesData : []);
+    } catch (e) {
+      setError(e?.response?.data?.message || e?.message || "Failed to load students");
+      setStudents([]);
+      setCourses([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    load();
+  }, []);
+
+  const coursesById = useMemo(() => new Map(courses.map((c) => [String(c.id), c])), [courses]);
+
+  const filteredStudents = useMemo(() => {
+    const q = searchTerm.trim().toLowerCase();
+    return students.filter((student) => {
+      const programId = student.course_id ?? student.course?.id;
+      const course = coursesById.get(String(programId));
+      const programName = course?.title || "";
+
+      const matchesProgram = filter ? String(programId) === String(filter) : true;
+      const isActive = typeof student.is_active === "boolean" ? student.is_active : String(student.status || "").toLowerCase() === "active";
+      const matchesStatus =
+        statusFilter === "all" ||
+        (statusFilter === "Active" && isActive) ||
+        (statusFilter === "Inactive" && !isActive);
+
+      const fullName = `${student.fname || ""} ${student.lname || ""}`.trim();
+      const matchesSearch = !q
+        ? true
+        : fullName.toLowerCase().includes(q) ||
+          String(student.student_id || "").toLowerCase().includes(q) ||
+          programName.toLowerCase().includes(q);
+
+      return matchesProgram && matchesStatus && matchesSearch;
+    });
+  }, [students, filter, statusFilter, searchTerm, coursesById]);
 
   return (
     <div className="max-w-8xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
@@ -36,6 +84,12 @@ const AllStudents = () => {
       </div>
 
       <div className="p-6">
+        {error && (
+          <div className="mb-4 p-3 rounded-lg border border-red-200 bg-red-50 text-red-700 text-sm">
+            {error}
+          </div>
+        )}
+
         {/* Filters and Search */}
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 gap-4">
           <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">
@@ -63,9 +117,11 @@ const AllStudents = () => {
                   className="pl-10 pr-10 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none outline-none"
                 >
                   <option value="">All Programs</option>
-                  <option value="ICT">ICT</option>
-                  <option value="Business">Business</option>
-                  <option value="Engineering">Engineering</option>
+                  {courses.map((c) => (
+                    <option key={c.id} value={String(c.id)}>
+                      {c.title}
+                    </option>
+                  ))}
                 </select>
                 <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                   <i className="fas fa-chevron-down text-gray-400"></i>
@@ -124,21 +180,44 @@ const AllStudents = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredStudents.length > 0 ? (
-                filteredStudents.map((student) => (
+              {loading && (
+                <tr>
+                  <td colSpan="5" className="px-6 py-12 text-center text-gray-500">
+                    Loading students...
+                  </td>
+                </tr>
+              )}
+
+              {!loading && filteredStudents.length > 0 ? (
+                filteredStudents.map((student) => {
+                  const fullName = `${student.fname || ""} ${student.lname || ""}`.trim();
+                  const programId = student.course_id ?? student.course?.id;
+                  const course = coursesById.get(String(programId));
+                  const isActive = typeof student.is_active === "boolean" ? student.is_active : String(student.status || "").toLowerCase() === "active";
+                  const avatar = toStorageUrl(student.profile) || student.profile || "";
+                  return (
                   <tr key={student.id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="flex-shrink-0 h-10 w-10">
-                          <img
-                            className="h-10 w-10 rounded-full object-cover"
-                            src={student.avatar}
-                            alt={student.name}
-                          />
+                          {avatar ? (
+                            <img
+                              className="h-10 w-10 rounded-full object-cover"
+                              src={avatar}
+                              alt={fullName}
+                              onError={(e) => {
+                                e.target.src = "https://via.placeholder.com/80x80?text=PIU";
+                              }}
+                            />
+                          ) : (
+                            <div className="h-10 w-10 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center text-xs font-bold">
+                              {getInitials(fullName)}
+                            </div>
+                          )}
                         </div>
                         <div className="ml-4">
                           <div className="text-sm font-medium text-gray-900">
-                            {student.name}
+                            {fullName || "—"}
                           </div>
                           <div className="text-sm text-gray-500">
                             {student.email}
@@ -147,36 +226,56 @@ const AllStudents = () => {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                      {student.studentId}
+                      {student.student_id}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                      {student.program}
+                      {course?.title || "—"}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span
                         className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                          student.status === "Active"
+                          isActive
                             ? "bg-green-100 text-green-800"
                             : "bg-gray-100 text-gray-800"
                         }`}
                       >
-                        {student.status}
+                        {isActive ? "Active" : "Inactive"}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <button
-                        onClick={() => navigate(`/piu/admin/students/${student.id}/details`)}
-                        className="text-blue-600 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 px-4 py-2 rounded-md transition-colors"
-                        title="View student details"
-                      >
-                        <i className="fas fa-eye mr-1"></i>
-                        View
-                      </button>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => navigate(`/piu/admin/students/edit/${student.id}`)}
+                          className="text-blue-600 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 px-4 py-2 rounded-md transition-colors"
+                          title="Edit student"
+                        >
+                          <i className="fas fa-edit mr-1"></i>
+                          Edit
+                        </button>
+                        <button
+                          onClick={async () => {
+                            if (!window.confirm("Delete this student?")) return;
+                            try {
+                              await adminApi.students.remove(student.id);
+                              await load();
+                            } catch (e) {
+                              setError(e?.response?.data?.message || e?.message || "Failed to delete student");
+                            }
+                          }}
+                          className="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 px-4 py-2 rounded-md transition-colors"
+                          title="Delete student"
+                        >
+                          <i className="fas fa-trash mr-1"></i>
+                          Delete
+                        </button>
+                      </div>
                     </td>
                   </tr>
-                ))
+                  );
+                })
               ) : (
-                <tr>
+                !loading && (
+                  <tr>
                   <td colSpan="5" className="px-6 py-12 text-center text-gray-500">
                     <div className="flex flex-col items-center justify-center">
                       <i className="fas fa-user-graduate text-4xl text-gray-300 mb-3"></i>
@@ -189,7 +288,8 @@ const AllStudents = () => {
                       </p>
                     </div>
                   </td>
-                </tr>
+                  </tr>
+                )
               )}
             </tbody>
           </table>

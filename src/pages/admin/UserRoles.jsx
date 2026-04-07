@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
-import api from "../../api/axios";
 import EditRoleModal from "./EditRoleModal";
 import { FaEdit, FaTrash, FaPlus, FaSpinner } from "react-icons/fa";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { adminApi } from "../../api/admin";
 
 function RolesPage() {
   const [roles, setRoles] = useState([]);
@@ -22,13 +22,13 @@ function RolesPage() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [rolesRes, permissionsRes] = await Promise.all([
-        api.get("/api/v2/roles"),
-        api.get("/api/v2/permissions")
+      const [rolesData, permissionsData] = await Promise.all([
+        adminApi.roles.list(),
+        adminApi.permissions.list(),
       ]);
-      
-      setRoles(rolesRes.data.data || rolesRes.data);
-      setPermissions(permissionsRes.data);
+
+      setRoles(rolesData);
+      setPermissions(permissionsData);
     } catch (error) {
       console.error("Error fetching data:", error);
       toast.error("Failed to fetch data");
@@ -44,12 +44,12 @@ function RolesPage() {
     }
 
     try {
-      const response = await api.post("/api/v2/roles", {
+      const response = await adminApi.roles.create({
         name: newRoleName,
         permissions: selectedPermissions.map(p => p.id || p)
       });
       
-      setRoles([...roles, response.data]);
+      setRoles([...roles, response]);
       setNewRoleName("");
       setSelectedPermissions([]);
       setIsAddModalOpen(false);
@@ -62,10 +62,10 @@ function RolesPage() {
 
   const handleUpdateRole = async (roleId, updatedData) => {
     try {
-      const response = await api.put(`/api/v2/roles/${roleId}`, updatedData);
+      const response = await adminApi.roles.update(roleId, updatedData);
       
       setRoles(roles.map(role => 
-        role.id === roleId ? response.data : role
+        role.id === roleId ? response : role
       ));
       setEditingRole(null);
       toast.success("Role updated successfully");
@@ -81,7 +81,7 @@ function RolesPage() {
     }
 
     try {
-      await api.delete(`/api/v2/roles/${roleId}`);
+      await adminApi.roles.remove(roleId);
       setRoles(roles.filter(role => role.id !== roleId));
       toast.success("Role deleted successfully");
     } catch (error) {

@@ -3,7 +3,7 @@ import {
   FaSpinner, FaPlus, FaEdit, FaTrash, FaSearch, 
   FaTag, FaSort, FaSortUp, FaSortDown, FaFilter
 } from "react-icons/fa";
-import api from "../../api/axios";
+import { adminApi } from "../../api/admin";
 import CategoryModal from "./CategoryModal";
 
 const CourseCategories = () => {
@@ -22,8 +22,8 @@ const CourseCategories = () => {
   const fetchCategories = async () => {
     try {
       setLoading(true);
-      const response = await api.get("/api/v2/course-categories");
-      setCategories(response.data);
+      const data = await adminApi.categories.list();
+      setCategories(data);
     } catch (error) {
       console.error("Error fetching categories:", error);
     } finally {
@@ -52,7 +52,7 @@ const CourseCategories = () => {
     }
 
     try {
-      await api.delete(`/api/v2/course-categories/${id}`);
+      await adminApi.categories.remove(id);
       setCategories(categories.filter(category => category.id !== id));
     } catch (error) {
       console.error("Error deleting category:", error);

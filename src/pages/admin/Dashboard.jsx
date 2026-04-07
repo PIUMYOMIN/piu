@@ -1,45 +1,9 @@
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, LineChart, Line, PieChart, Pie, Cell
+  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, PieChart, Pie, Cell
 } from "recharts";
-
-const mockStats = {
-  totalStudents: 1235,
-  newAdmissions: 58,
-  activeCourses: 45,
-  pendingQueries: 12,
-};
-
-const recentQueries = [
-  { id: 1, name: "John Doe", message: "Interested in Computer Science", time: "2 hours ago" },
-  { id: 2, name: "Jane Smith", message: "Asked about scholarship", time: "5 hours ago" },
-  { id: 3, name: "Mark Lee", message: "Wants campus tour", time: "1 day ago" },
-  { id: 4, name: "Sara Khan", message: "Inquiring about fees", time: "1 day ago" },
-];
-
-const enrollmentData = [
-  { month: "Jan", students: 100 },
-  { month: "Feb", students: 120 },
-  { month: "Mar", students: 150 },
-  { month: "Apr", students: 170 },
-  { month: "May", students: 160 },
-  { month: "Jun", students: 180 },
-  { month: "Jul", students: 200 },
-  { month: "Aug", students: 210 },
-  { month: "Sep", students: 230 },
-  { month: "Oct", students: 250 },
-  { month: "Nov", students: 270 },
-  { month: "Dec", students: 300 },
-];
-
-const courseDistribution = [
-  { name: "Computer Science", value: 35 },
-  { name: "Business", value: 25 },
-  { name: "Engineering", value: 20 },
-  { name: "Arts", value: 15 },
-  { name: "Other", value: 5 },
-];
+import adminApi from "../../api/admin";
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
 
@@ -63,6 +27,94 @@ const Card = ({ title, value, icon, trend }) => (
 );
 
 const DashboardPage = () => {
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    totalStudents: 0,
+    totalAdmissions: 0,
+    activeCourses: 0,
+  });
+  const [recentAdmissions, setRecentAdmissions] = useState([]);
+  const [enrollmentData, setEnrollmentData] = useState([]);
+  const [courseDistribution, setCourseDistribution] = useState([]);
+
+  useEffect(() => {
+    let mounted = true;
+    async function load() {
+      setLoading(true);
+      setError("");
+      try {
+        const [usersData, studentsData, coursesData, admissionsData] = await Promise.all([
+          adminApi.users.list(),
+          adminApi.students.list(),
+          adminApi.courses.list(),
+          adminApi.admissions.list(),
+        ]);
+
+        if (!mounted) return;
+        const users = Array.isArray(usersData) ? usersData : [];
+        const students = Array.isArray(studentsData) ? studentsData : [];
+        const courses = Array.isArray(coursesData) ? coursesData : [];
+        const admissions = Array.isArray(admissionsData) ? admissionsData : [];
+
+        const totalUsers = users.length;
+        // Students are managed in a dedicated `students` resource (not just `users` with role).
+        const totalStudents = students.length;
+        const totalAdmissions = admissions.length;
+        const activeCourses = courses.filter((c) => c?.is_active === true || c?.is_active === 1 || c?.is_active === undefined).length;
+
+        setStats({ totalUsers, totalStudents, totalAdmissions, activeCourses });
+
+        // Recent admissions (latest 5 by created_at)
+        const recent = admissions
+          .slice()
+          .sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime())
+          .slice(0, 5);
+        setRecentAdmissions(recent);
+
+        // Enrollment trend (last 12 months count by month, based on admissions created_at)
+        const now = new Date();
+        const months = Array.from({ length: 12 }, (_, i) => {
+          const d = new Date(now.getFullYear(), now.getMonth() - (11 - i), 1);
+          return { year: d.getFullYear(), month: d.getMonth(), label: d.toLocaleString("en-US", { month: "short" }) };
+        });
+        const counts = months.map((m) => {
+          const c = admissions.filter((a) => {
+            if (!a?.created_at) return false;
+            const d = new Date(a.created_at);
+            return d.getFullYear() === m.year && d.getMonth() === m.month;
+          }).length;
+          return { month: m.label, students: c };
+        });
+        setEnrollmentData(counts);
+
+        // Course distribution (by category name if present)
+        const distMap = new Map();
+        for (const c of courses) {
+          const name = c?.category?.name || c?.course_category?.name || "Other";
+          distMap.set(name, (distMap.get(name) || 0) + 1);
+        }
+        const dist = Array.from(distMap.entries())
+          .map(([name, value]) => ({ name, value }))
+          .sort((a, b) => b.value - a.value)
+          .slice(0, 5);
+        setCourseDistribution(dist);
+      } catch (e) {
+        if (!mounted) return;
+        setError(e?.response?.data?.message || e?.message || "Failed to load dashboard data");
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    }
+    load();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  // (kept simple; charts render even when 0s)
+
   const studentIcon = (
     <svg className="w-6 h-6 text-blue-600 dark:text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -89,26 +141,32 @@ const DashboardPage = () => {
 
   return (
     <div className="space-y-6">
+      {error && (
+        <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+          {error}
+        </div>
+      )}
+
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card 
           title="Total Students" 
-          value={mockStats.totalStudents} 
+          value={loading ? "—" : stats.totalStudents} 
           icon={studentIcon}
         />
         <Card 
-          title="New Admissions" 
-          value={mockStats.newAdmissions} 
+          title="Total Admissions" 
+          value={loading ? "—" : stats.totalAdmissions} 
           icon={admissionIcon}
         />
         <Card 
           title="Active Courses" 
-          value={mockStats.activeCourses} 
+          value={loading ? "—" : stats.activeCourses} 
           icon={courseIcon}
         />
         <Card 
-          title="Pending Queries" 
-          value={mockStats.pendingQueries} 
+          title="Total Users" 
+          value={loading ? "—" : stats.totalUsers} 
           icon={queryIcon}
         />
       </div>
@@ -118,62 +176,85 @@ const DashboardPage = () => {
         {/* Enrollment Trend Chart */}
         <div className="bg-white rounded-lg shadow p-6 dark:bg-gray-800">
           <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Enrollment Trends</h2>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={enrollmentData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="month" />
-              <YAxis />
-              <Tooltip />
-              <Bar dataKey="students" fill="#002147" />
-            </BarChart>
-          </ResponsiveContainer>
+          {loading ? (
+            <div className="h-[300px] flex items-center justify-center text-gray-500">Loading…</div>
+          ) : (
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={enrollmentData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="month" />
+                <YAxis allowDecimals={false} />
+                <Tooltip />
+                <Bar dataKey="students" fill="#002147" />
+              </BarChart>
+            </ResponsiveContainer>
+          )}
         </div>
 
         {/* Course Distribution Chart */}
         <div className="bg-white rounded-lg shadow p-6 dark:bg-gray-800">
           <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Course Distribution</h2>
-          <ResponsiveContainer width="100%" height={300}>
-            <PieChart>
-              <Pie
-                data={courseDistribution}
-                cx="50%"
-                cy="50%"
-                labelLine={false}
-                outerRadius={100}
-                fill="#8884d8"
-                dataKey="value"
-                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-              >
-                {courseDistribution.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip />
-            </PieChart>
-          </ResponsiveContainer>
+          {loading ? (
+            <div className="h-[300px] flex items-center justify-center text-gray-500">Loading…</div>
+          ) : courseDistribution.length === 0 ? (
+            <div className="h-[300px] flex items-center justify-center text-gray-500">No course data</div>
+          ) : (
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={courseDistribution}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  outerRadius={100}
+                  fill="#8884d8"
+                  dataKey="value"
+                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                >
+                  {courseDistribution.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
+          )}
         </div>
       </div>
 
       {/* Recent Queries and Quick Actions */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Recent Admission Queries */}
+        {/* Recent Admissions */}
         <div className="lg:col-span-2 bg-white rounded-lg shadow p-6 dark:bg-gray-800">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Recent Admission Queries</h2>
-            <button className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-300 dark:hover:text-blue-200">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Recent Admissions</h2>
+            <Link
+              to="/piu/admin/admission"
+              className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-300 dark:hover:text-blue-200"
+            >
               View all
-            </button>
+            </Link>
           </div>
           <ul className="divide-y divide-gray-200 dark:divide-gray-700">
-            {recentQueries.map((query) => (
-              <li key={query.id} className="py-3">
-                <div className="flex justify-between">
-                  <p className="font-semibold text-gray-900 dark:text-white">{query.name}</p>
-                  <span className="text-sm text-gray-500 dark:text-gray-400">{query.time}</span>
-                </div>
-                <p className="text-gray-600 dark:text-gray-300">{query.message}</p>
-              </li>
-            ))}
+            {loading ? (
+              <li className="py-6 text-gray-500">Loading…</li>
+            ) : recentAdmissions.length === 0 ? (
+              <li className="py-6 text-gray-500">No admissions yet.</li>
+            ) : (
+              recentAdmissions.map((a) => (
+                <li key={a.id} className="py-3">
+                  <div className="flex justify-between gap-4">
+                    <div className="min-w-0">
+                      <p className="font-semibold text-gray-900 dark:text-white truncate">{a.name}</p>
+                      <p className="text-gray-600 dark:text-gray-300 text-sm truncate">{a.email}</p>
+                    </div>
+                    <span className="text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                      {a.created_at ? new Date(a.created_at).toLocaleDateString() : ""}
+                    </span>
+                  </div>
+                </li>
+              ))
+            )}
           </ul>
         </div>
 

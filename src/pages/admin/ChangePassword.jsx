@@ -1,8 +1,8 @@
 // src/pages/admin/ChangePassword.jsx
 import React, { useState } from "react";
 import { FaLock, FaEye, FaEyeSlash, FaSpinner, FaSave } from "react-icons/fa";
-import api from "../../api/axios";
 import { toast } from "react-toastify";
+import { v2 } from "../../api/v2";
 
 function ChangePassword() {
   const [formData, setFormData] = useState({
@@ -39,7 +39,7 @@ function ChangePassword() {
     try {
       setLoading(true);
       
-      await api.post("/api/v2/user/change-password", {
+      await v2.changePassword({
         current_password: formData.current_password,
         password: formData.password,
         password_confirmation: formData.password_confirmation,

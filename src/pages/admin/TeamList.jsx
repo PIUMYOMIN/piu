@@ -1,80 +1,89 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { adminApi } from "../../api/admin";
+import { toStorageUrl } from "../../api/axios";
 
 const TeamList = () => {
   const navigate = useNavigate();
 
-  // Dummy data with better images
-  const [teams, setTeams] = useState([
-    {
-      id: 1,
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=100&q=80",
-      name: "John Doe",
-      email: "john@example.com",
-      phone: "0912345678",
-      address: "Yangon, Myanmar",
-      department: "Engineering",
-      position: "Senior Developer",
-      status: true,
-    },
-    {
-      id: 2,
-      image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=100&q=80",
-      name: "Jane Smith",
-      email: "jane@example.com",
-      phone: "0987654321",
-      address: "Mandalay, Myanmar",
-      department: "Marketing",
-      position: "Manager",
-      status: false,
-    },
-    {
-      id: 3,
-      image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=100&q=80",
-      name: "Michael Johnson",
-      email: "michael@example.com",
-      phone: "0976543210",
-      address: "Naypyidaw, Myanmar",
-      department: "Science",
-      position: "Professor",
-      status: true,
-    },
-  ]);
+  const [teams, setTeams] = useState([]);
+  const [departments, setDepartments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   const [searchTerm, setSearchTerm] = useState("");
   const [departmentFilter, setDepartmentFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
 
+  const load = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const [teamData, deptData] = await Promise.all([
+        adminApi.teams.list(),
+        adminApi.meta.departments(),
+      ]);
+      setTeams(Array.isArray(teamData) ? teamData : []);
+      setDepartments(Array.isArray(deptData) ? deptData : []);
+    } catch (e) {
+      setError(e?.response?.data?.message || e?.message || "Failed to load team members");
+      setTeams([]);
+      setDepartments([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    load();
+  }, []);
+
   // Toggle status
-  const handleStatusChange = (id) => {
-    setTeams((prev) =>
-      prev.map((team) =>
-        team.id === id ? { ...team, status: !team.status } : team
-      )
-    );
+  const handleStatusChange = async (id) => {
+    try {
+      await adminApi.teams.toggleActive(id);
+      await load();
+    } catch (e) {
+      setError(e?.response?.data?.message || e?.message || "Failed to update status");
+    }
   };
 
   // Delete team
-  const handleDelete = (id) => {
-    if (window.confirm("Are you sure you want to delete this team member?")) {
-      setTeams((prev) => prev.filter((team) => team.id !== id));
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this team member?")) return;
+    try {
+      await adminApi.teams.remove(id);
+      await load();
+    } catch (e) {
+      setError(e?.response?.data?.message || e?.message || "Failed to delete team member");
     }
   };
 
   // Filter teams based on search and filters
-  const filteredTeams = teams.filter(team => {
-    const matchesSearch = team.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          team.email.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesDepartment = departmentFilter === "all" || team.department === departmentFilter;
-    const matchesStatus = statusFilter === "all" || 
-                         (statusFilter === "active" && team.status) || 
-                         (statusFilter === "inactive" && !team.status);
-    
-    return matchesSearch && matchesDepartment && matchesStatus;
-  });
+  const filteredTeams = useMemo(() => {
+    const q = searchTerm.trim().toLowerCase();
+    return teams.filter((team) => {
+      const matchesSearch =
+        !q ||
+        String(team.name || "").toLowerCase().includes(q) ||
+        String(team.email || "").toLowerCase().includes(q);
 
-  // Get unique departments for filter
-  const departments = [...new Set(teams.map(team => team.department))];
+      const depId = team.department_id ?? team.department?.id;
+      const matchesDepartment = departmentFilter === "all" || String(depId) === String(departmentFilter);
+
+      const isActive = typeof team.is_active === "boolean" ? team.is_active : Boolean(team.status);
+      const matchesStatus =
+        statusFilter === "all" || (statusFilter === "active" && isActive) || (statusFilter === "inactive" && !isActive);
+
+      return matchesSearch && matchesDepartment && matchesStatus;
+    });
+  }, [teams, searchTerm, departmentFilter, statusFilter]);
+
+  const departmentOptions = useMemo(() => {
+    return departments
+      .map((d) => ({ id: String(d.id), name: d.name }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [departments]);
 
   return (
     <div className="max-w-8xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
@@ -85,6 +94,12 @@ const TeamList = () => {
       </div>
 
       <div className="p-6">
+        {error && (
+          <div className="mb-4 p-3 rounded-lg border border-red-200 bg-red-50 text-red-700 text-sm">
+            {error}
+          </div>
+        )}
+
         {/* Search and Filters */}
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 gap-4">
           <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">
@@ -112,8 +127,10 @@ const TeamList = () => {
                   className="pl-10 pr-10 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none outline-none"
                 >
                   <option value="all">All Departments</option>
-                  {departments.map(dept => (
-                    <option key={dept} value={dept}>{dept}</option>
+                  {departmentOptions.map((dept) => (
+                    <option key={dept.id} value={dept.id}>
+                      {dept.name}
+                    </option>
                   ))}
                 </select>
                 <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
@@ -176,7 +193,18 @@ const TeamList = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredTeams.map((team) => (
+              {loading && (
+                <tr>
+                  <td colSpan="6" className="px-6 py-10 text-center text-gray-500">
+                    Loading team members...
+                  </td>
+                </tr>
+              )}
+
+              {!loading &&
+                filteredTeams.map((team) => {
+                  const isActive = typeof team.is_active === "boolean" ? team.is_active : Boolean(team.status);
+                  return (
                 <tr key={team.id} className="hover:bg-gray-50 transition-colors">
                   {/* Member Info */}
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -184,8 +212,11 @@ const TeamList = () => {
                       <div className="flex-shrink-0 h-10 w-10">
                         <img
                           className="h-10 w-10 rounded-full object-cover"
-                          src={team.image}
+                          src={toStorageUrl(team.profile) || team.profile || "https://via.placeholder.com/80x80?text=PIU"}
                           alt={team.name}
+                          onError={(e) => {
+                            e.target.src = "https://via.placeholder.com/80x80?text=PIU";
+                          }}
                         />
                       </div>
                       <div className="ml-4">
@@ -209,12 +240,12 @@ const TeamList = () => {
                   
                   {/* Department */}
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                    {team.department}
+                    {team.department?.name || `#${team.department_id ?? "—"}`}
                   </td>
                   
                   {/* Position */}
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                    {team.position}
+                    {team.position?.name || `#${team.position_id ?? "—"}`}
                   </td>
                   
                   {/* Status */}
@@ -224,14 +255,14 @@ const TeamList = () => {
                         <input
                           type="checkbox"
                           className="sr-only"
-                          checked={team.status}
+                          checked={isActive}
                           onChange={() => handleStatusChange(team.id)}
                         />
-                        <div className={`block w-14 h-7 rounded-full ${team.status ? 'bg-blue-600' : 'bg-gray-300'}`}></div>
-                        <div className={`absolute left-1 top-1 bg-white w-5 h-5 rounded-full transition-transform ${team.status ? 'transform translate-x-7' : ''}`}></div>
+                        <div className={`block w-14 h-7 rounded-full ${isActive ? 'bg-blue-600' : 'bg-gray-300'}`}></div>
+                        <div className={`absolute left-1 top-1 bg-white w-5 h-5 rounded-full transition-transform ${isActive ? 'transform translate-x-7' : ''}`}></div>
                       </div>
                       <span className="ml-3 text-sm font-medium text-gray-700">
-                        {team.status ? "Active" : "Inactive"}
+                        {isActive ? "Active" : "Inactive"}
                       </span>
                     </label>
                   </td>
@@ -258,12 +289,13 @@ const TeamList = () => {
                     </div>
                   </td>
                 </tr>
-              ))}
+                  );
+                })}
             </tbody>
           </table>
           
           {/* Empty State */}
-          {filteredTeams.length === 0 && (
+          {!loading && filteredTeams.length === 0 && (
             <div className="px-6 py-12 text-center">
               <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4">
                 <i className="fas fa-users text-2xl text-gray-400"></i>

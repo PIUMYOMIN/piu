@@ -5,6 +5,8 @@ import "react-responsive-carousel/lib/styles/carousel.min.css";
 import Modal from "react-modal";
 import LoadingSpinner from "../../components/user/LoadingSpinner";
 import { Link } from "react-router-dom";
+import { v2 } from "../../api/v2";
+import { toStorageUrl } from "../../api/axios";
 import {
   FaTag,
   FaCalendar,
@@ -20,12 +22,13 @@ import {
 
 Modal.setAppElement("#root");
 
-export default function Gallery() {
+export default function Gallery({ variant = "page" }) {
   const [galleries, setGallery] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [modalItems, setModalItems] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedTag, setSelectedTag] = useState("all");
   const [uniqueTags, setUniqueTags] = useState([]);
@@ -38,21 +41,8 @@ export default function Gallery() {
         setLoading(true);
         setError(null);
         
-        // Try multiple endpoints if needed
-        const response = await fetch("https://api.piueducation.org/api/v2/gallery");
-        
-        if (!response.ok) {
-          // Try alternative endpoint
-          const altResponse = await fetch("https://api.piueducation.org/api/v1/gallery");
-          if (!altResponse.ok) {
-            throw new Error(`Failed to fetch gallery: ${response.status}`);
-          }
-          const data = await altResponse.json();
-          processGalleryData(data);
-        } else {
-          const data = await response.json();
-          processGalleryData(data);
-        }
+        const data = await v2.getGallery();
+        processGalleryData(data);
       } catch (error) {
         console.error("Error fetching gallery:", error);
         setError("Unable to load gallery images. Please try again later.");
@@ -102,10 +92,8 @@ export default function Gallery() {
     setFilteredGalleries(filtered);
   }, [galleries, searchTerm, selectedTag]);
 
-  const maxImages = 9;
-  const limitedGalleries = filteredGalleries.slice(0, maxImages);
-
-  const openModal = index => {
+  const openModal = (items, index) => {
+    setModalItems(Array.isArray(items) ? items : []);
     setCurrentImageIndex(index);
     setModalIsOpen(true);
   };
@@ -127,13 +115,7 @@ export default function Gallery() {
       return "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80";
     }
     
-    if (imagePath.startsWith('http')) {
-      return imagePath;
-    }
-    
-    // Remove 'storage/' prefix if it exists
-    const cleanPath = imagePath.replace(/^storage\//, '');
-    return `https://api.piueducation.org/storage/${cleanPath}`;
+    return toStorageUrl(imagePath) || imagePath;
   };
 
   const resetFilters = () => {
@@ -144,8 +126,10 @@ export default function Gallery() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <LoadingSpinner />
+      <div className={variant === "home" ? "py-12" : "min-h-screen flex items-center justify-center"}>
+        <div className="flex items-center justify-center">
+          <LoadingSpinner />
+        </div>
       </div>
     );
   }
@@ -166,6 +150,133 @@ export default function Gallery() {
           </button>
         </div>
       </div>
+    );
+  }
+
+  if (variant === "home") {
+    const homeItems = filteredGalleries.slice(0, 8);
+
+    return (
+      <section className="w-full bg-gradient-to-b from-slate-50 to-white">
+        <div className="max-w-7xl mx-auto px-4 py-12">
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-8">
+            <div>
+              <div className="text-sm font-semibold text-indigo-600">Gallery</div>
+              <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 mt-1">
+                Campus Moments
+              </h2>
+              <p className="text-gray-600 mt-2 max-w-2xl">
+                A quick look at events, campus life, and activities at PIU.
+              </p>
+            </div>
+            <Link
+              to="/gallery"
+              className="inline-flex items-center justify-center px-4 py-2 rounded-xl border border-gray-200 bg-white text-gray-800 hover:bg-gray-50 font-semibold"
+            >
+              View all
+              <FaExternalLinkAlt className="ml-2" size={14} />
+            </Link>
+          </div>
+
+          {homeItems.length > 0 ? (
+            <ResponsiveMasonry columnsCountBreakPoints={{ 350: 2, 750: 3, 900: 4 }}>
+              <Masonry gutter="14px">
+                {homeItems.map((gallery, index) => (
+                  <button
+                    type="button"
+                    key={gallery.id || index}
+                    className="group relative overflow-hidden rounded-2xl shadow-sm border border-gray-100 bg-white text-left"
+                    onClick={() => openModal(homeItems, index)}
+                  >
+                    <img
+                      src={getImageUrl(gallery.image)}
+                      alt={gallery.image_tag || "Gallery image"}
+                      className="w-full h-auto transition-transform duration-500 group-hover:scale-105"
+                      onError={(e) => {
+                        e.target.src =
+                          "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80";
+                      }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className="absolute bottom-0 left-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="text-white text-sm font-semibold truncate">
+                        {gallery.image_tag || "Campus"}
+                      </div>
+                      <div className="text-white/80 text-xs mt-1">
+                        {formatDate(gallery.created_at)}
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </Masonry>
+            </ResponsiveMasonry>
+          ) : (
+            <div className="rounded-2xl border border-gray-200 bg-white p-8 text-center text-gray-600">
+              No gallery images available yet.
+            </div>
+          )}
+
+          {/* Modal (reused) */}
+          <Modal
+            isOpen={modalIsOpen}
+            onRequestClose={closeModal}
+            contentLabel="Gallery Image Modal"
+            className="modal-content"
+            overlayClassName="modal-overlay"
+          >
+            <div className="relative bg-black text-white max-w-4xl mx-auto rounded-xl overflow-hidden">
+              <button
+                onClick={closeModal}
+                className="absolute top-4 right-4 z-50 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full"
+              >
+                <FaTimes size={24} />
+              </button>
+              <Carousel
+                selectedItem={currentImageIndex}
+                onChange={setCurrentImageIndex}
+                showThumbs={false}
+                infiniteLoop
+                useKeyboardArrows
+                showStatus={false}
+                showIndicators={modalItems.length > 1}
+              >
+                {modalItems.map((gallery, idx) => (
+                  <div key={gallery.id || idx} className="relative">
+                    <img
+                      src={getImageUrl(gallery.image)}
+                      alt={gallery.image_tag || "Gallery image"}
+                      className="w-full max-h-[75vh] object-contain"
+                    />
+                  </div>
+                ))}
+              </Carousel>
+            </div>
+          </Modal>
+
+          <style>{`
+            .modal-overlay {
+              position: fixed;
+              top: 0;
+              left: 0;
+              right: 0;
+              bottom: 0;
+              background-color: rgba(0, 0, 0, 0.85);
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              z-index: 1000;
+            }
+            .modal-content {
+              position: relative;
+              background: transparent;
+              border: none;
+              outline: none;
+              max-width: 90vw;
+              max-height: 90vh;
+            }
+          `}</style>
+        </div>
+      </section>
     );
   }
 
@@ -271,11 +382,11 @@ export default function Gallery() {
             <>
               <ResponsiveMasonry columnsCountBreakPoints={{ 350: 1, 750: 2, 900: 3 }}>
                 <Masonry gutter="16px">
-                  {limitedGalleries.map((gallery, index) => (
+                  {filteredGalleries.map((gallery, index) => (
                     <div
                       key={gallery.id || index}
                       className="relative group overflow-hidden rounded-lg cursor-pointer shadow-md hover:shadow-xl transition-all duration-300"
-                      onClick={() => openModal(index)}
+                      onClick={() => openModal(filteredGalleries, index)}
                     >
                       <img
                         src={getImageUrl(gallery.image)}
@@ -349,11 +460,12 @@ export default function Gallery() {
           {/* Carousel */}
           <Carousel
             selectedItem={currentImageIndex}
+            onChange={setCurrentImageIndex}
             showThumbs={false}
             infiniteLoop
             useKeyboardArrows
             showStatus={false}
-            showIndicators={filteredGalleries.length > 1}
+            showIndicators={modalItems.length > 1}
             renderArrowPrev={(onClickHandler, hasPrev, label) =>
               hasPrev && (
                 <button
@@ -379,7 +491,7 @@ export default function Gallery() {
               )
             }
           >
-            {filteredGalleries.map((gallery, index) => (
+            {modalItems.map((gallery, index) => (
               <div key={gallery.id || index} className="relative">
                 <img
                   src={getImageUrl(gallery.image)}
@@ -429,13 +541,13 @@ export default function Gallery() {
           
           {/* Image Counter */}
           <div className="absolute bottom-4 right-4 bg-black/50 text-white px-3 py-1 rounded-full text-sm">
-            {currentImageIndex + 1} / {filteredGalleries.length}
+            {currentImageIndex + 1} / {modalItems.length}
           </div>
         </div>
       </Modal>
 
       {/* Styles */}
-      <style jsx>{`
+      <style>{`
         .modal-overlay {
           position: fixed;
           top: 0;

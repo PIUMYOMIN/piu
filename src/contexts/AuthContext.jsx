@@ -1,5 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import api from '../api/axios';
+import { v2 } from '../api/v2';
 
 const AuthContext = createContext();
 
@@ -27,8 +27,8 @@ export const AuthProvider = ({ children }) => {
       }
 
       try {
-        const response = await api.get('/user');
-        setUser(response.data);
+        const data = await v2.getProfile();
+        setUser(data.user);
       } catch (error) {
         localStorage.removeItem('token');
         setUser(null);
@@ -45,13 +45,11 @@ export const AuthProvider = ({ children }) => {
   const register = async (userData) => {
     setLoading(true);
     try {
-      const response = await api.post('/register', userData);
-      const { token, user } = response.data;
+      const responseData = await v2.register(userData);
+      const { token, user } = responseData;
       localStorage.setItem('token', token);
       setUser(user);
-      return response.data;
-    } catch (error) {
-      throw error;
+      return responseData;
     } finally {
       setLoading(false);
     }
@@ -61,13 +59,11 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     setLoading(true);
     try {
-      const response = await api.post('/login', { email, password });
-      const { token, user } = response.data;
+      const responseData = await v2.login({ email, password });
+      const { token, user } = responseData;
       localStorage.setItem('token', token);
       setUser(user);
-      return response.data;
-    } catch (error) {
-      throw error;
+      return responseData;
     } finally {
       setLoading(false);
     }
@@ -77,7 +73,7 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     setLoading(true);
     try {
-      await api.post('/logout');
+      await v2.logout();
     } catch (error) {
       console.error('Logout error:', error);
     } finally {

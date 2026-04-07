@@ -16,6 +16,8 @@ import {
   FaExclamationTriangle
 } from "react-icons/fa";
 import LoadingSpinner from "../../components/user/LoadingSpinner";
+import { v2 } from "../../api/v2";
+import { toStorageUrl } from "../../api/axios";
 
 export default function CourseDetails() {
   const { slug } = useParams();
@@ -30,12 +32,7 @@ export default function CourseDetails() {
         setError(null);
         
         // First, get all courses to find the one with matching slug
-        const response = await fetch("https://api.piueducation.org/api/v2/courses");
-        if (!response.ok) {
-          throw new Error(`Failed to fetch courses: ${response.status}`);
-        }
-        
-        const courses = await response.json();
+        const courses = await v2.getCourses();
         
         // Find course by slug
         const course = courses.find(c => c.slug === slug);
@@ -109,18 +106,8 @@ export default function CourseDetails() {
     if (!courseDetails.image) {
       return "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80";
     }
-    
-    if (courseDetails.image.startsWith('http')) {
-      return courseDetails.image;
-    }
-    
-    // Try different URL patterns
-    const baseUrls = [
-      'https://api.piueducation.org/storage/',
-      'https://dashboard.piueducation.org/storage/'
-    ];
-    
-    return baseUrls[0] + courseDetails.image.replace(/^storage\//, '');
+
+    return toStorageUrl(courseDetails.image) || courseDetails.image;
   };
 
   return (

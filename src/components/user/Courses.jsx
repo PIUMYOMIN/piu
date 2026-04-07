@@ -12,6 +12,8 @@ import {
   FaTimes
 } from "react-icons/fa";
 import LoadingSpinner from "./LoadingSpinner";
+import { v2 } from "../../api/v2";
+import { toStorageUrl } from "../../api/axios";
 
 export default function Course() {
   const [courses, setCourses] = useState([]);
@@ -31,19 +33,13 @@ export default function Course() {
         setError(null);
 
         // Fetch courses
-        const coursesResponse = await fetch("https://api.piueducation.org/api/v2/courses");
-        if (!coursesResponse.ok) throw new Error("Failed to fetch courses.");
-        const coursesData = await coursesResponse.json();
+        const coursesData = await v2.getCourses();
 
         // Process image URLs
         const processedCourses = coursesData.map(course => {
           // Handle image URL properly
           let imageUrl = course.image;
-          if (imageUrl && !imageUrl.startsWith('http')) {
-            // Remove any 'storage/' prefix if it exists
-            imageUrl = imageUrl.replace(/^storage\//, '');
-            imageUrl = `https://api.piueducation.org/storage/${imageUrl}`;
-          }
+          imageUrl = toStorageUrl(imageUrl) || imageUrl;
           return { ...course, image: imageUrl };
         });
 
@@ -52,11 +48,8 @@ export default function Course() {
 
         // Fetch categories if available
         try {
-          const categoriesResponse = await fetch("https://api.piueducation.org/api/v2/course-categories");
-          if (categoriesResponse.ok) {
-            const categoriesData = await categoriesResponse.json();
-            setCategories(categoriesData);
-          }
+          const categoriesData = await v2.getCourseCategories();
+          setCategories(categoriesData);
         } catch (catError) {
           console.error("Failed to fetch categories:", catError);
         }
@@ -104,14 +97,7 @@ export default function Course() {
     if (!imagePath) {
       return "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80";
     }
-
-    if (imagePath.startsWith('http')) {
-      return imagePath;
-    }
-
-    // Remove any leading slash or storage/ prefix
-    const cleanPath = imagePath.replace(/^\/|^storage\//, '');
-    return `https://api.piueducation.org/storage/${cleanPath}`;
+    return toStorageUrl(imagePath) || imagePath;
   };
 
   const getColorClass = (categoryId) => {

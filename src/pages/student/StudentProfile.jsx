@@ -229,7 +229,7 @@ const StudentProfile = () => {
                 </div>
                 <div>
                   <h4 className="font-medium text-gray-900 mb-2">Scholarships</h4>
-                  <p className="text-gray-600">Dean's Scholarship</p>
+                  <p className="text-gray-600">Dean&apos;s Scholarship</p>
                   <p className="text-sm text-gray-500">$5,000 per semester</p>
                 </div>
                 <div>

@@ -1,82 +1,99 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { adminApi } from "../../api/admin";
 
 const CurriculumList = () => {
   const navigate = useNavigate();
 
-  const [curriculums, setCurriculums] = useState([
-    {
-      id: 1,
-      title: "Introduction to Programming",
-      description: "Basics of programming with Python",
-      course: "Bachelor of Computer Science",
-      year: "1",
-      semester: "1",
-      moduleCode: "CS101",
-      credits: "3",
-      hours: "45",
-      status: "active"
-    },
-    {
-      id: 2,
-      title: "Advanced Marketing",
-      description: "Marketing strategies and case studies",
-      course: "Master of Business Administration",
-      year: "2",
-      semester: "2",
-      moduleCode: "MBA202",
-      credits: "4",
-      hours: "60",
-      status: "active"
-    },
-    {
-      id: 3,
-      title: "Calculus I",
-      description: "Fundamental concepts of differential calculus",
-      course: "Bachelor of Engineering",
-      year: "1",
-      semester: "1",
-      moduleCode: "MATH101",
-      credits: "4",
-      hours: "60",
-      status: "inactive"
-    },
-  ]);
+  const [curriculums, setCurriculums] = useState([]);
+  const [courses, setCourses] = useState([]);
+  const [years, setYears] = useState([]);
+  const [modules, setModules] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   const [searchTerm, setSearchTerm] = useState("");
   const [courseFilter, setCourseFilter] = useState("all");
   const [yearFilter, setYearFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
 
-  const handleDelete = (id) => {
-    if (window.confirm("Are you sure you want to delete this curriculum?")) {
-      setCurriculums(curriculums.filter((cur) => cur.id !== id));
+  const load = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const [curData, courseData, yearsData, modulesData] = await Promise.all([
+        adminApi.curriculums.list(),
+        adminApi.courses.list(),
+        adminApi.meta.years(),
+        adminApi.modules.list(),
+      ]);
+      setCurriculums(Array.isArray(curData) ? curData : []);
+      setCourses(Array.isArray(courseData) ? courseData : []);
+      setYears(Array.isArray(yearsData) ? yearsData : []);
+      setModules(Array.isArray(modulesData) ? modulesData : []);
+    } catch (e) {
+      setError(e?.response?.data?.message || e?.message || "Failed to load curriculums");
+      setCurriculums([]);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const toggleStatus = (id) => {
-    setCurriculums(curriculums.map(cur => 
-      cur.id === id 
-        ? { ...cur, status: cur.status === "active" ? "inactive" : "active" } 
-        : cur
-    ));
+  useEffect(() => {
+    load();
+  }, []);
+
+  const coursesById = useMemo(() => new Map(courses.map((c) => [String(c.id), c])), [courses]);
+  const yearsById = useMemo(() => new Map(years.map((y) => [String(y.id), y])), [years]);
+  const modulesById = useMemo(() => new Map(modules.map((m) => [String(m.id), m])), [modules]);
+
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this curriculum?")) return;
+    try {
+      await adminApi.curriculums.remove(id);
+      await load();
+    } catch (e) {
+      setError(e?.response?.data?.message || e?.message || "Failed to delete curriculum");
+    }
   };
 
   // Filter curriculums based on search and filters
-  const filteredCurriculums = curriculums.filter(curriculum => {
-    const matchesSearch = curriculum.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          curriculum.moduleCode.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCourse = courseFilter === "all" || curriculum.course === courseFilter;
-    const matchesYear = yearFilter === "all" || curriculum.year === yearFilter;
-    const matchesStatus = statusFilter === "all" || curriculum.status === statusFilter;
-    
-    return matchesSearch && matchesCourse && matchesYear && matchesStatus;
-  });
+  const filteredCurriculums = useMemo(() => {
+    const q = searchTerm.trim().toLowerCase();
+    return curriculums.filter((curriculum) => {
+      const module = modulesById.get(String(curriculum.module_id));
+      const course = coursesById.get(String(curriculum.course_id));
+      const year = yearsById.get(String(curriculum.year_id));
 
-  // Get unique courses for filter
-  const courses = [...new Set(curriculums.map(curriculum => curriculum.course))];
-  // Get unique years for filter
-  const years = [...new Set(curriculums.map(curriculum => curriculum.year))];
+      const matchesSearch =
+        !q ||
+        String(curriculum.title || "").toLowerCase().includes(q) ||
+        String(module?.module_code || "").toLowerCase().includes(q) ||
+        String(module?.name || "").toLowerCase().includes(q);
+
+      const matchesCourse = courseFilter === "all" || String(curriculum.course_id) === String(courseFilter);
+      const matchesYear = yearFilter === "all" || String(curriculum.year_id) === String(yearFilter);
+
+      // curriculum doesn't have status column in DB; keep filter for future compatibility.
+      const status = curriculum.status || curriculum.is_active;
+      const normalizedStatus = status === true ? "active" : status === false ? "inactive" : String(status || "active").toLowerCase();
+      const matchesStatus = statusFilter === "all" || normalizedStatus === statusFilter;
+
+      return matchesSearch && matchesCourse && matchesYear && matchesStatus;
+    });
+  }, [curriculums, searchTerm, courseFilter, yearFilter, statusFilter, modulesById, coursesById, yearsById]);
+
+  const courseOptions = useMemo(() => {
+    return courses
+      .map((c) => ({ id: String(c.id), title: c.title }))
+      .sort((a, b) => a.title.localeCompare(b.title));
+  }, [courses]);
+
+  const yearOptions = useMemo(() => {
+    return years
+      .map((y) => ({ id: String(y.id), name: y.name || y.title || `Year ${y.id}` }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [years]);
 
   return (
     <div className="max-w-8xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
@@ -87,6 +104,12 @@ const CurriculumList = () => {
       </div>
 
       <div className="p-6">
+        {error && (
+          <div className="mb-4 p-3 rounded-lg border border-red-200 bg-red-50 text-red-700 text-sm">
+            {error}
+          </div>
+        )}
+
         {/* Search and Filters */}
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 gap-4">
           <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">
@@ -114,8 +137,10 @@ const CurriculumList = () => {
                   className="pl-10 pr-10 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none outline-none"
                 >
                   <option value="all">All Courses</option>
-                  {courses.map(course => (
-                    <option key={course} value={course}>{course}</option>
+                  {courseOptions.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.title}
+                    </option>
                   ))}
                 </select>
                 <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
@@ -133,8 +158,10 @@ const CurriculumList = () => {
                   className="pl-10 pr-10 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none outline-none"
                 >
                   <option value="all">All Years</option>
-                  {years.map(year => (
-                    <option key={year} value={year}>Year {year}</option>
+                  {yearOptions.map((y) => (
+                    <option key={y.id} value={y.id}>
+                      {y.name}
+                    </option>
                   ))}
                 </select>
                 <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
@@ -194,7 +221,23 @@ const CurriculumList = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredCurriculums.map((curriculum) => (
+              {loading && (
+                <tr>
+                  <td colSpan="5" className="px-6 py-10 text-center text-gray-500">
+                    Loading curriculums...
+                  </td>
+                </tr>
+              )}
+
+              {!loading &&
+                filteredCurriculums.map((curriculum) => {
+                  const course = coursesById.get(String(curriculum.course_id));
+                  const year = yearsById.get(String(curriculum.year_id));
+                  const module = modulesById.get(String(curriculum.module_id));
+                  const status = curriculum.status || curriculum.is_active;
+                  const isActive =
+                    status === true ? true : status === false ? false : String(status || "active").toLowerCase() === "active";
+                  return (
                 <tr key={curriculum.id} className="hover:bg-gray-50 transition-colors">
                   {/* Module Info */}
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -203,7 +246,7 @@ const CurriculumList = () => {
                         {curriculum.title}
                       </div>
                       <div className="text-sm text-gray-500">
-                        {curriculum.moduleCode}
+                        {module?.module_code || module?.code || `Module #${curriculum.module_id ?? "-"}`}
                       </div>
                       <div className="text-xs text-gray-400 mt-1 line-clamp-2">
                         {curriculum.description}
@@ -213,41 +256,35 @@ const CurriculumList = () => {
                   
                   {/* Course & Year */}
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{curriculum.course}</div>
+                    <div className="text-sm text-gray-900">{course?.title || `Course #${curriculum.course_id ?? "-"}`}</div>
                     <div className="text-sm text-gray-500">
-                      Year {curriculum.year} • Semester {curriculum.semester}
+                      {year?.name || `Year #${curriculum.year_id ?? "-"}`}
                     </div>
                   </td>
                   
                   {/* Details */}
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">
-                      <span className="font-medium">{curriculum.credits}</span> Credits
-                    </div>
                     <div className="text-sm text-gray-500">
-                      <span className="font-medium">{curriculum.hours}</span> Hours
+                      <span className="font-medium">{module?.credit ?? "—"}</span> Credits
                     </div>
                   </td>
                   
                   {/* Status */}
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <button
-                      onClick={() => toggleStatus(curriculum.id)}
+                    <span
                       className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        curriculum.status === "active"
-                          ? "bg-green-100 text-green-800 hover:bg-green-200"
-                          : "bg-gray-100 text-gray-800 hover:bg-gray-200"
+                        isActive ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"
                       }`}
                     >
-                      {curriculum.status === "active" ? "Active" : "Inactive"}
-                    </button>
+                      {isActive ? "Active" : "Inactive"}
+                    </span>
                   </td>
                   
                   {/* Actions */}
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex space-x-2">
                       <button
-                        onClick={() => navigate(`/piu/admin/add-curriculum/edit/${curriculum.id}`, { state: curriculum })}
+                        onClick={() => navigate(`/piu/admin/add-curriculum/edit/${curriculum.id}`)}
                         className="text-blue-600 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 px-3 py-1 rounded-md transition-colors"
                         title="Edit curriculum"
                       >
@@ -265,12 +302,13 @@ const CurriculumList = () => {
                     </div>
                   </td>
                 </tr>
-              ))}
+                  );
+                })}
             </tbody>
           </table>
           
           {/* Empty State */}
-          {filteredCurriculums.length === 0 && (
+          {!loading && filteredCurriculums.length === 0 && (
             <div className="px-6 py-12 text-center">
               <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4">
                 <i className="fas fa-book-open text-2xl text-gray-400"></i>

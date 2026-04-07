@@ -1,8 +1,11 @@
-import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import React, { useMemo, useState, useEffect } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import LoadingSpinner from "../../components/user/LoadingSpinner";
+import { v2 } from "../../api/v2";
+import { toStorageUrl } from "../../api/axios";
 
 export default function Course() {
+  const [searchParams] = useSearchParams();
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -13,13 +16,7 @@ export default function Course() {
         setLoading(true);
         setError(null);
 
-        const response = await fetch("https://api.piueducation.org/api/v2/courses");
-
-        if (!response.ok) {
-          throw new Error(`Failed to fetch courses: ${response.status}`);
-        }
-
-        const data = await response.json();
+        const data = await v2.getCourses();
 
         console.log("Raw API Data:", data); // Debug
 
@@ -28,11 +25,7 @@ export default function Course() {
         const processedCourses = data.map(course => {
           // Handle image URL
           let imageUrl = course.image;
-          if (course.image && !course.image.startsWith('http')) {
-            // Remove 'storage/' prefix if it exists
-            const cleanPath = course.image.replace(/^storage\//, '');
-            imageUrl = `https://api.piueducation.org/storage/${cleanPath}`;
-          }
+          imageUrl = toStorageUrl(course.image) || course.image;
 
           return {
             ...course,
@@ -104,6 +97,12 @@ export default function Course() {
     return course.course_category_id;
   };
 
+  const filteredCourses = useMemo(() => {
+    const category = searchParams.get("category"); // numeric id as string
+    if (!category) return courses;
+    return courses.filter((c) => String(getCategoryId(c)) === String(category));
+  }, [courses, searchParams]);
+
   if (loading) {
     return (
       <div className="w-full bg-primary-background px-2 min-h-screen">
@@ -135,7 +134,7 @@ export default function Course() {
     );
   }
 
-  if (courses.length === 0) {
+  if (filteredCourses.length === 0) {
     return (
       <div className="w-full bg-primary-background px-2">
         <div className="max-w-7xl mx-auto">
@@ -144,7 +143,9 @@ export default function Course() {
               No Courses Available
             </div>
             <p className="font-nato text-yellow-500 mt-2">
-              Check back later for available courses.
+              {searchParams.get("category")
+                ? "No courses found for this program type."
+                : "Check back later for available courses."}
             </p>
           </div>
         </div>
@@ -163,12 +164,12 @@ export default function Course() {
             Choose the Course That Aligns with Your Goals!
           </p>
           <div className="mt-2 text-sm text-gray-600">
-            Showing {courses.length} {courses.length === 1 ? 'course' : 'courses'}
+            Showing {filteredCourses.length} {filteredCourses.length === 1 ? 'course' : 'courses'}
           </div>
         </div>
 
         <div className="grid lg:grid-cols-4 grid-cols-2 gap-4 mt-10">
-          {courses.map((course, index) => {
+          {filteredCourses.map((course, index) => {
             console.log(`Course ${index}:`, course); // Debug each course
 
             return (
@@ -182,9 +183,9 @@ export default function Course() {
                 <div className="relative overflow-hidden">
                   <img
                     src={
-                      course.image && course.image.startsWith('http')
-                        ? course.image
-                        : `https://api.piueducation.org/storage/${course.image}`
+                      toStorageUrl(course.image) ||
+                      course.image ||
+                      "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
                     }
                     alt={course.title}
                     className="object-cover w-full h-48 hover:scale-105 transition-transform duration-500 ease-in-out"

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
-import api from "../../api/axios";
 import { FaEdit, FaTrash, FaPlus, FaSpinner } from "react-icons/fa";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { adminApi } from "../../api/admin";
 
 function PermissionsPage() {
   const [permissions, setPermissions] = useState([]);
@@ -22,13 +22,13 @@ function PermissionsPage() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [permissionsRes, rolesRes] = await Promise.all([
-        api.get("/api/v2/permissions"),
-        api.get("/api/v2/roles")
+      const [permissionsData, rolesData] = await Promise.all([
+        adminApi.permissions.list(),
+        adminApi.roles.list(),
       ]);
-      
-      setPermissions(permissionsRes.data);
-      setRoles(rolesRes.data.data || rolesRes.data);
+
+      setPermissions(permissionsData);
+      setRoles(rolesData);
     } catch (error) {
       console.error("Error fetching data:", error);
       toast.error("Failed to fetch data");
@@ -71,7 +71,7 @@ function PermissionsPage() {
     try {
       // Update permission name
       if (editingPerm.name !== permissionName) {
-        await api.put(`/api/v2/permissions/${editingPerm.id}`, {
+        await adminApi.permissions.update(editingPerm.id, {
           name: permissionName
         });
       }
@@ -90,7 +90,7 @@ function PermissionsPage() {
               ? [...currentPerms, editingPerm.id]
               : currentPerms.filter(id => id !== editingPerm.id);
 
-            await api.put(`/api/v2/roles/${role.id}`, {
+            await adminApi.roles.update(role.id, {
               name: role.name,
               permissions: newPerms
             });
@@ -115,7 +115,7 @@ function PermissionsPage() {
     }
 
     try {
-      await api.post("/api/v2/permissions", {
+      await adminApi.permissions.create({
         name: newPermissionName
       });
       
@@ -135,7 +135,7 @@ function PermissionsPage() {
     }
 
     try {
-      await api.delete(`/api/v2/permissions/${permissionId}`);
+      await adminApi.permissions.remove(permissionId);
       setPermissions(permissions.filter(p => p.id !== permissionId));
       toast.success("Permission deleted successfully");
     } catch (error) {

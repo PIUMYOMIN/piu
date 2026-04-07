@@ -3,6 +3,8 @@ import Swiper from "swiper";
 import { Autoplay, Navigation, Pagination } from "swiper/modules";
 import LoadingSpinner from "./LoadingSpinner";
 import "swiper/swiper-bundle.css";
+import { v2 } from "../../api/v2";
+import { toStorageUrl } from "../../api/axios";
 
 const Carousel = () => {
   const [slides, setSlides] = useState([]);
@@ -11,22 +13,14 @@ const Carousel = () => {
   useEffect(() => {
     const fetchSlides = async () => {
       try {
-        const response = await fetch("https://api.piueducation.org/api/v2/slides");
-        if (!response.ok) {
-          throw new Error("Failed to fetch slides");
-        }
-        const data = await response.json();
+        const data = await v2.getSlides();
         
         // Handle image URLs
         const processedSlides = data.map(slide => {
           let imageUrl = slide.slide_image || slide.image;
           
           // If image doesn't start with http, prepend storage URL
-          if (imageUrl && !imageUrl.startsWith('http')) {
-            // Remove any leading slash or storage/ prefix
-            imageUrl = imageUrl.replace(/^\/|^storage\//, '');
-            imageUrl = `https://api.piueducation.org/storage/${imageUrl}`;
-          }
+          imageUrl = toStorageUrl(imageUrl) || imageUrl;
           
           return {
             ...slide,
@@ -84,9 +78,10 @@ const Carousel = () => {
               <img
                 src={slide.slide_image}
                 alt={slide.title || "Slide"}
-                className="w-full h-[400px] md:h-[500px] object-cover"
+                className="w-full h-[300px] sm:h-[400px] md:h-[500px] object-cover"
                 onError={(e) => {
-                  e.target.src = "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80";
+                  e.target.src =
+                    "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80";
                 }}
               />
               <div className="bg-black opacity-70">
@@ -95,11 +90,13 @@ const Carousel = () => {
                     {slide.title || "News & Update"}
                   </p>
                   <p className="text-gray-300 whitespace-nowrap">
-                    {slide.created_at ? new Date(slide.created_at).toLocaleDateString('en-US', {
-                      year: 'numeric',
-                      month: 'short',
-                      day: 'numeric'
-                    }) : "Recent"}
+                    {slide.created_at
+                      ? new Date(slide.created_at).toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                        })
+                      : "Recent"}
                   </p>
                 </div>
               </div>

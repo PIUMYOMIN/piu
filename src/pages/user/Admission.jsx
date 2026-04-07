@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import LoadingSpinner from "../../components/user/LoadingSpinner";
+import { v2 } from "../../api/v2";
 
 export default function Admission() {
   const [error, setError] = useState({});
@@ -18,22 +19,20 @@ export default function Admission() {
   const [zipcode, setZipcode] = useState("");
   const [student_id, setStudentId] = useState("");
   const [alumni_sts, setAlumni] = useState("");
-  const [profile, setProfile] = useState("");
-  const [personal_statement, setPersonalStatement] = useState("");
-  const [language_proficiency, setLanguageProficiency] = useState("");
-  const [education_certificate, setEducationCertificate] = useState("");
-  const [other_document, setOtherDocument] = useState("");
+  const [profile, setProfile] = useState(null);
+  const [personal_statement, setPersonalStatement] = useState(null);
+  const [language_proficiency, setLanguageProficiency] = useState(null);
+  const [education_certificate, setEducationCertificate] = useState(null);
+  const [other_document, setOtherDocument] = useState(null);
   const [course_id, setApplyCourse] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [step, setStep] = useState(1);
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const response = await fetch(
-          "https://api.piueducation.org/api/v1/courses"
-        );
-        const data = await response.json();
+        const data = await v2.getCourses();
         setCourses(data);
       } catch (error) {
         setError({ message: "Failed to fetch courses" });
@@ -43,36 +42,60 @@ export default function Admission() {
     fetchCourses();
   }, []);
 
-  const submitApplicationForm = async e => {
-    e.preventDefault();
-
-    // Form validation
+  const validateStep = (targetStep) => {
     const newError = {};
-    if (!name) newError.name = "Name is required";
-    if (!email) newError.email = "Email is required";
-    if (!phone) newError.phone = "Phone is required";
-    if (!address) newError.address = "Address is required";
-    if (!gender) newError.gender = "Gender is required";
-    if (!dob) newError.dob = "Date of Birth is required";
-    if (!marital_sts) newError.marital_sts = "Marital Status is required";
-    if (!national_id) newError.national_id = "National ID is required";
-    if (!city) newError.city = "City is required";
-    if (!country) newError.country = "Country is required";
-    if (!zipcode) newError.zipcode = "Zipcode is required";
-    if (!alumni_sts) newError.alumni_sts = "Alumni status is required";
-    if (!profile) newError.profile = "Profile picture is required";
-    if (!personal_statement)
-      newError.personal_statement = "Personal statement is required";
-    if (!language_proficiency)
-      newError.language_proficiency = "Language proficiency test is required";
-    if (!education_certificate)
-      newError.education_certificate = "Education certificate is required";
-    if (!other_document) newError.other_document = "Other document is required";
-    if (!course_id) newError.course_id = "Apply course is required";
+
+    if (targetStep === 1) {
+      if (!name) newError.name = "Name is required";
+      if (!email) newError.email = "Email is required";
+      if (!phone) newError.phone = "Phone is required";
+      if (!gender) newError.gender = "Gender is required";
+      if (!dob) newError.dob = "Date of Birth is required";
+      if (!marital_sts) newError.marital_sts = "Marital Status is required";
+      if (!national_id) newError.national_id = "National ID is required";
+    }
+
+    if (targetStep === 2) {
+      if (!address) newError.address = "Address is required";
+      if (!city) newError.city = "City is required";
+      if (!country) newError.country = "Country is required";
+      if (!zipcode) newError.zipcode = "Zipcode is required";
+      if (!alumni_sts) newError.alumni_sts = "Alumni status is required";
+    }
+
+    if (targetStep === 3) {
+      if (!course_id) newError.course_id = "Apply course is required";
+      if (!(profile instanceof File)) newError.profile = "Profile picture is required";
+      if (!(personal_statement instanceof File)) newError.personal_statement = "Personal statement is required";
+      if (!(language_proficiency instanceof File)) newError.language_proficiency = "Language proficiency document is required";
+      if (!(education_certificate instanceof File)) newError.education_certificate = "Education certificate is required";
+      // other_document is optional
+    }
 
     setError(newError);
+    return Object.keys(newError).length === 0;
+  };
 
-    if (Object.keys(newError).length > 0) {
+  const goNext = () => {
+    if (validateStep(step)) setStep((s) => Math.min(3, s + 1));
+  };
+
+  const goBack = () => setStep((s) => Math.max(1, s - 1));
+
+  const submitApplicationForm = async (e) => {
+    e.preventDefault();
+
+    // Validate all steps and jump to first invalid
+    if (!validateStep(1)) {
+      setStep(1);
+      return;
+    }
+    if (!validateStep(2)) {
+      setStep(2);
+      return;
+    }
+    if (!validateStep(3)) {
+      setStep(3);
       return;
     }
 
@@ -93,72 +116,149 @@ export default function Admission() {
     formData.append("gender", gender);
     formData.append("national_id", national_id);
     formData.append("course_id", course_id);
-    formData.append("profile", profile);
-    formData.append("personal_statement", personal_statement);
-    formData.append("language_proficiency", language_proficiency);
-    formData.append("education_certificate", education_certificate);
-    formData.append("other_document", other_document);
+    if (profile instanceof File) formData.append("profile", profile);
+    if (personal_statement instanceof File) formData.append("personal_statement", personal_statement);
+    if (language_proficiency instanceof File) formData.append("language_proficiency", language_proficiency);
+    if (education_certificate instanceof File) formData.append("education_certificate", education_certificate);
+    if (other_document instanceof File) formData.append("other_document", other_document);
 
     // for (var pair of formData.entries()) {
     //   console.log(pair[0] + ": " + pair[1]);
     // }
 
     try {
-      const response = await fetch(
-        "https://api.piueducation.org/api/v1/application-form/submit",
-        {
-          method: "POST",
-          body: formData
-        }
-      );
+      const responseData = await v2.submitAdmission(formData);
 
-      if (response.ok) {
-        const responseData = await response.json();
-        console.log("Response Data:", responseData);
+      // Only redirect after backend confirms email was sent to applicant (and admin).
+      const applicantSent = responseData?.mail?.applicant_confirmed === true;
+      const adminSent = responseData?.mail?.admin_notified === true;
 
-      if (responseData && responseData.status === 200) {
+      if (responseData?.success && applicantSent && adminSent) {
         navigate("/admissions/application-form/successfully-submitted");
-      } else {
-        throw new Error(
-          "Submission failed: " + (responseData.message || "Unknown error")
-        );
+        return;
       }
-      } else {
-        const data = await response.json();
-        console.error("Error Response Data:", data);
-        throw new Error(data.error || "Unknown error occurred");
+
+      if (responseData?.success && (!applicantSent || !adminSent)) {
+        setError({
+          form:
+            responseData?.mail?.error ||
+            "Your application was submitted, but the confirmation email could not be sent. Please contact support or try again later.",
+        });
+        return;
       }
+
+      throw new Error(responseData?.message || "Unknown error occurred");
 
     } catch (error) {
-      setError({
-        form: "An error occurred while submitting the application form."
-      });
+      const status = error?.response?.status;
+      if (status === 413) {
+        setError({
+          form:
+            "Your files are too large for the server to accept (413). Please compress the documents or increase PHP upload limits (upload_max_filesize / post_max_size) in XAMPP php.ini, then try again.",
+        });
+      } else if (status === 422) {
+        const data = error?.response?.data;
+        const fieldErrors = data?.errors && typeof data.errors === "object" ? data.errors : null;
+
+        // Convert backend errors {field: [msg]} into our error shape {field: msg}
+        const next = {};
+        if (fieldErrors) {
+          for (const [key, val] of Object.entries(fieldErrors)) {
+            next[key] = Array.isArray(val) ? val[0] : String(val || "");
+          }
+        }
+
+        setError({
+          ...next,
+          form: data?.message || "Validation failed",
+        });
+
+        // Jump to the step that contains the first failing field so the user can fix it quickly.
+        const step1Fields = new Set(["name", "email", "phone", "gender", "dob", "marital_sts", "national_id"]);
+        const step2Fields = new Set(["address", "city", "country", "zipcode", "alumni_sts", "student_id"]);
+        const step3Fields = new Set([
+          "course_id",
+          "profile",
+          "personal_statement",
+          "language_proficiency",
+          "education_certificate",
+          "other_document",
+        ]);
+
+        const keys = Object.keys(next);
+        const firstKey = keys.find((k) => k && k !== "form") || "";
+        if (firstKey) {
+          if (step1Fields.has(firstKey)) setStep(1);
+          else if (step2Fields.has(firstKey)) setStep(2);
+          else if (step3Fields.has(firstKey)) setStep(3);
+        }
+      } else {
+        setError({
+          form: error?.response?.data?.message || error?.message || "An error occurred while submitting the application form.",
+        });
+      }
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="max-w-7xl mx-auto">
-      <div className="flex justify-center items-center lg:my-8 my-5 px-2">
+    <div className="max-w-7xl mx-auto px-3 py-6">
+      <div className="mb-6 rounded-2xl bg-gradient-to-r from-blue-900 to-indigo-800 p-6 text-white">
+        <div className="text-2xl md:text-3xl font-bold">Admission Application</div>
+        <div className="mt-1 text-sm md:text-base text-blue-100">
+          Submit your application and upload the required documents. We’ll email you after a successful submission.
+        </div>
+        <div className="mt-3 text-sm text-blue-100">
+          Help line: <span className="font-semibold text-white">+09-793200074</span>
+        </div>
+      </div>
+
+      <div className="flex justify-center items-center">
         <form
-          className="max-w-6xl my-5 overflow-hidden"
+          className="w-full max-w-6xl overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm"
           onSubmit={submitApplicationForm}
         >
-          <div className="hidden lg:block mt-8 mb-14 py-2 text-center border-b border-black">
-            <div className="text-xl">Applicant Information Form</div>
-            <div className="flex flex-row justify-between mt-3">
-              <div>Phaung Daw Oo International University</div>
-              <div>Help line: +09-793200074</div>
+          <div className="border-b border-gray-200 p-6">
+            <div className="text-lg font-semibold text-gray-900">Applicant Information</div>
+            <div className="mt-1 text-sm text-gray-500">
+              Fields marked with <span className="text-red-600 font-semibold">*</span> are required.
             </div>
           </div>
-          <div className="flex flex-wrap -mx-3 mb-6">
+
+          <div className="p-6">
+            {error.form && (
+              <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+                {error.form}
+              </div>
+            )}
+
+          <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+            <div className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+              <span className={`inline-flex h-7 w-7 items-center justify-center rounded-full ${step === 1 ? "bg-indigo-600 text-white" : "bg-gray-200 text-gray-700"}`}>1</span>
+              <span className={step === 1 ? "text-gray-900" : "text-gray-600"}>Personal</span>
+              <span className="text-gray-300">/</span>
+              <span className={`inline-flex h-7 w-7 items-center justify-center rounded-full ${step === 2 ? "bg-indigo-600 text-white" : "bg-gray-200 text-gray-700"}`}>2</span>
+              <span className={step === 2 ? "text-gray-900" : "text-gray-600"}>Details</span>
+              <span className="text-gray-300">/</span>
+              <span className={`inline-flex h-7 w-7 items-center justify-center rounded-full ${step === 3 ? "bg-indigo-600 text-white" : "bg-gray-200 text-gray-700"}`}>3</span>
+              <span className={step === 3 ? "text-gray-900" : "text-gray-600"}>Documents</span>
+            </div>
+
+            <div className="text-sm text-gray-500">
+              Step <span className="font-semibold text-gray-800">{step}</span> of{" "}
+              <span className="font-semibold text-gray-800">3</span>
+            </div>
+          </div>
+
+          <div className={step === 1 ? "" : "hidden"}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
             <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
               <label
                 className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
                 htmlFor="grid-first-name"
               >
-                Name
+                Name <span className="text-red-600">*</span>
               </label>
               <input
                 className={`appearance-none block w-full bg-gray-200 text-gray-700 border ${error.name
@@ -179,7 +279,7 @@ export default function Admission() {
                 className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
                 htmlFor="grid-email"
               >
-                Email
+                Email <span className="text-red-600">*</span>
               </label>
               <input
                 className={`appearance-none block w-full bg-gray-200 text-gray-700 border ${error.email
@@ -196,20 +296,21 @@ export default function Admission() {
                 </p>}
             </div>
           </div>
-          <div className="flex flex-wrap -mx-3 mb-6">
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
             <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
               <label
                 className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
                 htmlFor="grid-phone"
               >
-                Phone
+                Phone <span className="text-red-600">*</span>
               </label>
               <input
                 className={`appearance-none block w-full bg-gray-200 text-gray-700 border ${error.phone
                   ? "border-red-500"
                   : "border-gray-200"} rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white`}
                 id="grid-phone"
-                type="number"
+                type="tel"
                 placeholder="Phone Number"
                 onChange={e => setPhone(e.target.value)}
               />
@@ -223,7 +324,7 @@ export default function Admission() {
                 className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
                 htmlFor="grid-address"
               >
-                Address
+                Address <span className="text-red-600">*</span>
               </label>
               <input
                 className={`appearance-none block w-full bg-gray-200 text-gray-700 border ${error.address
@@ -240,13 +341,14 @@ export default function Admission() {
                 </p>}
             </div>
           </div>
-          <div className="flex flex-wrap -mx-3 mb-6">
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
             <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
               <label
                 className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
                 htmlFor="grid-state"
               >
-                Sex
+                Gender <span className="text-red-600">*</span>
               </label>
               <div className="relative">
                 <select
@@ -255,8 +357,11 @@ export default function Admission() {
                     : "border-gray-200"} rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white`}
                   id="grid-state"
                   onChange={e => setGender(e.target.value)}
+                  defaultValue=""
                 >
-                  <option disabled>Gender</option>
+                  <option value="" disabled>
+                    Select gender
+                  </option>
                   <option value="Male">Male</option>
                   <option value="Female">Female</option>
                   <option value="Other">Other</option>
@@ -281,7 +386,7 @@ export default function Admission() {
                 className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
                 htmlFor="grid-zip"
               >
-                Date of Birth
+                Date of Birth <span className="text-red-600">*</span>
               </label>
               <input
                 className={`appearance-none block w-full bg-gray-200 text-gray-700 border ${error.dob
@@ -297,13 +402,14 @@ export default function Admission() {
                 </p>}
             </div>
           </div>
-          <div className="flex flex-wrap -mx-3 mb-6">
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
             <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
               <label
                 className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
                 htmlFor="grid-state"
               >
-                Marital Status
+                Marital Status <span className="text-red-600">*</span>
               </label>
               <div className="relative">
                 <select
@@ -312,8 +418,11 @@ export default function Admission() {
                     : "border-gray-200"} rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white`}
                   id="grid-state"
                   onChange={e => setMaritalStatus(e.target.value)}
+                  defaultValue=""
                 >
-                  <option disabled>Marital Status</option>
+                  <option value="" disabled>
+                    Select marital status
+                  </option>
                   <option value="Single">Single</option>
                   <option value="Married">Married</option>
                   <option value="Divorced">Divorced</option>
@@ -338,7 +447,7 @@ export default function Admission() {
                 className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
                 htmlFor="grid-national-id"
               >
-                National ID
+                National ID <span className="text-red-600">*</span>
               </label>
               <input
                 className={`appearance-none block w-full bg-gray-200 text-gray-700 border ${error.national_id
@@ -355,13 +464,16 @@ export default function Admission() {
                 </p>}
             </div>
           </div>
-          <div className="flex flex-wrap -mx-3 mb-6">
+          </div>
+
+          <div className={step === 2 ? "" : "hidden"}>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
             <div className="w-full md:w-1/3 px-3 mb-6 md:mb-0">
               <label
                 className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
                 htmlFor="grid-city"
               >
-                City
+                City <span className="text-red-600">*</span>
               </label>
               <input
                 className={`appearance-none block w-full bg-gray-200 text-gray-700 border ${error.city
@@ -382,7 +494,7 @@ export default function Admission() {
                 className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
                 htmlFor="grid-country"
               >
-                Country
+                Country <span className="text-red-600">*</span>
               </label>
               <input
                 className={`appearance-none block w-full bg-gray-200 text-gray-700 border ${error.country
@@ -403,7 +515,7 @@ export default function Admission() {
                 className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
                 htmlFor="grid-zip"
               >
-                Zipcode
+                Zipcode <span className="text-red-600">*</span>
               </label>
               <input
                 className={`appearance-none block w-full bg-gray-200 text-gray-700 border ${error.zipcode
@@ -420,13 +532,14 @@ export default function Admission() {
                 </p>}
             </div>
           </div>
-          <div className="flex flex-wrap -mx-3 mb-6">
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
             <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
               <label
                 className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
                 htmlFor="grid-state"
               >
-                Are you Alumni of PIU?
+                Are you Alumni of PIU? <span className="text-red-600">*</span>
               </label>
               <div className="relative">
                 <select
@@ -474,13 +587,23 @@ export default function Admission() {
               />
             </div>
           </div>
-          <div className="flex flex-wrap -mx-3 mb-6">
+          </div>
+
+          <div className={step === 3 ? "" : "hidden"}>
+          <div className="border-t border-gray-200 pt-6 mt-2">
+            <div className="text-lg font-semibold text-gray-900">Documents</div>
+            <div className="mt-1 text-sm text-gray-500">
+              Upload clear and readable files. Accepted formats depend on each field.
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6 mt-4">
             <div className="w-full md:w-1/2 px-3">
               <label
                 className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
                 htmlFor="grid-profile"
               >
-                Profile Picture
+                Profile Picture <span className="text-red-600">*</span>
               </label>
               <input
                 className={`appearance-none block w-full bg-gray-200 text-gray-700 border ${error.profile
@@ -500,7 +623,7 @@ export default function Admission() {
                 className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
                 htmlFor="grid-profile"
               >
-                Personal Statement
+                Personal Statement <span className="text-red-600">*</span>
               </label>
               <input
                 className={`appearance-none block w-full bg-gray-200 text-gray-700 border ${error.personal_statement
@@ -516,13 +639,14 @@ export default function Admission() {
                 </p>}
             </div>
           </div>
-          <div className="flex flex-wrap -mx-3 mb-6">
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
             <div className="w-full md:w-1/2 px-3">
               <label
                 className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
                 htmlFor="grid-education-certificate"
               >
-                Education Certificate
+                Education Certificate <span className="text-red-600">*</span>
               </label>
               <input
                 className={`appearance-none block w-full bg-gray-200 text-gray-700 border ${error.education_certificate
@@ -542,7 +666,7 @@ export default function Admission() {
                 className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
                 htmlFor="grid-profile"
               >
-                Language Proficiency Document
+                Language Proficiency Document <span className="text-red-600">*</span>
               </label>
               <input
                 className={`appearance-none block w-full bg-gray-200 text-gray-700 border ${error.language_proficiency
@@ -558,13 +682,14 @@ export default function Admission() {
                 </p>}
             </div>
           </div>
-          <div className="flex flex-wrap -mx-3 mb-6">
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
             <div className="w-full md:w-1/2 px-3">
               <label
                 className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
                 htmlFor="grid-profile"
               >
-                Other Document
+                Other Document <span className="text-red-600">*</span>
               </label>
               <input
                 className={`appearance-none block w-full bg-gray-200 text-gray-700 border ${error.other_document
@@ -574,7 +699,7 @@ export default function Admission() {
                 type="file"
                 onChange={e => setOtherDocument(e.target.files[0])}
               />
-              {error.otherDocument &&
+              {error.other_document &&
                 <p className="text-red-500 text-xs italic">
                   {error.other_document}
                 </p>}
@@ -584,7 +709,7 @@ export default function Admission() {
                 className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
                 htmlFor="grid-state"
               >
-                Apply Course
+                Apply Course <span className="text-red-600">*</span>
               </label>
               <div className="relative">
                 <select
@@ -593,10 +718,13 @@ export default function Admission() {
                     : "border-gray-200"} rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white`}
                   id="grid-state"
                   onChange={e => setApplyCourse(e.target.value)}
+                  defaultValue=""
                 >
-                  <option disabled>Apply Course</option>
+                  <option value="" disabled>
+                    Select course
+                  </option>
                   {courses.map(course => {
-                    if (course.application_sts === "1") {
+                    if (course.application_sts === "1" || course.application_sts === 1 || course.application_sts === true) {
                       return (
                         <option key={course.id} value={course.id}>
                           {course.title}
@@ -622,22 +750,73 @@ export default function Admission() {
                 </p>}
             </div>
           </div>
-          <div className="flex flex-wrap text-center -mx-3 mb-6">
+
+          <div className="flex flex-wrap text-center -mx-3 mb-2">
             <div className="w-full px-3">
-              {!isLoading &&
-                <button
-                  className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                  type="submit"
-                >
-                  Submit Application
-                </button>}
-              {isLoading && <LoadingSpinner />}{" "}
-              {/* Show loading spinner while submitting */}
+              <button
+                className={`text-white font-semibold py-3 px-6 rounded-lg shadow-sm ${
+                  isLoading ? "bg-blue-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
+                }`}
+                type="submit"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <span className="inline-flex items-center gap-2">
+                    <svg
+                      className="h-5 w-5 animate-spin text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      aria-hidden="true"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                      />
+                    </svg>
+                    Submitting...
+                  </span>
+                ) : (
+                  "Submit Application"
+                )}
+              </button>
             </div>
-            {error.form &&
-              <p className="text-red-500 text-xs italic mt-4 w-full text-center">
-                {error.form}
-              </p>}
+          </div>
+          </div>
+
+          <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-between">
+            <button
+              type="button"
+              onClick={goBack}
+              disabled={step === 1}
+              className="px-5 py-3 rounded-xl border border-gray-200 bg-white text-gray-700 font-semibold hover:bg-gray-50 disabled:opacity-50"
+            >
+              Back
+            </button>
+
+            {step < 3 ? (
+              <button
+                type="button"
+                onClick={goNext}
+                className="px-5 py-3 rounded-xl bg-indigo-600 text-white font-semibold hover:bg-indigo-700"
+              >
+                Continue
+              </button>
+            ) : (
+              <div className="text-sm text-gray-500 self-center">
+                reCAPTCHA is enabled silently to protect this form.
+              </div>
+            )}
+          </div>
           </div>
         </form>
       </div>

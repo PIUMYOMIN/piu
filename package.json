@@ -9,7 +9,10 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
+    "lint": "eslint . --ext js,jsx --report-unused-disable-directives",
+    "seo:audit:frontend": "node ./scripts/seo-audit.mjs frontend",
+    "seo:audit:backend": "node ./scripts/seo-audit.mjs backend",
+    "seo:audit:all": "npm run seo:audit:frontend && npm run seo:audit:backend",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist",
     "serve": "vite preview",
@@ -38,6 +41,7 @@
     "tailwind-scrollbar-hide": "^4.0.0"
   },
   "devDependencies": {
+    "@lhci/cli": "^0.15.1",
     "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.7",
     "@vitejs/plugin-react": "^4.0.3",

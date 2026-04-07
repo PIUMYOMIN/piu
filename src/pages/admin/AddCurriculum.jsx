@@ -1,39 +1,69 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate, useLocation, useParams } from "react-router-dom";
+import React, { useEffect, useMemo, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
+import { adminApi } from "../../api/admin";
 
 const AddCurriculum = () => {
   const navigate = useNavigate();
-  const location = useLocation();
   const params = useParams();
-
-  // Example options
-  const courses = ["Bachelor of Computer Science", "Master of Business Administration", "Bachelor of Engineering", "Bachelor of Arts"];
-  const years = ["1", "2", "3", "4"];
-  const semesters = ["1", "2"];
-  const moduleCodes = ["CS101", "CS102", "MBA201", "MBA202", "ENG301", "ART110"];
 
   const [formData, setFormData] = useState({
     title: "",
     description: "",
-    course: "",
-    year: "",
-    semester: "",
-    moduleCode: "",
-    credits: "",
-    hours: ""
+    course_id: "",
+    year_id: "",
+    module_id: "",
   });
 
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
 
-  // Prefill data if editing
+  const [courses, setCourses] = useState([]);
+  const [years, setYears] = useState([]);
+  const [moduleOptions, setModuleOptions] = useState([]);
+
   useEffect(() => {
-    if (params.id && location.state) {
-      setFormData(location.state);
+    let mounted = true;
+    async function load() {
+      setLoading(true);
+      setLoadError("");
+      try {
+        const [courseData, yearData, moduleData] = await Promise.all([
+          adminApi.courses.list(),
+          adminApi.meta.years(),
+          adminApi.modules.list(),
+        ]);
+        if (!mounted) return;
+        setCourses(Array.isArray(courseData) ? courseData : []);
+        setYears(Array.isArray(yearData) ? yearData : []);
+        setModuleOptions(Array.isArray(moduleData) ? moduleData : []);
+
+        if (params.id) {
+          const cur = await adminApi.curriculums.get(params.id);
+          if (!mounted) return;
+          setFormData({
+            title: cur?.title || "",
+            description: cur?.description || "",
+            course_id: cur?.course_id ? String(cur.course_id) : "",
+            year_id: cur?.year_id ? String(cur.year_id) : "",
+            module_id: cur?.module_id ? String(cur.module_id) : "",
+          });
+        }
+      } catch (e) {
+        if (!mounted) return;
+        setLoadError(e?.response?.data?.message || e?.message || "Failed to load curriculum form");
+      } finally {
+        if (mounted) setLoading(false);
+      }
     }
-  }, [params.id, location.state]);
+    load();
+    return () => {
+      mounted = false;
+    };
+  }, [params.id]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -73,42 +103,56 @@ const AddCurriculum = () => {
       newErrors.description = "Description is required";
     }
     
-    if (!formData.course) {
+    if (!formData.course_id) {
       newErrors.course = "Course is required";
     }
     
-    if (!formData.year) {
+    if (!formData.year_id) {
       newErrors.year = "Year is required";
     }
     
-    if (!formData.moduleCode) {
-      newErrors.moduleCode = "Module code is required";
+    if (!formData.module_id) {
+      newErrors.moduleCode = "Module is required";
     }
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     if (!validateForm()) return;
     
     setIsSubmitting(true);
-    
-    // Simulate API call
-    setTimeout(() => {
-      console.log("Submitted Curriculum:", formData);
-      setIsSubmitting(false);
+
+    try {
+      const payload = {
+        title: formData.title,
+        description: formData.description,
+        course_id: Number(formData.course_id),
+        year_id: Number(formData.year_id),
+        module_id: Number(formData.module_id),
+      };
+
+      if (params.id) {
+        await adminApi.curriculums.update(params.id, payload);
+      } else {
+        await adminApi.curriculums.create(payload);
+      }
       navigate("/piu/admin/curriculum-list");
-    }, 1500);
+    } catch (e2) {
+      setLoadError(e2?.response?.data?.message || e2?.message || "Failed to save curriculum");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleCancel = () => {
     navigate("/piu/admin/curriculum-list");
   };
 
-  const modules = {
+  const quillModules = {
     toolbar: [
       [{ 'header': [1, 2, 3, false] }],
       ['bold', 'italic', 'underline'],
@@ -134,6 +178,15 @@ const AddCurriculum = () => {
       </div>
 
       <div className="p-6">
+        {loadError && (
+          <div className="mb-4 p-3 rounded-lg border border-red-200 bg-red-50 text-red-700 text-sm">
+            {loadError}
+          </div>
+        )}
+
+        {loading ? (
+          <div className="py-10 text-center text-gray-500">Loading form...</div>
+        ) : (
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Title */}
@@ -168,8 +221,8 @@ const AddCurriculum = () => {
                 Course <span className="text-red-500">*</span>
               </label>
               <select
-                name="course"
-                value={formData.course}
+                name="course_id"
+                value={formData.course_id}
                 onChange={handleChange}
                 className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:outline-none ${
                   errors.course 
@@ -179,8 +232,10 @@ const AddCurriculum = () => {
                 required
               >
                 <option value="">Select Course</option>
-                {courses.map((c, i) => (
-                  <option key={i} value={c}>{c}</option>
+                {courses.map((c) => (
+                  <option key={c.id} value={String(c.id)}>
+                    {c.title}
+                  </option>
                 ))}
               </select>
               {errors.course && (
@@ -197,8 +252,8 @@ const AddCurriculum = () => {
                 Year <span className="text-red-500">*</span>
               </label>
               <select
-                name="year"
-                value={formData.year}
+                name="year_id"
+                value={formData.year_id}
                 onChange={handleChange}
                 className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:outline-none ${
                   errors.year 
@@ -208,8 +263,10 @@ const AddCurriculum = () => {
                 required
               >
                 <option value="">Select Year</option>
-                {years.map((y, i) => (
-                  <option key={i} value={y}>Year {y}</option>
+                {years.map((y) => (
+                  <option key={y.id} value={String(y.id)}>
+                    {y.name || `Year ${y.id}`}
+                  </option>
                 ))}
               </select>
               {errors.year && (
@@ -220,32 +277,14 @@ const AddCurriculum = () => {
               )}
             </div>
 
-            {/* Semester */}
+            {/* Module */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Semester
+                Module <span className="text-red-500">*</span>
               </label>
               <select
-                name="semester"
-                value={formData.semester}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-              >
-                <option value="">Select Semester</option>
-                {semesters.map((s, i) => (
-                  <option key={i} value={s}>Semester {s}</option>
-                ))}
-              </select>
-            </div>
-
-            {/* Module Code */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Module Code <span className="text-red-500">*</span>
-              </label>
-              <select
-                name="moduleCode"
-                value={formData.moduleCode}
+                name="module_id"
+                value={formData.module_id}
                 onChange={handleChange}
                 className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:outline-none ${
                   errors.moduleCode 
@@ -254,9 +293,11 @@ const AddCurriculum = () => {
                 }`}
                 required
               >
-                <option value="">Select Module Code</option>
-                {moduleCodes.map((m, i) => (
-                  <option key={i} value={m}>{m}</option>
+                <option value="">Select Module</option>
+                {moduleOptions.map((m) => (
+                  <option key={m.id} value={String(m.id)}>
+                    {m.module_code ? `${m.module_code} — ${m.name}` : m.name}
+                  </option>
                 ))}
               </select>
               {errors.moduleCode && (
@@ -265,40 +306,6 @@ const AddCurriculum = () => {
                   {errors.moduleCode}
                 </p>
               )}
-            </div>
-
-            {/* Credits */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Credits
-              </label>
-              <input
-                type="number"
-                name="credits"
-                value={formData.credits}
-                onChange={handleChange}
-                min="0"
-                max="10"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                placeholder="Enter credit hours"
-              />
-            </div>
-
-            {/* Contact Hours */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Contact Hours
-              </label>
-              <input
-                type="number"
-                name="hours"
-                value={formData.hours}
-                onChange={handleChange}
-                min="0"
-                max="100"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                placeholder="Enter contact hours"
-              />
             </div>
           </div>
 
@@ -311,7 +318,7 @@ const AddCurriculum = () => {
               theme="snow"
               value={formData.description}
               onChange={handleDescriptionChange}
-              modules={modules}
+              modules={quillModules}
               className="h-48 mb-16"
               placeholder="Enter detailed curriculum description..."
             />
@@ -355,6 +362,7 @@ const AddCurriculum = () => {
             </button>
           </div>
         </form>
+        )}
       </div>
     </div>
   );

@@ -1,15 +1,27 @@
 import React, { useState } from "react";
-import { FaBars, FaCaretDown, FaCaretUp, FaUserCircle } from "react-icons/fa";
+import { FaBars, FaCaretDown, FaCaretUp } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 
+function getUserRole(user) {
+  const raw = user?.role ?? (Array.isArray(user?.roles) ? user.roles[0] : "");
+  return String(raw || "").toLowerCase();
+}
+
+function getProfilePathByRole(role) {
+  if (role === "admin") return "/piu/admin/profile";
+  if (role === "student") return "/piu/student";
+  if (role === "teacher") return "/piu/teacher";
+  return "/login";
+}
+
 export default function Menu() {
   const [newsHovered, setNewsHovered] = useState(false);
-  const [applicationHovered, setApplicationHovered] = useState(false);
   const [academicHovered, setAcademicHovered] = useState(false);
   const [open, setOpen] = useState(false);
   
   const { isAuthenticated, user, logout } = useAuth();
+  const role = getUserRole(user);
 
   const handleMobileLogout = () => {
     logout();
@@ -32,6 +44,10 @@ export default function Menu() {
           >
             <li className="lg:my-0 my-5">
               <Link to="/" onClick={() => setOpen(false)}>HOME</Link>
+            </li>
+
+            <li className="lg:my-0 my-5">
+              <Link to="/courses" onClick={() => setOpen(false)}>COURSES</Link>
             </li>
             
             <li 
@@ -58,13 +74,13 @@ export default function Menu() {
               >
                 <ul className="px-2">
                   <li className="my-5 hover:text-gray-400" role="menuitem" tabIndex="-1" id="menu-item-0">
-                    <Link to="#!" onClick={() => setOpen(false)}>Postgraduate Program</Link>
+                    <Link to="/courses?category=2" onClick={() => setOpen(false)}>Postgraduate Program</Link>
                   </li>
                   <li className="my-5 hover:text-gray-400" role="menuitem" tabIndex="-1" id="menu-item-1">
-                    <Link to="#!" onClick={() => setOpen(false)}>Undergraduate Program</Link>
+                    <Link to="/courses?category=3" onClick={() => setOpen(false)}>Undergraduate Program</Link>
                   </li>
                   <li className="my-5 hover:text-gray-400" role="menuitem" tabIndex="-1" id="menu-item-2">
-                    <Link to="#!" onClick={() => setOpen(false)}>Certificate Program</Link>
+                    <Link to="/courses?category=1" onClick={() => setOpen(false)}>Certificate Program</Link>
                   </li>
                 </ul>
               </div>
@@ -94,10 +110,13 @@ export default function Menu() {
               >
                 <ul className="px-2">
                   <li className="my-5 hover:text-gray-400" role="menuitem" tabIndex="-1" id="menu-item-0">
-                    <Link to="/news" onClick={() => setOpen(false)}>News & Events</Link>
+                    <Link to="/news?tab=all" onClick={() => setOpen(false)}>News & Events</Link>
                   </li>
                   <li className="my-5 hover:text-gray-400" role="menuitem" tabIndex="-1" id="menu-item-1">
-                    <Link to="#!" onClick={() => setOpen(false)}>Announcements</Link>
+                    <Link to="/news?tab=news" onClick={() => setOpen(false)}>News</Link>
+                  </li>
+                  <li className="my-5 hover:text-gray-400" role="menuitem" tabIndex="-1" id="menu-item-2">
+                    <Link to="/news?tab=events" onClick={() => setOpen(false)}>Events</Link>
                   </li>
                 </ul>
               </div>
@@ -105,6 +124,18 @@ export default function Menu() {
             
             <li className="lg:my-0 my-5">
               <Link to="/about-us" onClick={() => setOpen(false)}>ABOUT</Link>
+            </li>
+
+            <li className="lg:my-0 my-5">
+              <Link to="/faculties" onClick={() => setOpen(false)}>FACULTIES</Link>
+            </li>
+
+            <li className="lg:my-0 my-5">
+              <Link to="/admissions/application-form" onClick={() => setOpen(false)}>ADMISSION</Link>
+            </li>
+
+            <li className="lg:my-0 my-5">
+              <Link to="/contact-us" onClick={() => setOpen(false)}>CONTACT</Link>
             </li>
             
             {/* Mobile Login/Logout - Only shown on mobile */}
@@ -114,6 +145,25 @@ export default function Menu() {
                   <div className="mb-2 text-sm">
                     <span className="font-medium">{user?.name || 'User'}</span>
                   </div>
+
+                  <Link
+                    to={getProfilePathByRole(role)}
+                    onClick={() => setOpen(false)}
+                    className="text-left hover:text-gray-400 transition-colors mb-2"
+                  >
+                    PROFILE
+                  </Link>
+
+                  {role === "admin" && (
+                    <Link
+                      to="/piu/admin"
+                      onClick={() => setOpen(false)}
+                      className="text-left hover:text-gray-400 transition-colors mb-2"
+                    >
+                      DASHBOARD
+                    </Link>
+                  )}
+
                   <button 
                     onClick={handleMobileLogout}
                     className="text-left hover:text-gray-400 transition-colors"

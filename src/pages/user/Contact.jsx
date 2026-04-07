@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import ReCAPTCHA from "react-google-recaptcha";
 import {
   FaEnvelope,
   FaGlobeAsia,
@@ -8,6 +7,7 @@ import {
   FaPhoneAlt
 } from "react-icons/fa";
 import { Link } from "react-router-dom";
+import { v1 } from "../../api/v1";
 
 export default function Contact() {
   const [name, setName] = useState("");
@@ -16,7 +16,7 @@ export default function Contact() {
   const [country, setCountry] = useState("");
   const [message, setMessage] = useState("");
   const [errors, setErrors] = useState({});
-  const [reCapt, setReCapt] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
   const validateForm = () => {
@@ -47,6 +47,7 @@ export default function Contact() {
     }
 
     setErrors({});
+    setIsSubmitting(true);
 
     const formData = new FormData();
     formData.append("name", name);
@@ -54,45 +55,38 @@ export default function Contact() {
     formData.append("phone", phone);
     formData.append("country", country);
     formData.append("message", message);
-    formData.append("recaptcha", reCapt);
 
     console.log({
       name,
       email,
       phone,
       country,
-      message,
-      recaptcha: reCapt
+      message
     });
 
     try {
-      const response = await fetch(
-        "https://api.piueducation.org/api/v1/contact/form-submit",
-        {
-          method: "POST",
-          headers: {
-            "X-CSRF-TOKEN": getCsrfToken()
-          },
-          body: formData
-        }
-      );
+      const res = await v1.submitContactForm(formData);
 
-      console.log(response);
-
-      if (!response.ok) {
-        const contentType = response.headers.get("content-type");
-        if (contentType && contentType.includes("application/json")) {
-          const data = await response.json();
-          throw new Error(data.error || "Something went wrong");
-        } else {
-          const text = await response.text();
-          throw new Error(text || "Something went wrong");
-        }
+      // Only redirect after backend confirms mail was sent.
+      if (res?.success && res?.mail?.sent === true) {
+        navigate("/contact/thank-you-for-contacting-us");
+        return;
       }
 
-      navigate("/contact/thank-you-for-contacting-us");
+      if (res?.success && res?.mail?.sent === false) {
+        setErrors({
+          submit:
+            res?.mail?.error ||
+            "Your message was saved, but the email could not be sent. Please try again later or contact us by phone.",
+        });
+        return;
+      }
+
+      throw new Error(res?.message || "Failed to submit contact form");
     } catch (error) {
-      setErrors({ submit: error.message });
+      setErrors({ submit: error?.response?.data?.message || error?.message || "Failed to submit contact form" });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -264,22 +258,41 @@ export default function Contact() {
                     {errors.message}
                   </p>}
               </div>
-              <div className="my-3">
-                <ReCAPTCHA
-                  sitekey="6LcwADUpAAAAAH3ACDhfHCqVixn1fbB2Bjrro9tY"
-                  onChange={val => setReCapt(val)}
-                />
-                {errors.recaptcha &&
-                  <p className="text-red-400 italic">
-                    {errors.recaptcha}
-                  </p>}
-              </div>
               <button
                 type="submit"
-                className="text-white mt-5 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                disabled={!reCapt}
+                disabled={isSubmitting}
+                className={`text-white mt-5 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:focus:ring-blue-800 ${
+                  isSubmitting ? "bg-blue-400 cursor-not-allowed" : "bg-blue-700 hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-700"
+                }`}
               >
-                Submit
+                {isSubmitting ? (
+                  <span className="inline-flex items-center gap-2">
+                    <svg
+                      className="h-5 w-5 animate-spin text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      aria-hidden="true"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                      />
+                    </svg>
+                    Submitting...
+                  </span>
+                ) : (
+                  "Submit"
+                )}
               </button>
               {errors.submit &&
                 <p className="text-red-400 italic">

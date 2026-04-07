@@ -113,7 +113,7 @@ const PositionList = () => {
                       <p>No positions found</p>
                       {searchTerm && (
                         <p className="text-sm mt-1">
-                          No positions match "{searchTerm}"
+                          No positions match &quot;{searchTerm}&quot;
                         </p>
                       )}
                     </div>

@@ -4,7 +4,7 @@ import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import api from "../../api/axios";
+import { adminApi } from "../../api/admin";
 
 export default function NewCourse() {
   const location = useLocation();
@@ -47,8 +47,8 @@ export default function NewCourse() {
 
   const loadCategories = async () => {
     try {
-      const response = await api.get("/api/v2/course-categories");
-      setCategories(response.data.data || response.data);
+      const data = await adminApi.categories.list();
+      setCategories(data);
     } catch (error) {
       console.error("Failed to load categories:", error);
       toast.error("Failed to load categories");
@@ -58,8 +58,7 @@ export default function NewCourse() {
   const loadCourseData = async () => {
     try {
       setLoading(true);
-      const response = await api.get(`/api/v2/courses/${params.id}`);
-      const course = response.data.data || response.data;
+      const course = await adminApi.courses.get(params.id);
 
       setFormData({
         title: course.title || "",
@@ -205,19 +204,11 @@ export default function NewCourse() {
       let response;
       if (params.id) {
         // Update existing course
-        response = await api.post(`/api/v2/courses/${params.id}?_method=PUT`, formDataToSend, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        });
+        response = await adminApi.courses.update(params.id, formDataToSend);
         toast.success("Course updated successfully!");
       } else {
         // Create new course
-        response = await api.post("/api/v2/courses", formDataToSend, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        });
+        response = await adminApi.courses.create(formDataToSend);
         toast.success("Course created successfully!");
       }
 

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { adminApi } from "../../api/admin";
 
 const AddAssignment = () => {
   const { id } = useParams();
@@ -16,8 +17,8 @@ const AddAssignment = () => {
 
   useEffect(() => {
     if (id) {
-      fetch(`http://localhost:5000/assignments/${id}`)
-        .then((res) => res.json())
+      adminApi.assignments
+        .get(id)
         .then((data) => setFormData(data))
         .catch((err) => console.error("Error fetching assignment:", err));
     }
@@ -36,24 +37,16 @@ const AddAssignment = () => {
     setIsSubmitting(true);
 
     if (id) {
-      // Update
-      fetch(`http://localhost:5000/assignments/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      })
+      adminApi.assignments
+        .update(id, formData)
         .then(() => {
           alert("Assignment updated successfully!");
           navigate("/piu/admin/assignments");
         })
         .finally(() => setIsSubmitting(false));
     } else {
-      // Add new
-      fetch("http://localhost:5000/assignments", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      })
+      adminApi.assignments
+        .create(formData)
         .then(() => {
           alert("Assignment added successfully!");
           navigate("/piu/admin/assignments");

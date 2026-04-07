@@ -17,6 +17,8 @@ import StudentLayout from "../layouts/StudentLayout";
 import TeacherLayout from "../layouts/TeacherLayout";
 import CourseDetails from "../pages/user/CourseDetails";
 import NewsDetails from "../pages/user/NewsDetails";
+import Gallery from "../components/user/Gallery";
+import NewsPage from "../pages/user/News";
 
 // Admin Dashboard
 import Dashboard from "../pages/admin/Dashboard";
@@ -68,6 +70,9 @@ import ChangePassword from "../pages/admin/ChangePassword";
 import Admission2 from "../pages/user/Admission2";
 import TeamProfile from "../pages/user/TeamProfile";
 import StudentProfile from "../pages/student/StudentProfile";
+import Admission from "../pages/user/Admission";
+import ApplicationFormSubmitSuccessful from "../pages/user/ApplicationFormSubmitSuccessful";
+import ContactFormSubmittedSuccessful from "../pages/user/ContactFormSubmittedSuccessful";
 
 // Auth Components
 import PrivateRoute from "../components/PrivateRoute";
@@ -97,12 +102,17 @@ const router = createBrowserRouter([
       { path: "/", element: <Home /> },
       { path: "/campus", element: <Campus /> },
       { path: "/admission", element: <Admission2 /> },
+      { path: "/admissions/application-form", element: <Admission /> },
+      { path: "/admissions/application-form/successfully-submitted", element: <ApplicationFormSubmitSuccessful /> },
       { path: "/about-us", element: <About /> },
       { path: "/courses", element: <Courses /> },
       { path: "/courses/:slug", element: <CourseDetails /> },
       { path: "/team/:slug", element: <TeamProfile /> },
       { path: "/news/:slug", element: <NewsDetails /> },
+      { path: "/news", element: <NewsPage /> },
+      { path: "/gallery", element: <Gallery variant="page" /> },
       { path: "/contact-us", element: <Contact /> },
+      { path: "/contact/thank-you-for-contacting-us", element: <ContactFormSubmittedSuccessful /> },
       { path: "/president-of-piu", element: <President /> },
       { path: "/faculties", element: <Faculties /> },
       { path: "/faculties/:slug", element: <FacultiesDetails /> },
@@ -124,6 +134,7 @@ const router = createBrowserRouter([
       { path: "users-role", element: <UserRoles /> },
       { path: "user-permission", element: <UserPermissions /> },
       { path: "admission", element: <AdmissionPage /> },
+      { path: "admission/:id", element: <AdmissionDetails /> },
       { path: "admission/details", element: <AdmissionDetails /> },
       { path: "course-list", element: <CourseList /> },
       { path: "course-categories", element: <CourseCategories /> },

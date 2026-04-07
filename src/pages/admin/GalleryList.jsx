@@ -1,64 +1,81 @@
-import { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { adminApi } from "../../api/admin";
+import { toStorageUrl } from "../../api/axios";
 
 const GalleryList = () => {
   const navigate = useNavigate();
 
-  // Sample data
-  const [gallery, setGallery] = useState([
-    { 
-      id: 1, 
-      tag: "Banner 1", 
-      link1: "/promotions", 
-      link2: "/products", 
-      active: true,
-      image: "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80"
-    },
-    { 
-      id: 2, 
-      tag: "Event Photo", 
-      link1: "/events", 
-      link2: "/gallery", 
-      active: false,
-      image: "https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80"
-    },
-    { 
-      id: 3, 
-      tag: "Product Showcase", 
-      link1: "/products/featured", 
-      link2: "/sale", 
-      active: true,
-      image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80"
-    }
-  ]);
+  const [gallery, setGallery] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+
+  const load = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const data = await adminApi.gallery.list();
+      setGallery(Array.isArray(data) ? data : []);
+    } catch (e) {
+      setError(e?.response?.data?.message || e?.message || "Failed to load gallery");
+      setGallery([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    load();
+  }, []);
 
   const handleEdit = (id) => {
     navigate(`/piu/admin/gallery/add/${id}`);
   };
 
-  const handleDelete = (id) => {
-    if (window.confirm("Are you sure you want to delete this image?")) {
-      setGallery(gallery.filter((item) => item.id !== id));
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this image?")) return;
+    setError("");
+    try {
+      await adminApi.gallery.remove(id);
+      await load();
+    } catch (e) {
+      setError(e?.response?.data?.message || e?.message || "Failed to delete image");
     }
   };
 
-  const toggleStatus = (id) => {
-    setGallery(gallery.map(item => 
-      item.id === id ? { ...item, active: !item.active } : item
-    ));
+  const toggleStatus = async (id) => {
+    setError("");
+    try {
+      await adminApi.gallery.toggleActive(id);
+      await load();
+    } catch (e) {
+      setError(e?.response?.data?.message || e?.message || "Failed to update status");
+    }
   };
 
   // Filter gallery items based on search and status filter
-  const filteredGallery = gallery.filter(item => {
-    const matchesSearch = item.tag.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === "all" || 
-                          (statusFilter === "active" && item.active) || 
-                          (statusFilter === "inactive" && !item.active);
-    return matchesSearch && matchesStatus;
-  });
+  const filteredGallery = useMemo(() => {
+    const q = searchTerm.trim().toLowerCase();
+    return gallery.filter((item) => {
+      const tag = String(item.image_tag || "");
+      const matchesSearch = !q || tag.toLowerCase().includes(q);
+
+      const isActive =
+        typeof item.is_active === "boolean"
+          ? item.is_active
+          : String(item.is_active ?? "").toLowerCase() === "true";
+
+      const matchesStatus =
+        statusFilter === "all" ||
+        (statusFilter === "active" && isActive) ||
+        (statusFilter === "inactive" && !isActive);
+
+      return matchesSearch && matchesStatus;
+    });
+  }, [gallery, searchTerm, statusFilter]);
 
   return (
     <div className="max-w-8xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
@@ -69,6 +86,12 @@ const GalleryList = () => {
       </div>
 
       <div className="p-6">
+        {error && (
+          <div className="mb-4 p-3 rounded-lg border border-red-200 bg-red-50 text-red-700 text-sm">
+            {error}
+          </div>
+        )}
+
         {/* Search and Add Button */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
           <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
@@ -142,19 +165,36 @@ const GalleryList = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredGallery.length > 0 ? (
-                filteredGallery.map((item, index) => (
+              {loading && (
+                <tr>
+                  <td colSpan="7" className="px-6 py-12 text-center text-gray-500">
+                    Loading gallery...
+                  </td>
+                </tr>
+              )}
+
+              {!loading && filteredGallery.length > 0 ? (
+                filteredGallery.map((item, index) => {
+                  const isActive =
+                    typeof item.is_active === "boolean"
+                      ? item.is_active
+                      : String(item.is_active ?? "").toLowerCase() === "true";
+                  const img = toStorageUrl(item.image) || item.image || "";
+                  return (
                   <tr key={item.id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                       {index + 1}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="w-16 h-12 bg-gray-200 rounded overflow-hidden">
-                        {item.image ? (
+                        {img ? (
                           <img 
-                            src={item.image} 
-                            alt={item.tag} 
+                            src={img} 
+                            alt={item.image_tag || "Gallery"} 
                             className="w-full h-full object-cover"
+                            onError={(e) => {
+                              e.target.src = "https://via.placeholder.com/160x120?text=PIU";
+                            }}
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-gray-400">
@@ -164,28 +204,36 @@ const GalleryList = () => {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                      {item.tag}
+                      {item.image_tag}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600 truncate max-w-xs">
-                      <a href={item.link1} className="hover:underline" target="_blank" rel="noopener noreferrer">
-                        {item.link1}
-                      </a>
+                      {item.link1 ? (
+                        <a href={item.link1} className="hover:underline" target="_blank" rel="noopener noreferrer">
+                          {item.link1}
+                        </a>
+                      ) : (
+                        <span className="text-gray-400">—</span>
+                      )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600 truncate max-w-xs">
-                      <a href={item.link2} className="hover:underline" target="_blank" rel="noopener noreferrer">
-                        {item.link2}
-                      </a>
+                      {item.link2 ? (
+                        <a href={item.link2} className="hover:underline" target="_blank" rel="noopener noreferrer">
+                          {item.link2}
+                        </a>
+                      ) : (
+                        <span className="text-gray-400">—</span>
+                      )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <button
                         onClick={() => toggleStatus(item.id)}
                         className={`px-3 py-1 rounded-full text-xs font-medium ${
-                          item.active 
+                          isActive 
                             ? 'bg-green-100 text-green-800 hover:bg-green-200' 
                             : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
                         }`}
                       >
-                        {item.active ? 'Active' : 'Inactive'}
+                        {isActive ? 'Active' : 'Inactive'}
                       </button>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -209,9 +257,11 @@ const GalleryList = () => {
                       </div>
                     </td>
                   </tr>
-                ))
+                  );
+                })
               ) : (
-                <tr>
+                !loading && (
+                  <tr>
                   <td colSpan="7" className="px-6 py-12 text-center text-gray-500">
                     <div className="flex flex-col items-center justify-center">
                       <i className="fas fa-image text-4xl text-gray-300 mb-3"></i>
@@ -224,7 +274,8 @@ const GalleryList = () => {
                       </p>
                     </div>
                   </td>
-                </tr>
+                  </tr>
+                )
               )}
             </tbody>
           </table>

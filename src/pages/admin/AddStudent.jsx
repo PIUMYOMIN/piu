@@ -1,18 +1,23 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { adminApi } from "../../api/admin";
 
 const AddStudent = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  // Prefill if editing
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [courses, setCourses] = useState([]);
+  const [years, setYears] = useState([]);
+
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
     studentId: "",
     dob: "",
-    academicYear: "",
-    program: "",
+    yearId: "",
+    courseId: "",
     phone: "",
     email: "",
     address: "",
@@ -29,30 +34,56 @@ const AddStudent = () => {
   });
 
   useEffect(() => {
-    if (id) {
-      // Simulate fetching existing student
-      setForm({
-        firstName: "Lucifer",
-        lastName: "Morningstar",
-        studentId: "ST001",
-        dob: "2000-01-01",
-        academicYear: "2025",
-        program: "ICT",
-        phone: "123456",
-        email: "lucifer@mail.com",
-        address: "Yangon",
-        permanentAddress: "Mandalay",
-        city: "Yangon",
-        country: "Myanmar",
-        nationalId: "123456789",
-        passport: "",
-        gender: "Male",
-        maritalStatus: "Single",
-        profile: null,
-        certificate: null,
-        otherDocs: null,
-      });
+    let mounted = true;
+    async function load() {
+      setLoading(true);
+      setError("");
+      try {
+        const [courseData, yearData] = await Promise.all([
+          adminApi.courses.list(),
+          adminApi.meta.years(),
+        ]);
+        if (!mounted) return;
+        setCourses(Array.isArray(courseData) ? courseData : []);
+        setYears(Array.isArray(yearData) ? yearData : []);
+
+        if (id) {
+          const s = await adminApi.students.get(id);
+          if (!mounted) return;
+          setForm((prev) => ({
+            ...prev,
+            firstName: s?.fname || "",
+            lastName: s?.lname || "",
+            studentId: s?.student_id || "",
+            dob: s?.dob || "",
+            yearId: s?.year_id ? String(s.year_id) : "",
+            courseId: s?.course_id ? String(s.course_id) : "",
+            phone: s?.phone || "",
+            email: s?.email || "",
+            address: s?.address || "",
+            permanentAddress: s?.permanent_address || "",
+            city: s?.city || "",
+            country: s?.country || "",
+            nationalId: s?.national_id || "",
+            passport: s?.passport_id || "",
+            gender: s?.gender_sts || "",
+            maritalStatus: s?.marital_sts || "",
+            profile: null,
+            certificate: null,
+            otherDocs: null,
+          }));
+        }
+      } catch (e) {
+        if (!mounted) return;
+        setError(e?.response?.data?.message || e?.message || "Failed to load student form");
+      } finally {
+        if (mounted) setLoading(false);
+      }
     }
+    load();
+    return () => {
+      mounted = false;
+    };
   }, [id]);
 
   const handleChange = (e) => {
@@ -64,10 +95,41 @@ const AddStudent = () => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(form);
-    navigate("/piu/admin/students");
+    setError("");
+    try {
+      const fd = new FormData();
+      fd.append("fname", form.firstName);
+      fd.append("lname", form.lastName || "");
+      fd.append("student_id", form.studentId);
+      fd.append("dob", form.dob || "");
+      fd.append("year_id", form.yearId);
+      fd.append("course_id", form.courseId || "");
+      fd.append("phone", form.phone);
+      fd.append("email", form.email);
+      fd.append("address", form.address);
+      fd.append("permanent_address", form.permanentAddress || "");
+      fd.append("city", form.city);
+      fd.append("country", form.country);
+      fd.append("national_id", form.nationalId);
+      fd.append("passport_id", form.passport || "");
+      fd.append("gender_sts", form.gender);
+      fd.append("marital_sts", form.maritalStatus || "");
+
+      if (form.profile instanceof File) fd.append("profile", form.profile);
+      if (form.certificate instanceof File) fd.append("education_certificate", form.certificate);
+      if (form.otherDocs instanceof File) fd.append("other_documents", form.otherDocs);
+
+      if (id) {
+        await adminApi.students.update(id, fd);
+      } else {
+        await adminApi.students.create(fd);
+      }
+      navigate("/piu/admin/students");
+    } catch (e2) {
+      setError(e2?.response?.data?.message || e2?.message || "Failed to save student");
+    }
   };
 
   return (
@@ -82,6 +144,15 @@ const AddStudent = () => {
 
       {/* Form Container */}
       <div className="bg-white rounded-b-lg shadow-md p-6">
+        {error && (
+          <div className="mb-4 p-3 rounded-lg border border-red-200 bg-red-50 text-red-700 text-sm">
+            {error}
+          </div>
+        )}
+
+        {loading ? (
+          <div className="py-10 text-center text-gray-500">Loading form...</div>
+        ) : (
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Personal Information Section */}
           <div className="border-b border-gray-200 pb-6">
@@ -167,13 +238,14 @@ const AddStudent = () => {
               
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Marital Status
+                  Marital Status <span className="text-red-500">*</span>
                 </label>
                 <select
                   name="maritalStatus"
                   value={form.maritalStatus}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  required
                 >
                   <option value="">Select Status</option>
                   <option value="Single">Single</option>
@@ -224,16 +296,18 @@ const AddStudent = () => {
                   Academic Year <span className="text-red-500">*</span>
                 </label>
                 <select
-                  name="academicYear"
-                  value={form.academicYear}
+                  name="yearId"
+                  value={form.yearId}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   required
                 >
                   <option value="">Select Academic Year</option>
-                  <option value="2024">2024</option>
-                  <option value="2025">2025</option>
-                  <option value="2026">2026</option>
+                  {years.map((y) => (
+                    <option key={y.id} value={String(y.id)}>
+                      {y.name || `Year ${y.id}`}
+                    </option>
+                  ))}
                 </select>
               </div>
               
@@ -242,17 +316,18 @@ const AddStudent = () => {
                   Program <span className="text-red-500">*</span>
                 </label>
                 <select
-                  name="program"
-                  value={form.program}
+                  name="courseId"
+                  value={form.courseId}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   required
                 >
                   <option value="">Select Program</option>
-                  <option value="ICT">ICT</option>
-                  <option value="Business">Business</option>
-                  <option value="Engineering">Engineering</option>
-                  <option value="Medicine">Medicine</option>
+                  {courses.map((c) => (
+                    <option key={c.id} value={String(c.id)}>
+                      {c.title}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>
@@ -394,6 +469,7 @@ const AddStudent = () => {
                       name="certificate" 
                       onChange={handleChange} 
                       className="hidden" 
+                      required={!id}
                     />
                   </label>
                 </div>
@@ -439,6 +515,7 @@ const AddStudent = () => {
             </button>
           </div>
         </form>
+        )}
       </div>
     </div>
   );

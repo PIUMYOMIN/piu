@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { FaSpinner, FaSave, FaTimes, FaTag, FaInfoCircle, FaCheck, FaExclamationTriangle } from "react-icons/fa";
-import api from "../../api/axios";
+import { adminApi } from "../../api/admin";
 
 const CategoryForm = ({ category = null, onSuccess, onCancel, mode = "create" }) => {
   const [formData, setFormData] = useState({
@@ -91,11 +91,11 @@ const CategoryForm = ({ category = null, onSuccess, onCancel, mode = "create" })
     try {
       if (mode === "edit" && category) {
         // Update existing category
-        await api.put(`/api/v2/course-categories/${category.id}`, formData);
+        await adminApi.categories.update(category.id, formData);
         showToast(`Category "${formData.name}" updated successfully!`, "success");
       } else {
         // Create new category
-        await api.post("/api/v2/course-categories", formData);
+        await adminApi.categories.create(formData);
         showToast(`Category "${formData.name}" created successfully!`, "success");
       }
       

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { FaUser, FaEnvelope, FaPhone, FaMapMarkerAlt, FaCity, FaGlobe, FaEdit, FaCamera, FaSave, FaSpinner } from "react-icons/fa";
-import api from "../../api/axios";
+import { v2 } from "../../api/v2";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -28,8 +28,8 @@ function ProfileSetting() {
   const fetchUserProfile = async () => {
     try {
       setLoading(true);
-      const response = await api.get("/api/v2/user/profile");
-      const userData = response.data.user;
+      const data = await v2.getProfile();
+      const userData = data?.user || data;
       
       setCurrentUser(userData);
       setFormData({
@@ -98,14 +98,10 @@ function ProfileSetting() {
         formDataToSend.append("profile_image", formData.profile_image);
       }
 
-      const response = await api.put("/api/v2/user/profile", formDataToSend, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      const response = await v2.updateProfile(formDataToSend);
 
       // Update local user data
-      setCurrentUser(response.data.user);
+      setCurrentUser(response?.user || response?.data?.user || null);
       
       toast.success("Profile updated successfully!");
       
@@ -180,7 +176,7 @@ function ProfileSetting() {
               )}
             </div>
             {currentUser?.bio && (
-              <p className="text-gray-200 text-sm italic">"{currentUser.bio}"</p>
+              <p className="text-gray-200 text-sm italic">&quot;{currentUser.bio}&quot;</p>
             )}
           </div>
         </div>
