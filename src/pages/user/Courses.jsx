@@ -185,19 +185,8 @@ export default function Course() {
                     alt={course.title}
                     className="object-cover w-full h-48 hover:scale-105 transition-transform duration-500 ease-in-out"
                     onError={(e) => {
-                      console.error("Image failed:", course.image);
-                      // Try alternative URLs
-                      const alternatives = [
-                        `https://dashboard.piueducation.org/storage/${course.image}`,
-                        "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
-                      ];
-
-                      for (let altUrl of alternatives) {
-                        if (altUrl !== e.target.src) {
-                          e.target.src = altUrl;
-                          break;
-                        }
-                      }
+                      e.currentTarget.src =
+                        "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80";
                     }}
                   />
                   {/* Status Badge */}

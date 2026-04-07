@@ -5,7 +5,9 @@ import { executeRecaptcha } from '../utils/recaptchaV3';
 
 const API_BASE_URL = config.apiBaseUrl;
 const API_V1_URL = `${API_BASE_URL}/api/v1`;
-const API_V2_URL = `${API_BASE_URL}/api/v2`;
+// Backend now serves everything under /api/v1 (no /api/v2 routes).
+// Keep apiV2 export for backward compatibility with existing frontend imports.
+const API_V2_URL = API_V1_URL;
 
 function createApiClient(baseURL) {
   const client = axios.create({
