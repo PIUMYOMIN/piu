@@ -1,0 +1,16 @@
+[
+  {
+    "name": "minScore",
+    "expected": 0.5,
+    "actual": 0.42,
+    "values": [
+      0.42
+    ],
+    "operator": ">=",
+    "passed": false,
+    "auditProperty": "performance",
+    "auditId": "categories",
+    "level": "warn",
+    "url": "https://www.piueducation.org/"
+  }
+]

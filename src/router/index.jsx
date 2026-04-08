@@ -11,6 +11,8 @@ import FacultiesDetails from "../pages/user/FacultiesDetails";
 import About from "../pages/user/About";
 import Login from "../auth/Login";
 import Register from "../auth/Register";
+import ForgotPassword from "../auth/ForgotPassword";
+import ResetPassword from "../auth/ResetPassword";
 import AdminLayout from "../layouts/AdminLayout";
 import UserLayout from "../layouts/UserLayout";
 import StudentLayout from "../layouts/StudentLayout";
@@ -19,6 +21,7 @@ import CourseDetails from "../pages/user/CourseDetails";
 import NewsDetails from "../pages/user/NewsDetails";
 import Gallery from "../components/user/Gallery";
 import NewsPage from "../pages/user/News";
+import SearchResults from "../pages/user/SearchResults";
 
 // Admin Dashboard
 import Dashboard from "../pages/admin/Dashboard";
@@ -96,6 +99,22 @@ const router = createBrowserRouter([
     ),
   },
   {
+    path: "/forgot-password",
+    element: (
+      <PublicRoute>
+        <ForgotPassword />
+      </PublicRoute>
+    ),
+  },
+  {
+    path: "/reset-password",
+    element: (
+      <PublicRoute>
+        <ResetPassword />
+      </PublicRoute>
+    ),
+  },
+  {
     path: "/",
     element: <UserLayout />,
     children: [
@@ -110,6 +129,7 @@ const router = createBrowserRouter([
       { path: "/team/:slug", element: <TeamProfile /> },
       { path: "/news/:slug", element: <NewsDetails /> },
       { path: "/news", element: <NewsPage /> },
+      { path: "/search", element: <SearchResults /> },
       { path: "/gallery", element: <Gallery variant="page" /> },
       { path: "/contact-us", element: <Contact /> },
       { path: "/contact/thank-you-for-contacting-us", element: <ContactFormSubmittedSuccessful /> },

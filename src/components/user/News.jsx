@@ -114,8 +114,11 @@ export default function News() {
                   src={getImageUrl(newItem.image)}
                   alt={newItem.title}
                   className="object-cover w-full hover:scale-105 transition duration-300 ease-out h-full"
+                  loading="lazy"
+                  decoding="async"
+                  fetchPriority="low"
                   onError={(e) => {
-                    e.target.src = "https://images.unsplash.com/photo-1588681664899-f142ff2dc9b1?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80";
+                    e.currentTarget.src = "https://images.unsplash.com/photo-1588681664899-f142ff2dc9b1?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80";
                   }}
                 />
               </div>

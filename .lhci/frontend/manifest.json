@@ -1,0 +1,14 @@
+[
+  {
+    "url": "http://localhost:59863/",
+    "isRepresentativeRun": true,
+    "htmlPath": "D:\\React Projects\\PIU-Web-Project\\.lhci\\frontend\\localhost--2026_04_08_11_07_07.report.html",
+    "jsonPath": "D:\\React Projects\\PIU-Web-Project\\.lhci\\frontend\\localhost--2026_04_08_11_07_07.report.json",
+    "summary": {
+      "performance": 0.89,
+      "accessibility": 0.86,
+      "best-practices": 0.96,
+      "seo": 0.92
+    }
+  }
+]

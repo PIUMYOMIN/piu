@@ -79,6 +79,8 @@ export const v2 = {
   register: (userData) => apiClient.post('/register', userData).then((r) => r.data),
   login: (payload) => apiClient.post('/login', payload).then((r) => r.data),
   logout: () => apiClient.post('/logout').then((r) => r.data),
+  forgotPassword: (email) => apiClient.post('/forgot-password', { email }).then((r) => r.data),
+  resetPassword: (payload) => apiClient.post('/reset-password', payload).then((r) => r.data),
 
   // User
   getProfile: () => apiClient.get('/user/profile').then((r) => r.data),

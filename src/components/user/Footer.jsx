@@ -12,7 +12,7 @@ import {
 
 export default function Footer() {
   return <footer className="w-full font-robotoSlab">
-      <div className="w-full bg-zinc-900 text-white font-montserrat px-2 lg:pt-20 py-5">
+      <div className="w-full bg-green-800 text-white font-montserrat px-2 lg:pt-20 py-5">
         <div className="max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-4 lg:gap-5 gap-8">
             <div className="pr-3">
@@ -22,16 +22,16 @@ export default function Footer() {
                 established by the two brothers, Ven Nayaka and Ven Jotika.
               </p>
               <div className="flex flex-row gap-5 text-2xl mt-5">
-                <a href="#" aria-label="Facebook">
+                <a href="#" aria-label="Facebook" className="text-yellow-300 hover:text-white transition-colors">
                   <FaFacebook />
                 </a>
-                <a href="#" aria-label="Twitter">
+                <a href="#" aria-label="Twitter" className="text-yellow-300 hover:text-white transition-colors">
                   <FaTwitter />
                 </a>
-                <a href="#" aria-label="YouTube">
+                <a href="#" aria-label="YouTube" className="text-yellow-300 hover:text-white transition-colors">
                   <FaYoutube />
                 </a>
-                <a href="#" aria-label="Telegram">
+                <a href="#" aria-label="Telegram" className="text-yellow-300 hover:text-white transition-colors">
                   <FaTelegram />
                 </a>
               </div>
@@ -86,7 +86,7 @@ export default function Footer() {
               <div className="grid grid-rows gap-1">
                 <div className="flex flex-row items">
                   <div>
-                    <FaMapMarkerAlt className="text-3xl text-white bg-orange-400 rounded-full p-2" />
+                    <FaMapMarkerAlt className="text-3xl text-green-900 bg-yellow-400 rounded-full p-2" />
                   </div>
                   <div className="px-3 w-full font-regular">
                     <strong>Address</strong>
@@ -99,7 +99,7 @@ export default function Footer() {
                 </div>
                 <div className="flex flex-row items">
                   <div>
-                    <FaPhoneAlt className="text-3xl text-white bg-orange-400 rounded-full p-2" />
+                    <FaPhoneAlt className="text-3xl text-green-900 bg-yellow-400 rounded-full p-2" />
                   </div>
                   <div className="flex flex-col px-3 w-full font-regular">
                     <strong>Phone</strong>
@@ -110,7 +110,7 @@ export default function Footer() {
                 </div>
                 <div className="flex flex-row items">
                   <div>
-                    <FaEnvelope className="text-3xl text-white bg-orange-400 rounded-full p-2" />
+                    <FaEnvelope className="text-3xl text-green-900 bg-yellow-400 rounded-full p-2" />
                   </div>
                   <div className="flex flex-col px-3 w-full font-regular">
                     <strong>Email</strong>
@@ -122,7 +122,7 @@ export default function Footer() {
               </div>
             </div>
           </div>
-          <div className="mt-5 pt-3 border-t border-gray-50 lg:flex flex-row justify-between items-center text-sm text-center">
+          <div className="mt-5 pt-3 border-t border-green-600 lg:flex flex-row justify-between items-center text-sm text-center">
             <div>
               <p>
                 Copyright &copy; {new Date().getFullYear()}, All Rights Reserved

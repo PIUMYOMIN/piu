@@ -254,6 +254,13 @@ export default function Course() {
                       src={getImageUrl(course.image)}
                       alt={course.title}
                       className="object-cover lg:h-48 hover:scale-105 transition-all duration-200 ease-in w-full"
+                      loading="lazy"
+                      decoding="async"
+                      fetchPriority="low"
+                      onError={(e) => {
+                        e.currentTarget.src =
+                          "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80";
+                      }}
                     />
                     {/* Category Badge */}
                     {course.category && (

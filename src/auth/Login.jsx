@@ -2,6 +2,15 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
+function resolveRole(user) {
+  const roleFromField = user?.role;
+  if (roleFromField) return String(roleFromField).toLowerCase();
+  if (Array.isArray(user?.roles) && user.roles.length > 0) {
+    return String(user.roles[0]).toLowerCase();
+  }
+  return "";
+}
+
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -20,12 +29,13 @@ export default function Login() {
 
     try {
       const userData = await login(email, password);
+      const role = resolveRole(userData?.user);
       // Redirect based on role
-      if (userData.user.role === 'admin') {
+      if (role === 'admin') {
         navigate('/piu/admin');
-      } else if (userData.user.role === 'student') {
+      } else if (role === 'student') {
         navigate('/piu/student');
-      } else if (userData.user.role === 'teacher') {
+      } else if (role === 'teacher') {
         navigate('/piu/teacher');
       } else {
         navigate('/');
@@ -46,15 +56,6 @@ export default function Login() {
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
             Sign in to your account
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Or{' '}
-            <Link
-              to="/register"
-              className="font-medium text-green-600 hover:text-green-500"
-            >
-              create a new account
-            </Link>
-          </p>
         </div>
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
@@ -132,12 +133,26 @@ export default function Login() {
                       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                     ></path>
                   </svg>
-                  Signing in...
+                  Login...
                 </div>
               ) : (
                 'Sign in'
               )}
             </button>
+          </div>
+
+          <div className="pt-2 text-center space-y-2">
+            <p className="text-sm">
+              <Link to="/forgot-password" className="font-medium text-green-700 hover:text-green-600">
+                Forgot your password?
+              </Link>
+            </p>
+            <p className="text-sm text-gray-600">
+              Don&apos;t have an account?{" "}
+              <Link to="/register" className="font-medium text-green-600 hover:text-green-500">
+                Create one
+              </Link>
+            </p>
           </div>
         </form>
       </div>

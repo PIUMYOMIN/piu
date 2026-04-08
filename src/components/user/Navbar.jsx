@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FaSearch, FaUserCircle, FaCaretDown, FaSignOutAlt } from "react-icons/fa";
 import Logo from "../../assets/logo.png";
 import { useAuth } from "../../contexts/AuthContext";
@@ -19,7 +19,9 @@ function getProfilePathByRole(role) {
 export default function Navbar() {
   const { isAuthenticated, user, logout } = useAuth();
   const [showUserDropdown, setShowUserDropdown] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
   const dropdownRef = useRef(null);
+  const navigate = useNavigate();
   const role = getUserRole(user);
 
   // Close dropdown when clicking outside
@@ -41,12 +43,20 @@ export default function Navbar() {
     setShowUserDropdown(false);
   };
 
+  const handleSearchSubmit = (event) => {
+    event.preventDefault();
+    const query = searchTerm.trim();
+    if (!query) return;
+    navigate(`/search?q=${encodeURIComponent(query)}`);
+    setSearchTerm("");
+  };
+
   return (
     <nav>
       <div className="max-w-7xl mx-auto lg:flex justify-between items-center">
         <Link to="/">
           <div className="flex items-center">
-            <img src={Logo} alt="Logo" className="object-contain w-20" />
+            <img src={Logo} alt="Logo" className="object-contain w-20" loading="eager" decoding="async" />
             <div className="flex flex-col justify-between gap-0">
               <h2 className="text-3xl font-roboto text-green-700">
                 Phaung Daw Oo
@@ -64,9 +74,6 @@ export default function Navbar() {
             </li>
             <li className="hover:border-b border-dark-purple transition-all delay-75 ease-in-out">
               <Link to="/courses">COURSES</Link>
-            </li>
-            <li className="hover:border-b border-dark-purple transition-all delay-75 ease-in-out">
-              <Link to="/campus">CAMPUS</Link>
             </li>
             <li className="hover:border-b border-dark-purple transition-all delay-75 ease-in-out">
               <Link to="/about-us">ABOUT</Link>
@@ -149,18 +156,24 @@ export default function Navbar() {
             </li>
           </ul>
           
-          <div className="relative flex items-center w-[100%] lg:mt-3">
-            <form action="">
-              <div className="p-2">
-                <input 
-                  type="text" 
-                  className="font-normal lg:border-b text-dark lg:w-96 w-[350px] lg:focus:outline-none focus:border-dark-purple px-3 py-1 lg:rounded-e-full relative" 
-                  placeholder="Search..." 
+          <div className="relative flex items-center w-full lg:mt-3 px-2">
+            <form onSubmit={handleSearchSubmit} className="w-full max-w-md mx-auto lg:mx-0">
+              <div className="relative">
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full rounded-full border border-gray-300 bg-white px-4 py-2 pr-10 text-sm text-gray-700 shadow-sm focus:border-green-700 focus:outline-none focus:ring-2 focus:ring-green-100"
+                  placeholder="Search courses, news, events..."
                 />
+                <button
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-green-700"
+                  type="submit"
+                  aria-label="Search"
+                >
+                  <FaSearch />
+                </button>
               </div>
-              <button className="absolute lg:top-1/2 transform -translate-y-1/2 text-slate-500 lg:p-2 cursor-pointer lg:right-10 right-4 top-6" type="submit">
-                <FaSearch />
-              </button>
             </form>
           </div>
         </div>
