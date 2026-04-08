@@ -1,4 +1,4 @@
-// Centralized API client + helpers (single source of truth)
+// src/utils/api.js
 import axios from 'axios';
 import config from '../config';
 import { executeRecaptcha } from './recaptchaV3';
@@ -13,7 +13,7 @@ function createApiClient(baseURL) {
       'Content-Type': 'application/json',
       Accept: 'application/json',
     },
-    withCredentials: true,
+    withCredentials: false,
   });
 
   client.interceptors.request.use(
