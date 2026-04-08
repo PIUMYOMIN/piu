@@ -13,6 +13,9 @@ function PermissionsPage() {
   const [permissionName, setPermissionName] = useState("");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [newPermissionName, setNewPermissionName] = useState("");
+  const [search, setSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
 
   // Fetch data
   useEffect(() => {
@@ -27,8 +30,8 @@ function PermissionsPage() {
         adminApi.roles.list(),
       ]);
 
-      setPermissions(permissionsData);
-      setRoles(rolesData);
+      setPermissions(Array.isArray(permissionsData) ? permissionsData : []);
+      setRoles(Array.isArray(rolesData) ? rolesData : []);
     } catch (error) {
       console.error("Error fetching data:", error);
       toast.error("Failed to fetch data");
@@ -144,6 +147,12 @@ function PermissionsPage() {
     }
   };
 
+  const filteredPermissions = permissions.filter((p) =>
+    String(p?.name || "").toLowerCase().includes(search.trim().toLowerCase())
+  );
+  const totalPages = Math.max(1, Math.ceil(filteredPermissions.length / pageSize));
+  const paginatedPermissions = filteredPermissions.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -158,12 +167,23 @@ function PermissionsPage() {
       
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-bold text-gray-800">All Permissions</h2>
-        <button
-          onClick={() => setIsAddModalOpen(true)}
-          className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded flex items-center gap-2"
-        >
-          <FaPlus /> Add New Permission
-        </button>
+        <div className="flex items-center gap-2">
+          <input
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setCurrentPage(1);
+            }}
+            placeholder="Search permission..."
+            className="border border-gray-300 rounded px-3 py-2 text-sm"
+          />
+          <button
+            onClick={() => setIsAddModalOpen(true)}
+            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded flex items-center gap-2"
+          >
+            <FaPlus /> Add New Permission
+          </button>
+        </div>
       </div>
 
       <div className="overflow-x-auto">
@@ -177,21 +197,21 @@ function PermissionsPage() {
             </tr>
           </thead>
           <tbody>
-            {permissions.length === 0 ? (
+            {filteredPermissions.length === 0 ? (
               <tr>
                 <td colSpan="4" className="px-4 py-8 text-center text-gray-500">
                   No permissions found
                 </td>
               </tr>
             ) : (
-              permissions.map((perm, index) => {
+              paginatedPermissions.map((perm, index) => {
                 const assignedRoles = roles.filter(role => 
                   role.permissions?.some(p => p.id === perm.id || p === perm.id)
                 ).map(role => role.name);
 
                 return (
                   <tr key={perm.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-3 border border-gray-200">{index + 1}</td>
+                    <td className="px-4 py-3 border border-gray-200">{(currentPage - 1) * pageSize + index + 1}</td>
                     <td className="px-4 py-3 border border-gray-200 font-medium">{perm.name}</td>
                     <td className="px-4 py-3 border border-gray-200">
                       <div className="flex flex-wrap gap-1">
@@ -232,6 +252,32 @@ function PermissionsPage() {
           </tbody>
         </table>
       </div>
+
+      {filteredPermissions.length > 0 && (
+        <div className="mt-4 flex items-center justify-between text-sm">
+          <div>
+            Page {currentPage} of {totalPages}
+          </div>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className="px-3 py-1 border rounded disabled:opacity-50"
+            >
+              Prev
+            </button>
+            <button
+              type="button"
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+              className="px-3 py-1 border rounded disabled:opacity-50"
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Edit Permission Modal */}
       {editingPerm && (

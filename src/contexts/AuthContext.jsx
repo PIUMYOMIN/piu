@@ -72,12 +72,15 @@ export const AuthProvider = ({ children }) => {
   };
 
   // Student portal login (student table auth flow)
-  const studentPortalLogin = async (email, studentId) => {
+  const studentPortalLogin = async (identifier, password) => {
     setLoading(true);
     try {
       const responseData = await v2.studentPortalLogin({
-        email,
-        student_id: studentId,
+        email_or_student_id: identifier,
+        // Keep both keys for backend compatibility.
+        email: identifier,
+        student_id: identifier,
+        password,
       });
       const { token, user } = responseData;
       localStorage.setItem('token', token);

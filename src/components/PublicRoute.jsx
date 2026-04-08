@@ -24,10 +24,12 @@ const PublicRoute = ({ children }) => {
     // Redirect based on user role
     if (role === "admin") {
       return <Navigate to="/piu/admin" replace />;
+    } else if (role === "registrar") {
+      return <Navigate to="/piu/admin" replace />;
     } else if (role === "student") {
       return <Navigate to="/piu/student" replace />;
     } else if (role === "teacher") {
-      return <Navigate to="/piu/teacher" replace />;
+      return <Navigate to="/piu/admin" replace />;
     } else if (role === "user" || role === "") {
       return <Navigate to="/piu/user" replace />;
     } else {

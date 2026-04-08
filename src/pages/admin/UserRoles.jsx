@@ -13,6 +13,9 @@ function RolesPage() {
   const [newRoleName, setNewRoleName] = useState("");
   const [permissions, setPermissions] = useState([]);
   const [selectedPermissions, setSelectedPermissions] = useState([]);
+  const [search, setSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
 
   // Fetch roles and permissions
   useEffect(() => {
@@ -27,8 +30,8 @@ function RolesPage() {
         adminApi.permissions.list(),
       ]);
 
-      setRoles(rolesData);
-      setPermissions(permissionsData);
+      setRoles(Array.isArray(rolesData) ? rolesData : []);
+      setPermissions(Array.isArray(permissionsData) ? permissionsData : []);
     } catch (error) {
       console.error("Error fetching data:", error);
       toast.error("Failed to fetch data");
@@ -104,6 +107,12 @@ function RolesPage() {
     }
   };
 
+  const filteredRoles = roles.filter((r) =>
+    String(r?.name || "").toLowerCase().includes(search.trim().toLowerCase())
+  );
+  const totalPages = Math.max(1, Math.ceil(filteredRoles.length / pageSize));
+  const paginatedRoles = filteredRoles.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -118,12 +127,23 @@ function RolesPage() {
       
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-bold text-gray-800">User Roles</h2>
-        <button
-          onClick={() => setIsAddModalOpen(true)}
-          className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded flex items-center gap-2"
-        >
-          <FaPlus /> Add New Role
-        </button>
+        <div className="flex items-center gap-2">
+          <input
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setCurrentPage(1);
+            }}
+            placeholder="Search role..."
+            className="border border-gray-300 rounded px-3 py-2 text-sm"
+          />
+          <button
+            onClick={() => setIsAddModalOpen(true)}
+            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded flex items-center gap-2"
+          >
+            <FaPlus /> Add New Role
+          </button>
+        </div>
       </div>
 
       <div className="overflow-x-auto">
@@ -137,16 +157,16 @@ function RolesPage() {
             </tr>
           </thead>
           <tbody>
-            {roles.length === 0 ? (
+            {filteredRoles.length === 0 ? (
               <tr>
                 <td colSpan="4" className="p-4 text-center text-gray-500">
                   No roles found
                 </td>
               </tr>
             ) : (
-              roles.map((role, index) => (
+              paginatedRoles.map((role, index) => (
                 <tr key={role.id} className="border-b hover:bg-gray-50">
-                  <td className="p-3">{index + 1}</td>
+                  <td className="p-3">{(currentPage - 1) * pageSize + index + 1}</td>
                   <td className="p-3 font-medium">{role.name}</td>
                   <td className="p-3">
                     <div className="flex flex-wrap gap-1">
@@ -182,6 +202,32 @@ function RolesPage() {
           </tbody>
         </table>
       </div>
+
+      {filteredRoles.length > 0 && (
+        <div className="mt-4 flex items-center justify-between text-sm">
+          <div>
+            Page {currentPage} of {totalPages}
+          </div>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className="px-3 py-1 border rounded disabled:opacity-50"
+            >
+              Prev
+            </button>
+            <button
+              type="button"
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+              className="px-3 py-1 border rounded disabled:opacity-50"
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Edit Role Modal */}
       {editingRole && (

@@ -10,6 +10,8 @@ function AdmissionPage() {
   const [error, setError] = useState("");
   const [admissions, setAdmissions] = useState([]);
   const [courses, setCourses] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
 
   useEffect(() => {
     let mounted = true;
@@ -53,6 +55,16 @@ function AdmissionPage() {
     if (!selectedCourseId) return admissions;
     return admissions.filter((a) => String(a.course_id) === selectedCourseId);
   }, [admissions, selectedCourseId]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredAdmissions.length / pageSize));
+  const paginatedAdmissions = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filteredAdmissions.slice(start, start + pageSize);
+  }, [filteredAdmissions, currentPage]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedCourseId, admissions.length]);
 
   const handleViewDetails = (admission) => {
     navigate(`/piu/admin/admission/${admission.id}`);
@@ -142,7 +154,7 @@ function AdmissionPage() {
               )}
 
               {!loading &&
-                filteredAdmissions.map((admission, index) => {
+                paginatedAdmissions.map((admission, index) => {
                   const course = coursesById.get(String(admission.course_id));
                   const certificateUrl = toStorageUrl(admission.education_certificate);
                   const statementUrl = toStorageUrl(admission.personal_statement);
@@ -150,7 +162,7 @@ function AdmissionPage() {
                   return (
                 <tr key={admission.id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {index + 1}
+                    {(currentPage - 1) * pageSize + index + 1}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                     {admission.name}
@@ -238,6 +250,32 @@ function AdmissionPage() {
             </tbody>
           </table>
         </div>
+
+        {!loading && filteredAdmissions.length > 0 && (
+          <div className="mt-4 flex items-center justify-between text-sm text-gray-600">
+            <div>
+              Page {currentPage} of {totalPages}
+            </div>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="px-3 py-1 border rounded disabled:opacity-50"
+              >
+                Prev
+              </button>
+              <button
+                type="button"
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="px-3 py-1 border rounded disabled:opacity-50"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

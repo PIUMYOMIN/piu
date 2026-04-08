@@ -14,8 +14,9 @@ function getUserRole(user) {
 
 function getProfilePathByRole(role) {
   if (role === "admin") return "/piu/admin/profile";
+  if (role === "registrar") return "/piu/admin/profile";
   if (role === "student") return "/piu/student";
-  if (role === "teacher") return "/piu/teacher";
+  if (role === "teacher") return "/piu/admin/profile";
   if (role === "user") return "/piu/user";
   return "/piu/user";
 }
@@ -130,7 +131,7 @@ export default function Navbar() {
                           Profile
                         </Link>
 
-                        {role === "admin" && (
+                        {(role === "admin" || role === "teacher" || role === "registrar") && (
                           <Link
                             to="/piu/admin"
                             onClick={() => setShowUserDropdown(false)}

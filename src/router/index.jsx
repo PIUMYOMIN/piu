@@ -84,6 +84,7 @@ import ContactFormSubmittedSuccessful from "../pages/user/ContactFormSubmittedSu
 // Auth Components
 import PrivateRoute from "../components/PrivateRoute";
 import PublicRoute from "../components/PublicRoute";
+import RoleRoute from "../components/RoleRoute";
 
 const router = createBrowserRouter([
   {
@@ -146,7 +147,7 @@ const router = createBrowserRouter([
   {
     path: "piu/admin",
     element: (
-      <PrivateRoute requiredRole="admin">
+      <PrivateRoute requiredRole={["admin", "teacher", "registrar"]}>
         <AdminLayout />
       </PrivateRoute>
     ),
@@ -154,14 +155,63 @@ const router = createBrowserRouter([
       { index: true, element: <Dashboard /> },
       { path: "profile", element: <ProfileSetting /> },
       { path: "change-password", element: <ChangePassword /> },
-      { path: "users", element: <AdminUsers /> },
-      { path: "users-role", element: <UserRoles /> },
-      { path: "user-permission", element: <UserPermissions /> },
-      { path: "admission", element: <AdmissionPage /> },
-      { path: "admission/:id", element: <AdmissionDetails /> },
-      { path: "admission/details", element: <AdmissionDetails /> },
+      {
+        path: "users",
+        element: (
+          <RoleRoute allowedRoles={["admin"]}>
+            <AdminUsers />
+          </RoleRoute>
+        ),
+      },
+      {
+        path: "users-role",
+        element: (
+          <RoleRoute allowedRoles={["admin"]}>
+            <UserRoles />
+          </RoleRoute>
+        ),
+      },
+      {
+        path: "user-permission",
+        element: (
+          <RoleRoute allowedRoles={["admin"]}>
+            <UserPermissions />
+          </RoleRoute>
+        ),
+      },
+      {
+        path: "admission",
+        element: (
+          <RoleRoute allowedRoles={["admin", "registrar"]}>
+            <AdmissionPage />
+          </RoleRoute>
+        ),
+      },
+      {
+        path: "admission/:id",
+        element: (
+          <RoleRoute allowedRoles={["admin", "registrar"]}>
+            <AdmissionDetails />
+          </RoleRoute>
+        ),
+      },
+      {
+        path: "admission/details",
+        element: (
+          <RoleRoute allowedRoles={["admin", "registrar"]}>
+            <AdmissionDetails />
+          </RoleRoute>
+        ),
+      },
       { path: "course-list", element: <CourseList /> },
-      { path: "course-categories", element: <CourseCategories /> },
+      {
+        path: "course-categories",
+        element: (
+          <RoleRoute allowedRoles={["admin", "registrar"]}>
+            <CourseCategories />
+          </RoleRoute>
+        ),
+      },
       { path: "new/:id?", element: <NewCourse /> },
       { path: "blog-list", element: <BlogsList /> },
       { path: "add-blog", element: <BlogsForm /> },
@@ -172,16 +222,44 @@ const router = createBrowserRouter([
       { path: "campus-list", element: <CampusList /> },
       { path: "new-campus", element: <CampusForm /> },
       { path: "campus/:id/edit", element: <CampusForm /> },
-      { path: "team-list", element: <TeamList /> },
-      { path: "add-team", element: <AddTeam /> },
-      { path: "add-team/edit/:id", element: <AddTeam /> },
+      {
+        path: "team-list",
+        element: (
+          <RoleRoute allowedRoles={["admin"]}>
+            <TeamList />
+          </RoleRoute>
+        ),
+      },
+      {
+        path: "add-team",
+        element: (
+          <RoleRoute allowedRoles={["admin"]}>
+            <AddTeam />
+          </RoleRoute>
+        ),
+      },
+      {
+        path: "add-team/edit/:id",
+        element: (
+          <RoleRoute allowedRoles={["admin"]}>
+            <AddTeam />
+          </RoleRoute>
+        ),
+      },
       { path: "event-list", element: <EventList /> },
       { path: "add-event", element: <AddEvent /> },
       { path: "events/edit/:id", element: <AddEvent /> },
       { path: "curriculum-list", element: <CurriculumList /> },
       { path: "add-curriculum", element: <AddCurriculum /> },
       { path: "add-curriculum/edit/:id", element: <AddCurriculum /> },
-      { path: "slider", element: <SliderList /> },
+      {
+        path: "slider",
+        element: (
+          <RoleRoute allowedRoles={["admin"]}>
+            <SliderList />
+          </RoleRoute>
+        ),
+      },
       { path: "mou", element: <MOUList /> },
       { path: "mou/add", element: <AddMOU /> },
       { path: "departments", element: <DepartmentList /> },

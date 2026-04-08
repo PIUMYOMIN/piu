@@ -16,7 +16,7 @@ export default function Login() {
   const [portal, setPortal] = useState('user');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [studentId, setStudentId] = useState('');
+  const [studentCredential, setStudentCredential] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const { login, studentPortalLogin, loading } = useAuth();
@@ -27,11 +27,11 @@ export default function Login() {
 
     try {
       if (portal === 'student') {
-        if (!email || !studentId) {
-          setError('Please enter email and student ID.');
+        if (!studentCredential || !password) {
+          setError('Please enter email/student ID and password.');
           return;
         }
-        await studentPortalLogin(email, studentId);
+        await studentPortalLogin(studentCredential, password);
         navigate('/piu/student');
         return;
       }
@@ -61,10 +61,12 @@ export default function Login() {
 
       if (role === 'admin') {
         navigate('/piu/admin');
+      } else if (role === 'registrar') {
+        navigate('/piu/admin');
       } else if (role === 'student') {
         navigate('/piu/student');
       } else if (role === 'teacher') {
-        navigate('/piu/teacher');
+        navigate('/piu/admin');
       } else if (role === 'user') {
         navigate('/piu/user');
       } else {
@@ -128,61 +130,80 @@ export default function Login() {
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="rounded-md border border-green-200 bg-green-50 px-3 py-2 text-sm font-medium text-green-800">
             {portal === "student"
-              ? "Student Portal: use email and student ID."
+              ? "Student Portal: use email or student ID, and password."
               : "User Portal: normal users can login directly with email and password."}
           </div>
 
           <div className="rounded-md shadow-sm space-y-4">
-            <div>
-              <label htmlFor="email" className="sr-only">
-                Email address
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 sm:text-sm"
-                placeholder="Email address"
-              />
-            </div>
-
             {portal === 'student' ? (
-              <div>
-                <label htmlFor="studentId" className="sr-only">
-                  Student ID
-                </label>
-                <input
-                  id="studentId"
-                  name="studentId"
-                  type="text"
-                  required
-                  value={studentId}
-                  onChange={(e) => setStudentId(e.target.value)}
-                  className="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 sm:text-sm"
-                  placeholder="Student ID"
-                />
-              </div>
+              <>
+                <div>
+                  <label htmlFor="studentCredential" className="sr-only">
+                    Email or Student ID
+                  </label>
+                  <input
+                    id="studentCredential"
+                    name="studentCredential"
+                    type="text"
+                    required
+                    value={studentCredential}
+                    onChange={(e) => setStudentCredential(e.target.value)}
+                    className="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 sm:text-sm"
+                    placeholder="Email or Student ID"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="password" className="sr-only">
+                    Password
+                  </label>
+                  <input
+                    id="password"
+                    name="password"
+                    type="password"
+                    autoComplete="current-password"
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 sm:text-sm"
+                    placeholder="Password"
+                  />
+                </div>
+              </>
             ) : (
-              <div>
-                <label htmlFor="password" className="sr-only">
-                  Password
-                </label>
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  autoComplete="current-password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 sm:text-sm"
-                  placeholder="Password"
-                />
-              </div>
+              <>
+                <div>
+                  <label htmlFor="email" className="sr-only">
+                    Email address
+                  </label>
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    autoComplete="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 sm:text-sm"
+                    placeholder="Email address"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="password" className="sr-only">
+                    Password
+                  </label>
+                  <input
+                    id="password"
+                    name="password"
+                    type="password"
+                    autoComplete="current-password"
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 sm:text-sm"
+                    placeholder="Password"
+                  />
+                </div>
+              </>
             )}
           </div>
 

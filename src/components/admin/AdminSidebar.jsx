@@ -7,15 +7,24 @@ import {
   FaClock, FaImages, FaSuitcase, FaUserGraduate, FaEnvelope, FaTasks,
   FaBook, FaBookReader, FaChevronRight, FaTimes, FaSignOutAlt
 } from "react-icons/fa";
+import { useAuth } from "../../contexts/AuthContext";
+
+function resolveRole(user) {
+  return String(
+    user?.role?.name ??
+      user?.role ??
+      (Array.isArray(user?.roles) ? user.roles[0]?.name || user.roles[0] : "")
+  ).toLowerCase();
+}
 
 // ----------------- ADMIN MENU -----------------
 const adminMenu = [
-  { title: "Dashboard", icon: <FaTachometerAlt />, path: "/piu/admin" },
-  { title: "Profile Setting", icon: <FaUserCog />, path: "/piu/admin/profile" },
-  { title: "Change Password", icon: <FaKey />, path: "/piu/admin/change-password" },
+  { title: "Dashboard", icon: <FaTachometerAlt />, path: "/piu/admin", roles: ["admin", "teacher", "registrar"] },
+  { title: "Profile Setting", icon: <FaUserCog />, path: "/piu/admin/profile", roles: ["admin", "teacher", "registrar"] },
+  { title: "Change Password", icon: <FaKey />, path: "/piu/admin/change-password", roles: ["admin", "teacher", "registrar"] },
 
   {
-    title: "Users", icon: <FaUsers />,
+    title: "Users", icon: <FaUsers />, roles: ["admin"],
     sub: [
       { name: "All Users", path: "/piu/admin/users" },
       { name: "User Role", path: "/piu/admin/users-role" },
@@ -23,96 +32,96 @@ const adminMenu = [
     ]
   },
   {
-    title: "Admission", icon: <FaGraduationCap />, path: "/piu/admin/admission",
+    title: "Admission", icon: <FaGraduationCap />, path: "/piu/admin/admission", roles: ["admin", "registrar"],
   },
   {
-    title: "All Courses", icon: <FaBookOpen />,
+    title: "All Courses", icon: <FaBookOpen />, roles: ["admin", "teacher", "registrar"],
     sub: [
       { name: "Course List", path: "/piu/admin/course-list" },
       { name: "Add Course", path: "/piu/admin/new" },
     ]
   },
   {
-    title: "Course Categories", icon: <FaListAlt />,
+    title: "Course Categories", icon: <FaListAlt />, roles: ["admin", "registrar"],
     sub: [
       { name: "Categories", path: "/piu/admin/course-categories" }
     ]
   },
   {
-    title: "All Blogs", icon: <FaBlog />,
+    title: "All Blogs", icon: <FaBlog />, roles: ["admin", "teacher", "registrar"],
     sub: [
       { name: "Blog List", path: "/piu/admin/blog-list" },
       { name: "Add Blog", path: "/piu/admin/add-blog" },
     ]
   },
   {
-    title: "All News", icon: <FaNewspaper />,
+    title: "All News", icon: <FaNewspaper />, roles: ["admin", "teacher", "registrar"],
     sub: [
       { name: "News List", path: "/piu/admin/news" },
       { name: "Add News", path: "/piu/admin/add-news" },
     ]
   },
   {
-    title: "Events", icon: <FaCalendarAlt />,
+    title: "Events", icon: <FaCalendarAlt />, roles: ["admin", "teacher", "registrar"],
     sub: [
       { name: "Event List", path: "/piu/admin/event-list" },
       { name: "Add Event", path: "/piu/admin/add-event" },
     ]
   },
   {
-    title: "All Campus", icon: <FaUniversity />,
+    title: "All Campus", icon: <FaUniversity />, roles: ["admin", "registrar"],
     sub: [
       { name: "Campus List", path: "/piu/admin/campus-list" },
       { name: "Add Campus", path: "/piu/admin/new-campus" },
     ]
   },
   {
-    title: "Curriculums", icon: <FaListAlt />,
+    title: "Curriculums", icon: <FaListAlt />, roles: ["admin", "teacher", "registrar"],
     sub: [
       { name: "Curriculum List", path: "/piu/admin/curriculum-list" },
       { name: "Add Curriculum", path: "/piu/admin/add-curriculum" },
     ]
   },
   {
-    title: "Teams", icon: <FaUsersCog />,
+    title: "Teams", icon: <FaUsersCog />, roles: ["admin"],
     sub: [
       { name: "Team List", path: "/piu/admin/team-list" },
       { name: "Add Team", path: "/piu/admin/add-team" },
     ]
   },
   {
-    title: "Slider", icon: <FaSlidersH />, path: "/piu/admin/slider"
+    title: "Slider", icon: <FaSlidersH />, path: "/piu/admin/slider", roles: ["admin"]
   },
   {
-    title: "MOU Partnership", icon: <FaHandshake />,
+    title: "MOU Partnership", icon: <FaHandshake />, roles: ["admin", "registrar"],
     sub: [
       { name: "All MOU", path: "/piu/admin/mou" },
       { name: "Add MOU", path: "/piu/admin/mou/add" },
     ]
   },
   {
-    title: "Departments", icon: <FaBuilding />,
+    title: "Departments", icon: <FaBuilding />, roles: ["admin", "registrar"],
     sub: [
       { name: "Department List", path: "/piu/admin/departments" },
       { name: "Add Department", path: "/piu/admin/departments/new" },
     ]
   },
   {
-    title: "Positions", icon: <FaBriefcase />,
+    title: "Positions", icon: <FaBriefcase />, roles: ["admin", "registrar"],
     sub: [
       { name: "Position List", path: "/piu/admin/positions" },
       { name: "Add Position", path: "/piu/admin/positions/new" },
     ]
   },
   {
-    title: "Seminar", icon: <FaChalkboardTeacher />,
+    title: "Seminar", icon: <FaChalkboardTeacher />, roles: ["admin", "teacher", "registrar"],
     sub: [
       { name: "Seminar List", path: "/piu/admin/seminars" },
       { name: "Add Seminar", path: "/piu/admin/seminars/add" },
     ]
   },
   {
-    title: "Students", icon: <FaUserGraduate />,
+    title: "Students", icon: <FaUserGraduate />, roles: ["admin", "teacher", "registrar"],
     sub: [
       { name: "All Students", path: "/piu/admin/students" },
       { name: "Add Student", path: "/piu/admin/students/add" },
@@ -121,28 +130,28 @@ const adminMenu = [
     ]
   },
   {
-    title: "Gallery", icon: <FaImages />,
+    title: "Gallery", icon: <FaImages />, roles: ["admin", "teacher", "registrar"],
     sub: [
       { name: "Gallery List", path: "/piu/admin/gallery" },
       { name: "Add Gallery", path: "/piu/admin/gallery/add" },
     ]
   },
   {
-    title: "Assignments", icon: <FaTasks />,
+    title: "Assignments", icon: <FaTasks />, roles: ["admin", "teacher"],
     sub: [
       { name: "Assignment List", path: "/piu/admin/assignments" },
       { name: "Add Assignment", path: "/piu/admin/assignments/add" },
     ]
   },
   {
-    title: "Course Modules", icon: <FaBook />,
+    title: "Course Modules", icon: <FaBook />, roles: ["admin", "teacher", "registrar"],
     sub: [
       { name: "Module List", path: "/piu/admin/modules" },
       { name: "Add Module", path: "/piu/admin/modules/add" },
     ]
   },
   {
-    title: "Exam Time Table", icon: <FaClock />,
+    title: "Exam Time Table", icon: <FaClock />, roles: ["admin", "registrar"],
     sub: [
       { name: "Time Table List", path: "/piu/admin/timetable-list" },
       { name: "Add Time Table", path: "/piu/admin/add-timetable" },
@@ -150,7 +159,7 @@ const adminMenu = [
     ]
   },
   {
-    title: "Job Vacants", icon: <FaSuitcase />,
+    title: "Job Vacants", icon: <FaSuitcase />, roles: ["admin"],
     sub: [
       { name: "Job List", path: "/piu/admin/job-list" },
       { name: "Add Job", path: "/piu/admin/add-job" },
@@ -158,7 +167,7 @@ const adminMenu = [
     ]
   },
   {
-    title: "Mail Box", icon: <FaEnvelope />,
+    title: "Mail Box", icon: <FaEnvelope />, roles: ["admin", "teacher", "registrar"],
     sub: [
       { name: "Inbox", path: "/piu/admin/inbox" },
       { name: "Sent Mails", path: "/piu/admin/sent-mails" },
@@ -166,7 +175,7 @@ const adminMenu = [
     ]
   },
   {
-    title: "Subjects", icon: <FaBookReader />,
+    title: "Subjects", icon: <FaBookReader />, roles: ["admin", "teacher", "registrar"],
     sub: [
       { name: "Subject List", path: "/piu/admin/subject-list" },
       { name: "Add Subject", path: "/piu/admin/add-subject" },
@@ -176,6 +185,8 @@ const adminMenu = [
 ];
 
 const AdminSidebar = ({ isSidebarOpen, toggleSidebar }) => {
+  const { user } = useAuth();
+  const role = resolveRole(user);
   const [openMenu, setOpenMenu] = useState(null);
   const location = useLocation();
 
@@ -211,7 +222,9 @@ const AdminSidebar = ({ isSidebarOpen, toggleSidebar }) => {
         </div>
 
         <ul className="p-4 space-y-1">
-          {adminMenu.map((item, index) => {
+          {adminMenu
+            .filter((item) => !item.roles || item.roles.includes(role))
+            .map((item, index) => {
             const hasSub = !!item.sub;
             const isItemActive = isActive(item.path) || (item.sub?.some(subItem => isActive(subItem.path)));
 
@@ -274,7 +287,7 @@ const AdminSidebar = ({ isSidebarOpen, toggleSidebar }) => {
                 )}
               </li>
             );
-          })}
+            })}
         </ul>
 
         {/* Footer with logout */}

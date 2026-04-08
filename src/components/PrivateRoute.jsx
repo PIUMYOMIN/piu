@@ -29,9 +29,15 @@ const PrivateRoute = ({ children, role, requiredRole }) => {
       (Array.isArray(user?.roles) ? user.roles[0]?.name || user.roles[0] : "")
   ).toLowerCase();
 
-  // Check if user has role
-  if (expectedRole && currentRole !== String(expectedRole).toLowerCase()) {
-    return <Navigate to="/" replace />;
+  // Check if user has role (supports string or array)
+  if (expectedRole) {
+    const allowedRoles = Array.isArray(expectedRole)
+      ? expectedRole.map((r) => String(r).toLowerCase())
+      : [String(expectedRole).toLowerCase()];
+
+    if (!allowedRoles.includes(currentRole)) {
+      return <Navigate to="/" replace />;
+    }
   }
 
   return children;

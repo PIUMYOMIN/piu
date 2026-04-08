@@ -24,6 +24,8 @@ const AllStudents = () => {
   const [filter, setFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
 
   const load = async () => {
     setLoading(true);
@@ -74,6 +76,16 @@ const AllStudents = () => {
       return matchesProgram && matchesStatus && matchesSearch;
     });
   }, [students, filter, statusFilter, searchTerm, coursesById]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredStudents.length / pageSize));
+  const paginatedStudents = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filteredStudents.slice(start, start + pageSize);
+  }, [filteredStudents, currentPage]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filter, statusFilter, searchTerm, students.length]);
 
   return (
     <div className="max-w-8xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
@@ -189,7 +201,7 @@ const AllStudents = () => {
               )}
 
               {!loading && filteredStudents.length > 0 ? (
-                filteredStudents.map((student) => {
+                paginatedStudents.map((student) => {
                   const fullName = `${student.fname || ""} ${student.lname || ""}`.trim();
                   const programId = student.course_id ?? student.course?.id;
                   const course = coursesById.get(String(programId));
@@ -296,8 +308,30 @@ const AllStudents = () => {
         </div>
 
         {/* Summary */}
-        <div className="mt-4 text-sm text-gray-600">
-          Showing {filteredStudents.length} of {students.length} students
+        <div className="mt-4 flex items-center justify-between text-sm text-gray-600">
+          <div>
+            Showing {paginatedStudents.length} of {filteredStudents.length} students (total {students.length})
+          </div>
+          {filteredStudents.length > 0 && (
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="px-3 py-1 border rounded disabled:opacity-50"
+              >
+                Prev
+              </button>
+              <button
+                type="button"
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="px-3 py-1 border rounded disabled:opacity-50"
+              >
+                Next
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

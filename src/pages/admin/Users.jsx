@@ -3,7 +3,10 @@ import { adminApi } from "../../api/admin";
 import { toStorageUrl } from "../../utils/api";
 
 function getUserRoleLabel(user) {
-  const role = user?.role || (Array.isArray(user?.roles) ? user.roles[0] : "");
+  const role =
+    user?.role?.name ||
+    user?.role ||
+    (Array.isArray(user?.roles) ? user.roles[0]?.name || user.roles[0] : "");
   return role ? String(role) : "user";
 }
 
@@ -22,6 +25,9 @@ function Users() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
+  const [updatingRoleId, setUpdatingRoleId] = useState(null);
 
   const [modal, setModal] = useState(null); // {mode:'create'|'edit', user, form}
   const [saving, setSaving] = useState(false);
@@ -55,6 +61,16 @@ function Users() {
       );
     });
   }, [users, search]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const paginatedUsers = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filtered.slice(start, start + pageSize);
+  }, [filtered, currentPage]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search]);
 
   const openCreate = () => {
     setModal({
@@ -116,6 +132,19 @@ function Users() {
     }
   };
 
+  const assignRole = async (user, nextRole) => {
+    setUpdatingRoleId(user.id);
+    setError("");
+    try {
+      await adminApi.users.update(user.id, { role: nextRole });
+      await load();
+    } catch (e) {
+      setError(e?.response?.data?.message || e?.message || "Failed to assign role");
+    } finally {
+      setUpdatingRoleId(null);
+    }
+  };
+
   return (
     <div className="bg-white p-6 rounded-lg shadow">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between p-4 mb-2 bg-[#002147] text-white rounded-t-lg">
@@ -149,7 +178,7 @@ function Users() {
             />
           </div>
           <div className="text-sm text-gray-600">
-            {loading ? "Loading..." : `Showing ${filtered.length} of ${users.length}`}
+            {loading ? "Loading..." : `Showing ${paginatedUsers.length} of ${filtered.length} (total ${users.length})`}
           </div>
         </div>
 
@@ -175,7 +204,7 @@ function Users() {
               )}
 
               {!loading &&
-                filtered.map((user) => {
+                paginatedUsers.map((user) => {
                   const img = toStorageUrl(user.profile_image) || user.profile_image || "";
                   const role = getUserRoleLabel(user);
                   return (
@@ -200,9 +229,21 @@ function Users() {
                       <td className="px-4 py-3">{user.phone || "—"}</td>
                       <td className="px-4 py-3">{user.email}</td>
                       <td className="px-4 py-3">
-                        <span className="px-2 py-1 rounded-full text-xs bg-slate-100 text-slate-700">
-                          {role}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <select
+                            value={role}
+                            onChange={(e) => assignRole(user, e.target.value)}
+                            disabled={updatingRoleId === user.id}
+                            className="border border-gray-300 rounded px-2 py-1 text-xs"
+                          >
+                            <option value="user">user</option>
+                            <option value="student">student</option>
+                            <option value="teacher">teacher</option>
+                            <option value="registrar">registrar</option>
+                            <option value="admin">admin</option>
+                          </select>
+                          {updatingRoleId === user.id && <span className="text-xs text-blue-600">Updating...</span>}
+                        </div>
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex justify-end gap-2">
@@ -236,6 +277,32 @@ function Users() {
             </tbody>
           </table>
         </div>
+
+        {!loading && filtered.length > 0 && (
+          <div className="mt-4 flex items-center justify-between text-sm">
+            <div>
+              Page {currentPage} of {totalPages}
+            </div>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="px-3 py-1 border rounded disabled:opacity-50"
+              >
+                Prev
+              </button>
+              <button
+                type="button"
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="px-3 py-1 border rounded disabled:opacity-50"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {modal && (
@@ -268,6 +335,7 @@ function Users() {
                     <option value="user">user</option>
                     <option value="student">student</option>
                     <option value="teacher">teacher</option>
+                    <option value="registrar">registrar</option>
                     <option value="admin">admin</option>
                   </select>
                 </div>
