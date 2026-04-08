@@ -3,16 +3,17 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 function resolveRole(user) {
-  const roleFromField = user?.role;
+  const roleFromField = user?.role?.name || user?.role;
   if (roleFromField) return String(roleFromField).toLowerCase();
   if (Array.isArray(user?.roles) && user.roles.length > 0) {
-    return String(user.roles[0]).toLowerCase();
+    const firstRole = user.roles[0];
+    return String(firstRole?.name || firstRole).toLowerCase();
   }
   return "";
 }
 
 export default function Login() {
-  const [portal, setPortal] = useState('');
+  const [portal, setPortal] = useState('user');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [studentId, setStudentId] = useState('');
@@ -23,11 +24,6 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-
-    if (!portal) {
-      setError('Please select a portal first.');
-      return;
-    }
 
     try {
       if (portal === 'student') {
@@ -70,10 +66,11 @@ export default function Login() {
         navigate('/');
       }
     } catch (err) {
-      const message =
-        err.response?.data?.message ||
-        err.response?.data?.error ||
-        'Invalid email or password';
+      const fallback =
+        portal === "user"
+          ? "No matching account in the user table. Please choose the correct portal."
+          : "Invalid login credentials.";
+      const message = err.response?.data?.message || err.response?.data?.error || fallback;
       setError(message);
     }
   };
@@ -83,59 +80,52 @@ export default function Login() {
       <div className="max-w-md w-full space-y-8">
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Select Portal & Sign In
+            Sign in to your account
           </h2>
         </div>
 
-        {!portal ? (
-          <div className="grid grid-cols-1 gap-3">
-            <button
-              type="button"
-              onClick={() => setPortal('admin')}
-              className="w-full rounded-md border border-gray-300 bg-white px-4 py-3 text-left hover:border-green-600 hover:bg-green-50"
-            >
-              <p className="font-semibold text-gray-900">Admin Portal</p>
-              <p className="text-xs text-gray-500">Login with email and password (users table)</p>
-            </button>
-            <button
-              type="button"
-              onClick={() => setPortal('teacher')}
-              className="w-full rounded-md border border-gray-300 bg-white px-4 py-3 text-left hover:border-green-600 hover:bg-green-50"
-            >
-              <p className="font-semibold text-gray-900">Teacher Portal</p>
-              <p className="text-xs text-gray-500">Login with email and password (users table)</p>
-            </button>
-            <button
-              type="button"
-              onClick={() => setPortal('student')}
-              className="w-full rounded-md border border-gray-300 bg-white px-4 py-3 text-left hover:border-green-600 hover:bg-green-50"
-            >
-              <p className="font-semibold text-gray-900">Student Portal</p>
-              <p className="text-xs text-gray-500">Login with email and student ID (students table)</p>
-            </button>
-          </div>
-        ) : null}
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+          <button
+            type="button"
+            onClick={() => setPortal('admin')}
+            className={`w-full rounded-md border px-4 py-2 text-sm text-left transition ${
+              portal === "admin"
+                ? "border-green-700 bg-green-50 text-green-900"
+                : "border-gray-300 bg-white hover:border-green-600 hover:bg-green-50"
+            }`}
+          >
+            Admin Portal
+          </button>
+          <button
+            type="button"
+            onClick={() => setPortal('teacher')}
+            className={`w-full rounded-md border px-4 py-2 text-sm text-left transition ${
+              portal === "teacher"
+                ? "border-green-700 bg-green-50 text-green-900"
+                : "border-gray-300 bg-white hover:border-green-600 hover:bg-green-50"
+            }`}
+          >
+            Teacher Portal
+          </button>
+          <button
+            type="button"
+            onClick={() => setPortal('student')}
+            className={`w-full rounded-md border px-4 py-2 text-sm text-left transition ${
+              portal === "student"
+                ? "border-green-700 bg-green-50 text-green-900"
+                : "border-gray-300 bg-white hover:border-green-600 hover:bg-green-50"
+            }`}
+          >
+            Student Portal
+          </button>
+        </div>
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          {portal && (
-            <div className="flex items-center justify-between rounded-md border border-green-200 bg-green-50 px-3 py-2 text-sm">
-              <span className="font-medium text-green-800">
-                Portal: {portal.charAt(0).toUpperCase() + portal.slice(1)}
-              </span>
-              <button
-                type="button"
-                onClick={() => {
-                  setPortal('');
-                  setError('');
-                  setPassword('');
-                  setStudentId('');
-                }}
-                className="text-green-700 hover:underline"
-              >
-                Change
-              </button>
-            </div>
-          )}
+          <div className="rounded-md border border-green-200 bg-green-50 px-3 py-2 text-sm font-medium text-green-800">
+            {portal === "student"
+              ? "Student Portal: use email and student ID."
+              : "User Portal: normal users can login directly with email and password."}
+          </div>
 
           <div className="rounded-md shadow-sm space-y-4">
             <div>

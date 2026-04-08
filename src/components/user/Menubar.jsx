@@ -4,7 +4,10 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 
 function getUserRole(user) {
-  const raw = user?.role ?? (Array.isArray(user?.roles) ? user.roles[0] : "");
+  const raw =
+    user?.role?.name ??
+    user?.role ??
+    (Array.isArray(user?.roles) ? user.roles[0]?.name || user.roles[0] : "");
   return String(raw || "").toLowerCase();
 }
 
