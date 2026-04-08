@@ -3,12 +3,17 @@ import { adminApi } from "../../api/admin";
 import { toStorageUrl } from "../../utils/api";
 import { useAuth } from "../../contexts/AuthContext";
 
+function normalizeRole(role) {
+  const v = String(role || "").toLowerCase();
+  return v === "faculty" ? "teacher" : v;
+}
+
 function getUserRoleLabel(user) {
   const role =
     user?.role?.name ||
     user?.role ||
     (Array.isArray(user?.roles) ? user.roles[0]?.name || user.roles[0] : "");
-  return role ? String(role) : "user";
+  return normalizeRole(role || "user");
 }
 
 function getInitials(name) {
@@ -36,6 +41,7 @@ function Users() {
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
   const [updatingRoleId, setUpdatingRoleId] = useState(null);
+  const [availableRoles, setAvailableRoles] = useState([]);
 
   const [modal, setModal] = useState(null); // {mode:'create'|'edit', user, form}
   const [saving, setSaving] = useState(false);
@@ -44,11 +50,13 @@ function Users() {
     setLoading(true);
     setError("");
     try {
-      const data = await adminApi.users.list();
+      const [data, roles] = await Promise.all([adminApi.users.list(), adminApi.roles.list()]);
       setUsers(Array.isArray(data) ? data : []);
+      setAvailableRoles(Array.isArray(roles) ? roles : []);
     } catch (e) {
       setError(e?.response?.data?.message || e?.message || "Failed to load users");
       setUsers([]);
+      setAvailableRoles([]);
     } finally {
       setLoading(false);
     }
@@ -105,6 +113,27 @@ function Users() {
 
   const closeModal = () => setModal(null);
 
+  const roleNames = useMemo(() => {
+    const fromApi = (availableRoles || [])
+      .map((r) => normalizeRole(r?.name || r))
+      .filter(Boolean);
+    const base = ["user", "student", "teacher", "registrar", "admin"];
+    return Array.from(new Set([...base, ...fromApi]));
+  }, [availableRoles]);
+
+  const hasTeacherInApi = (availableRoles || []).some(
+    (r) => String(r?.name || r || "").toLowerCase() === "teacher"
+  );
+  const hasFacultyInApi = (availableRoles || []).some(
+    (r) => String(r?.name || r || "").toLowerCase() === "faculty"
+  );
+
+  const toApiRole = (role) => {
+    const normalized = normalizeRole(role);
+    if (normalized === "teacher" && !hasTeacherInApi && hasFacultyInApi) return "faculty";
+    return normalized;
+  };
+
   const onFormChange = (e) => {
     const { name, value } = e.target;
     setModal((prev) => (prev ? { ...prev, form: { ...prev.form, [name]: value } } : prev));
@@ -116,9 +145,9 @@ function Users() {
     setError("");
     try {
       if (modal.mode === "create") {
-        await adminApi.users.create(modal.form);
+        await adminApi.users.create({ ...modal.form, role: toApiRole(modal.form.role) });
       } else {
-        await adminApi.users.update(modal.user.id, modal.form);
+        await adminApi.users.update(modal.user.id, { ...modal.form, role: toApiRole(modal.form.role) });
       }
       closeModal();
       await load();
@@ -145,7 +174,7 @@ function Users() {
     setUpdatingRoleId(user.id);
     setError("");
     try {
-      await adminApi.users.update(user.id, { role: nextRole });
+      await adminApi.users.update(user.id, { role: toApiRole(nextRole) });
       await load();
     } catch (e) {
       setError(e?.response?.data?.message || e?.message || "Failed to assign role");
@@ -245,11 +274,11 @@ function Users() {
                             disabled={updatingRoleId === user.id}
                             className="border border-gray-300 rounded px-2 py-1 text-xs"
                           >
-                            <option value="user">user</option>
-                            <option value="student">student</option>
-                            <option value="teacher">teacher</option>
-                            <option value="registrar">registrar</option>
-                            <option value="admin">admin</option>
+                            {roleNames.map((r) => (
+                              <option key={r} value={r}>
+                                {r}
+                              </option>
+                            ))}
                           </select>
                           {updatingRoleId === user.id && <span className="text-xs text-blue-600">Updating...</span>}
                         </div>
@@ -343,11 +372,11 @@ function Users() {
                     onChange={onFormChange}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                   >
-                    <option value="user">user</option>
-                    <option value="student">student</option>
-                    <option value="teacher">teacher</option>
-                    <option value="registrar">registrar</option>
-                    <option value="admin">admin</option>
+                    {roleNames.map((r) => (
+                      <option key={r} value={r}>
+                        {r}
+                      </option>
+                    ))}
                   </select>
                 </div>
                 <div className="md:col-span-2">

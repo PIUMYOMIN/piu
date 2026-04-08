@@ -23,11 +23,12 @@ const PrivateRoute = ({ children, role, requiredRole }) => {
   }
 
   const expectedRole = requiredRole || role;
-  const currentRole = String(
+  const rawRole = String(
     user?.role?.name ??
       user?.role ??
       (Array.isArray(user?.roles) ? user.roles[0]?.name || user.roles[0] : "")
   ).toLowerCase();
+  const currentRole = rawRole === "faculty" ? "teacher" : rawRole;
 
   // Check if user has role (supports string or array)
   if (expectedRole) {

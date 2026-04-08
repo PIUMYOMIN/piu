@@ -15,11 +15,12 @@ const PublicRoute = ({ children }) => {
 
   // If user is authenticated, redirect to appropriate dashboard
   if (isAuthenticated) {
-    const role = String(
+    const rawRole = String(
       user?.role?.name ??
         user?.role ??
         (Array.isArray(user?.roles) ? user.roles[0]?.name || user.roles[0] : "")
     ).toLowerCase();
+    const role = rawRole === "faculty" ? "teacher" : rawRole;
 
     // Redirect based on user role
     if (role === "admin") {

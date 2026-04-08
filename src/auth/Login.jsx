@@ -4,10 +4,14 @@ import { useAuth } from '../contexts/AuthContext';
 
 function resolveRole(user) {
   const roleFromField = user?.role?.name || user?.role;
-  if (roleFromField) return String(roleFromField).toLowerCase();
+  if (roleFromField) {
+    const role = String(roleFromField).toLowerCase();
+    return role === "faculty" ? "teacher" : role;
+  }
   if (Array.isArray(user?.roles) && user.roles.length > 0) {
     const firstRole = user.roles[0];
-    return String(firstRole?.name || firstRole).toLowerCase();
+    const role = String(firstRole?.name || firstRole).toLowerCase();
+    return role === "faculty" ? "teacher" : role;
   }
   return "";
 }
