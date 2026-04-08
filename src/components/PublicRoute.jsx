@@ -3,7 +3,7 @@ import { Navigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 
 const PublicRoute = ({ children }) => {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, user, loading } = useAuth();
 
   if (loading) {
     return (
@@ -15,15 +15,19 @@ const PublicRoute = ({ children }) => {
 
   // If user is authenticated, redirect to appropriate dashboard
   if (isAuthenticated) {
-    const user = JSON.parse(localStorage.getItem("user") || "{}");
-    
+    const role = String(
+      user?.role ?? (Array.isArray(user?.roles) ? user.roles[0] : "")
+    ).toLowerCase();
+
     // Redirect based on user role
-    if (user?.role === "admin") {
+    if (role === "admin") {
       return <Navigate to="/piu/admin" replace />;
-    } else if (user?.role === "student") {
+    } else if (role === "student") {
       return <Navigate to="/piu/student" replace />;
-    } else if (user?.role === "teacher") {
+    } else if (role === "teacher") {
       return <Navigate to="/piu/teacher" replace />;
+    } else if (role === "user") {
+      return <Navigate to="/piu/user" replace />;
     } else {
       return <Navigate to="/" replace />;
     }

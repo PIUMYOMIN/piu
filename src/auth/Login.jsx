@@ -12,31 +12,60 @@ function resolveRole(user) {
 }
 
 export default function Login() {
+  const [portal, setPortal] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [studentId, setStudentId] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
-  const { login, loading } = useAuth();
+  const { login, studentPortalLogin, loading } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
-    if (!email || !password) {
-      setError('Please fill in all fields');
+    if (!portal) {
+      setError('Please select a portal first.');
       return;
     }
 
     try {
+      if (portal === 'student') {
+        if (!email || !studentId) {
+          setError('Please enter email and student ID.');
+          return;
+        }
+        await studentPortalLogin(email, studentId);
+        navigate('/piu/student');
+        return;
+      }
+
+      if (!email || !password) {
+        setError('Please fill in all fields');
+        return;
+      }
+
       const userData = await login(email, password);
       const role = resolveRole(userData?.user);
-      // Redirect based on role
+
+      if (portal === 'admin' && role !== 'admin') {
+        setError('This account is not an admin account.');
+        return;
+      }
+
+      if (portal === 'teacher' && role !== 'teacher') {
+        setError('This account is not a teacher account.');
+        return;
+      }
+
       if (role === 'admin') {
         navigate('/piu/admin');
       } else if (role === 'student') {
         navigate('/piu/student');
       } else if (role === 'teacher') {
         navigate('/piu/teacher');
+      } else if (role === 'user') {
+        navigate('/piu/user');
       } else {
         navigate('/');
       }
@@ -54,11 +83,60 @@ export default function Login() {
       <div className="max-w-md w-full space-y-8">
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Sign in to your account
+            Select Portal & Sign In
           </h2>
         </div>
 
+        {!portal ? (
+          <div className="grid grid-cols-1 gap-3">
+            <button
+              type="button"
+              onClick={() => setPortal('admin')}
+              className="w-full rounded-md border border-gray-300 bg-white px-4 py-3 text-left hover:border-green-600 hover:bg-green-50"
+            >
+              <p className="font-semibold text-gray-900">Admin Portal</p>
+              <p className="text-xs text-gray-500">Login with email and password (users table)</p>
+            </button>
+            <button
+              type="button"
+              onClick={() => setPortal('teacher')}
+              className="w-full rounded-md border border-gray-300 bg-white px-4 py-3 text-left hover:border-green-600 hover:bg-green-50"
+            >
+              <p className="font-semibold text-gray-900">Teacher Portal</p>
+              <p className="text-xs text-gray-500">Login with email and password (users table)</p>
+            </button>
+            <button
+              type="button"
+              onClick={() => setPortal('student')}
+              className="w-full rounded-md border border-gray-300 bg-white px-4 py-3 text-left hover:border-green-600 hover:bg-green-50"
+            >
+              <p className="font-semibold text-gray-900">Student Portal</p>
+              <p className="text-xs text-gray-500">Login with email and student ID (students table)</p>
+            </button>
+          </div>
+        ) : null}
+
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          {portal && (
+            <div className="flex items-center justify-between rounded-md border border-green-200 bg-green-50 px-3 py-2 text-sm">
+              <span className="font-medium text-green-800">
+                Portal: {portal.charAt(0).toUpperCase() + portal.slice(1)}
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  setPortal('');
+                  setError('');
+                  setPassword('');
+                  setStudentId('');
+                }}
+                className="text-green-700 hover:underline"
+              >
+                Change
+              </button>
+            </div>
+          )}
+
           <div className="rounded-md shadow-sm space-y-4">
             <div>
               <label htmlFor="email" className="sr-only">
@@ -77,22 +155,40 @@ export default function Login() {
               />
             </div>
 
-            <div>
-              <label htmlFor="password" className="sr-only">
-                Password
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 sm:text-sm"
-                placeholder="Password"
-              />
-            </div>
+            {portal === 'student' ? (
+              <div>
+                <label htmlFor="studentId" className="sr-only">
+                  Student ID
+                </label>
+                <input
+                  id="studentId"
+                  name="studentId"
+                  type="text"
+                  required
+                  value={studentId}
+                  onChange={(e) => setStudentId(e.target.value)}
+                  className="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 sm:text-sm"
+                  placeholder="Student ID"
+                />
+              </div>
+            ) : (
+              <div>
+                <label htmlFor="password" className="sr-only">
+                  Password
+                </label>
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  autoComplete="current-password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 sm:text-sm"
+                  placeholder="Password"
+                />
+              </div>
+            )}
           </div>
 
           {error && (
@@ -136,24 +232,26 @@ export default function Login() {
                   Login...
                 </div>
               ) : (
-                'Sign in'
+                'Login'
               )}
             </button>
           </div>
 
-          <div className="pt-2 text-center space-y-2">
-            <p className="text-sm">
-              <Link to="/forgot-password" className="font-medium text-green-700 hover:text-green-600">
-                Forgot your password?
-              </Link>
-            </p>
-            <p className="text-sm text-gray-600">
-              Don&apos;t have an account?{" "}
-              <Link to="/register" className="font-medium text-green-600 hover:text-green-500">
-                Create one
-              </Link>
-            </p>
-          </div>
+          {portal !== 'student' && (
+            <div className="pt-2 text-center space-y-2">
+              <p className="text-sm">
+                <Link to="/forgot-password" className="font-medium text-green-700 hover:text-green-600">
+                  Forgot your password?
+                </Link>
+              </p>
+              <p className="text-sm text-gray-600">
+                Don&apos;t have an account?{" "}
+                <Link to="/register" className="font-medium text-green-600 hover:text-green-500">
+                  Create one
+                </Link>
+              </p>
+            </div>
+          )}
         </form>
       </div>
     </div>

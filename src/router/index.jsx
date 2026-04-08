@@ -17,6 +17,7 @@ import AdminLayout from "../layouts/AdminLayout";
 import UserLayout from "../layouts/UserLayout";
 import StudentLayout from "../layouts/StudentLayout";
 import TeacherLayout from "../layouts/TeacherLayout";
+import UserDashboardLayout from "../layouts/UserDashboardLayout";
 import CourseDetails from "../pages/user/CourseDetails";
 import NewsDetails from "../pages/user/NewsDetails";
 import Gallery from "../components/user/Gallery";
@@ -73,6 +74,7 @@ import ChangePassword from "../pages/admin/ChangePassword";
 import Admission2 from "../pages/user/Admission2";
 import TeamProfile from "../pages/user/TeamProfile";
 import StudentProfile from "../pages/student/StudentProfile";
+import UserDashboard from "../pages/user/UserDashboard";
 import TeacherDashboard from "../pages/teacher/TeacherDashboard";
 import TeacherProfile from "../pages/teacher/TeacherProfile";
 import Admission from "../pages/user/Admission";
@@ -233,6 +235,15 @@ const router = createBrowserRouter([
       { index: true, element: <TeacherDashboard /> },
       { path: "profile", element: <TeacherProfile /> },
     ],
+  },
+  {
+    path: "piu/user",
+    element: (
+      <PrivateRoute requiredRole="user">
+        <UserDashboardLayout />
+      </PrivateRoute>
+    ),
+    children: [{ index: true, element: <UserDashboard /> }],
   },
 ]);
 

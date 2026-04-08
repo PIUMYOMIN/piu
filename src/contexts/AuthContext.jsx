@@ -48,6 +48,7 @@ export const AuthProvider = ({ children }) => {
       const responseData = await v2.register(userData);
       const { token, user } = responseData;
       localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(user || {}));
       setUser(user);
       return responseData;
     } finally {
@@ -62,6 +63,25 @@ export const AuthProvider = ({ children }) => {
       const responseData = await v2.login({ email, password });
       const { token, user } = responseData;
       localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(user || {}));
+      setUser(user);
+      return responseData;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Student portal login (student table auth flow)
+  const studentPortalLogin = async (email, studentId) => {
+    setLoading(true);
+    try {
+      const responseData = await v2.studentPortalLogin({
+        email,
+        student_id: studentId,
+      });
+      const { token, user } = responseData;
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(user || {}));
       setUser(user);
       return responseData;
     } finally {
@@ -78,6 +98,7 @@ export const AuthProvider = ({ children }) => {
       console.error('Logout error:', error);
     } finally {
       localStorage.removeItem('token');
+      localStorage.removeItem('user');
       setUser(null);
       setLoading(false);
     }
@@ -89,6 +110,7 @@ export const AuthProvider = ({ children }) => {
     initialized,
     register,
     login,
+    studentPortalLogin,
     logout,
     isAuthenticated: !!user,
   };

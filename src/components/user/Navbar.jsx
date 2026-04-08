@@ -13,6 +13,7 @@ function getProfilePathByRole(role) {
   if (role === "admin") return "/piu/admin/profile";
   if (role === "student") return "/piu/student";
   if (role === "teacher") return "/piu/teacher";
+  if (role === "user") return "/piu/user";
   return "/login";
 }
 
