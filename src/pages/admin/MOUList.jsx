@@ -1,170 +1,119 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import adminApi from "../../api/admin";
+import { toStorageUrl } from "../../utils/api";
+import { useAuth } from "../../contexts/AuthContext";
 
-function MOUList() {
+export default function MOUList() {
+  const { user: authUser } = useAuth();
+  const currentRole = String(
+    authUser?.role?.name ??
+      authUser?.role ??
+      (Array.isArray(authUser?.roles) ? authUser.roles[0]?.name || authUser.roles[0] : "")
+  ).toLowerCase();
+  const isAdmin = currentRole === "admin";
   const navigate = useNavigate();
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [search, setSearch] = useState("");
 
-  const [mous, setMous] = useState([
-    {
-      id: 1,
-      name: "Tech University",
-      description: "Collaboration for research and student exchange",
-      image: "https://images.unsplash.com/photo-1524178232400-38d816f003ae?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80",
-      status: "active",
-      startDate: "2023-01-01",
-      endDate: "2026-01-01",
-      partner: "Tech University",
-      category: "Research",
-    },
-    {
-      id: 2,
-      name: "Global Institute",
-      description: "Joint curriculum development program",
-      image: "https://images.unsplash.com/photo-1562774053-701939374585?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80",
-      status: "inactive",
-      startDate: "2022-06-15",
-      endDate: "2025-06-15",
-      partner: "Global Institute",
-      category: "Curriculum",
-    },
-  ]);
-
-  const handleStatusChange = (id) => {
-    setMous((prev) =>
-      prev.map((mou) =>
-        mou.id === id
-          ? { ...mou, status: mou.status === "active" ? "inactive" : "active" }
-          : mou
-      )
-    );
+  const load = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const data = await adminApi.partners.list();
+      setItems(Array.isArray(data) ? data : []);
+    } catch (e) {
+      setError(e?.response?.data?.message || e?.message || "Failed to load MOU partners");
+      setItems([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleEdit = (mou) => {
-    navigate("/piu/admin/mou/add", { state: { mou } });
+  useEffect(() => {
+    load();
+  }, []);
+
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return items;
+    return items.filter(
+      (i) =>
+        String(i?.name || "").toLowerCase().includes(q) ||
+        String(i?.web_address || "").toLowerCase().includes(q)
+    );
+  }, [items, search]);
+
+  const remove = async (item) => {
+    if (!isAdmin) return;
+    if (!window.confirm(`Delete "${item?.name}"?`)) return;
+    try {
+      await adminApi.partners.remove(item.id);
+      await load();
+    } catch (e) {
+      setError(e?.response?.data?.message || e?.message || "Failed to delete partner");
+    }
   };
 
   return (
     <div className="max-w-7xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
-      {/* Header */}
       <div className="bg-[#002147] p-6 text-white">
         <h2 className="text-2xl font-bold">MOU Management</h2>
-        <p className="text-blue-100 mt-1">
-          Manage Memorandums of Understanding with partner institutions
-        </p>
+        <p className="text-blue-100 mt-1">Manage partner institutions</p>
       </div>
 
       <div className="p-6">
-        {/* Add Button */}
-        <div className="flex justify-end mb-6">
-          <Link
-            to="/piu/admin/mou/add"
-            className="flex items-center justify-center bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors"
-          >
-            <i className="fas fa-plus-circle mr-2"></i>
+        {error && <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div>}
+        <div className="flex justify-between items-center mb-6 gap-4">
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search partner..."
+            className="px-4 py-2 w-full sm:w-72 border border-gray-300 rounded-lg"
+          />
+          <Link to="/piu/admin/mou/add" className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg">
             Add MOU
           </Link>
         </div>
 
-        {/* MOU Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {mous.map((mou) => (
-            <div
-              key={mou.id}
-              className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow"
-            >
-              {/* Image */}
-              <div className="h-48 overflow-hidden">
+          {loading && <div className="text-gray-500">Loading...</div>}
+          {!loading &&
+            filtered.map((mou) => (
+              <div key={mou.id} className="border border-gray-200 rounded-lg overflow-hidden">
                 <img
-                  src={mou.image}
+                  src={toStorageUrl(mou.image) || mou.image || "https://via.placeholder.com/500x250?text=MOU"}
                   alt={mou.name}
-                  className="w-full h-full object-cover"
+                  className="w-full h-44 object-cover"
                 />
-              </div>
-
-              {/* Content */}
-              <div className="p-5">
-                <div className="flex justify-between items-start mb-3">
-                  <h3 className="text-xl font-semibold text-gray-900">
-                    {mou.name}
-                  </h3>
-                  <span
-                    className={`px-3 py-1 text-xs font-medium rounded-full ${
-                      mou.status === "active"
-                        ? "bg-green-100 text-green-800"
-                        : "bg-gray-100 text-gray-800"
-                    }`}
-                  >
-                    {mou.status === "active" ? "Active" : "Inactive"}
-                  </span>
-                </div>
-
-                <p className="text-gray-600 mb-4 line-clamp-3">
-                  {mou.description}
-                </p>
-
-                <div className="flex justify-between items-center">
-                  <label className="flex items-center cursor-pointer">
-                    <div className="relative">
-                      <input
-                        type="checkbox"
-                        className="sr-only"
-                        checked={mou.status === "active"}
-                        onChange={() => handleStatusChange(mou.id)}
-                      />
-                      <div
-                        className={`block w-14 h-7 rounded-full ${
-                          mou.status === "active" ? "bg-blue-600" : "bg-gray-300"
-                        }`}
-                      ></div>
-                      <div
-                        className={`absolute left-1 top-1 bg-white w-5 h-5 rounded-full transition-transform ${
-                          mou.status === "active"
-                            ? "transform translate-x-7"
-                            : ""
-                        }`}
-                      ></div>
-                    </div>
-                    <div className="ml-3 text-sm font-medium text-gray-700">
-                      {mou.status === "active" ? "Deactivate" : "Activate"}
-                    </div>
-                  </label>
-
-                  <button
-                    onClick={() => handleEdit(mou)}
-                    className="text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-4 py-2 rounded-md transition-colors"
-                    title="Edit MOU"
-                  >
-                    <i className="fas fa-edit mr-2"></i>
-                    Edit
-                  </button>
+                <div className="p-4">
+                  <h3 className="text-lg font-semibold">{mou.name}</h3>
+                  <p className="text-sm text-gray-600 mt-1 line-clamp-3">{mou.description}</p>
+                  <a href={mou.web_address} target="_blank" rel="noreferrer" className="text-sm text-blue-600 hover:underline block mt-2">
+                    {mou.web_address}
+                  </a>
+                  <div className="mt-3 flex justify-end gap-2">
+                    <button
+                      onClick={() => navigate("/piu/admin/mou/add", { state: { mou } })}
+                      className="px-3 py-1 rounded bg-blue-50 hover:bg-blue-100 text-blue-700"
+                    >
+                      Edit
+                    </button>
+                    {isAdmin && (
+                      <button onClick={() => remove(mou)} className="px-3 py-1 rounded bg-red-50 hover:bg-red-100 text-red-700">
+                        Delete
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
         </div>
 
-        {/* Empty State */}
-        {mous.length === 0 && (
-          <div className="text-center py-12">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4">
-              <i className="fas fa-file-contract text-2xl text-gray-400"></i>
-            </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-1">
-              No MOUs found
-            </h3>
-            <p className="text-gray-500">
-              Get started by adding your first Memorandum of Understanding
-            </p>
-          </div>
-        )}
-
-        {/* Summary */}
-        <div className="mt-6 text-sm text-gray-600">
-          Showing {mous.length} MOUs
-        </div>
+        {!loading && filtered.length === 0 && <div className="text-center text-gray-500 py-8">No MOU records found</div>}
       </div>
     </div>
   );
 }
-
-export default MOUList;

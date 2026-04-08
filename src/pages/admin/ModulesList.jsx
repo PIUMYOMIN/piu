@@ -1,8 +1,16 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { adminApi } from "../../api/admin";
+import { useAuth } from "../../contexts/AuthContext";
 
 export default function ModulesList() {
+  const { user: authUser } = useAuth();
+  const currentRole = String(
+    authUser?.role?.name ??
+      authUser?.role ??
+      (Array.isArray(authUser?.roles) ? authUser.roles[0]?.name || authUser.roles[0] : "")
+  ).toLowerCase();
+  const isAdmin = currentRole === "admin";
   const [modules, setModules] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -50,6 +58,7 @@ export default function ModulesList() {
   }, [search]);
 
   const remove = async (module) => {
+    if (!isAdmin) return;
     if (!window.confirm(`Delete module "${module?.name}"?`)) return;
     setError("");
     try {
@@ -122,9 +131,11 @@ export default function ModulesList() {
                       <Link to={`/piu/admin/modules/edit/${m.id}`} className="text-blue-600 hover:underline">
                         Edit
                       </Link>
-                      <button className="text-red-600 hover:underline" onClick={() => remove(m)}>
-                        Delete
-                      </button>
+                      {isAdmin && (
+                        <button className="text-red-600 hover:underline" onClick={() => remove(m)}>
+                          Delete
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))}

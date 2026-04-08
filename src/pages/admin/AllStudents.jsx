@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { adminApi } from "../../api/admin";
 import { toStorageUrl } from "../../utils/api";
+import { useAuth } from "../../contexts/AuthContext";
 
 function getInitials(name) {
   const parts = String(name || "")
@@ -14,6 +15,13 @@ function getInitials(name) {
 }
 
 const AllStudents = () => {
+  const { user: authUser } = useAuth();
+  const currentRole = String(
+    authUser?.role?.name ??
+      authUser?.role ??
+      (Array.isArray(authUser?.roles) ? authUser.roles[0]?.name || authUser.roles[0] : "")
+  ).toLowerCase();
+  const isAdmin = currentRole === "admin";
   const navigate = useNavigate();
 
   const [students, setStudents] = useState([]);
@@ -264,22 +272,24 @@ const AllStudents = () => {
                           <i className="fas fa-edit mr-1"></i>
                           Edit
                         </button>
-                        <button
-                          onClick={async () => {
-                            if (!window.confirm("Delete this student?")) return;
-                            try {
-                              await adminApi.students.remove(student.id);
-                              await load();
-                            } catch (e) {
-                              setError(e?.response?.data?.message || e?.message || "Failed to delete student");
-                            }
-                          }}
-                          className="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 px-4 py-2 rounded-md transition-colors"
-                          title="Delete student"
-                        >
-                          <i className="fas fa-trash mr-1"></i>
-                          Delete
-                        </button>
+                        {isAdmin && (
+                          <button
+                            onClick={async () => {
+                              if (!window.confirm("Delete this student?")) return;
+                              try {
+                                await adminApi.students.remove(student.id);
+                                await load();
+                              } catch (e) {
+                                setError(e?.response?.data?.message || e?.message || "Failed to delete student");
+                              }
+                            }}
+                            className="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 px-4 py-2 rounded-md transition-colors"
+                            title="Delete student"
+                          >
+                            <i className="fas fa-trash mr-1"></i>
+                            Delete
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>

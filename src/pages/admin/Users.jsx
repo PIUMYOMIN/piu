@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { adminApi } from "../../api/admin";
 import { toStorageUrl } from "../../utils/api";
+import { useAuth } from "../../contexts/AuthContext";
 
 function getUserRoleLabel(user) {
   const role =
@@ -21,6 +22,13 @@ function getInitials(name) {
 }
 
 function Users() {
+  const { user: authUser } = useAuth();
+  const currentRole = String(
+    authUser?.role?.name ??
+      authUser?.role ??
+      (Array.isArray(authUser?.roles) ? authUser.roles[0]?.name || authUser.roles[0] : "")
+  ).toLowerCase();
+  const isAdmin = currentRole === "admin";
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -122,6 +130,7 @@ function Users() {
   };
 
   const remove = async (user) => {
+    if (!isAdmin) return;
     if (!window.confirm(`Delete user "${user?.name || user?.email || user?.id}"?`)) return;
     setError("");
     try {
@@ -254,13 +263,15 @@ function Users() {
                           >
                             Edit
                           </button>
-                          <button
-                            type="button"
-                            onClick={() => remove(user)}
-                            className="text-red-600 hover:text-red-800 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-md"
-                          >
-                            Delete
-                          </button>
+                          {isAdmin && (
+                            <button
+                              type="button"
+                              onClick={() => remove(user)}
+                              className="text-red-600 hover:text-red-800 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-md"
+                            >
+                              Delete
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>

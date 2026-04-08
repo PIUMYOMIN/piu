@@ -3,8 +3,16 @@ import { FaEdit, FaTrash, FaPlus, FaSpinner } from "react-icons/fa";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { adminApi } from "../../api/admin";
+import { useAuth } from "../../contexts/AuthContext";
 
 function PermissionsPage() {
+  const { user: authUser } = useAuth();
+  const currentRole = String(
+    authUser?.role?.name ??
+      authUser?.role ??
+      (Array.isArray(authUser?.roles) ? authUser.roles[0]?.name || authUser.roles[0] : "")
+  ).toLowerCase();
+  const isAdmin = currentRole === "admin";
   const [permissions, setPermissions] = useState([]);
   const [roles, setRoles] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -133,6 +141,7 @@ function PermissionsPage() {
   };
 
   const handleDeletePermission = async (permissionId) => {
+    if (!isAdmin) return;
     if (!window.confirm("Are you sure you want to delete this permission?")) {
       return;
     }
@@ -237,12 +246,14 @@ function PermissionsPage() {
                         >
                           <FaEdit /> Edit
                         </button>
-                        <button
-                          className="inline-flex items-center gap-2 text-red-600 hover:text-red-800"
-                          onClick={() => handleDeletePermission(perm.id)}
-                        >
-                          <FaTrash /> Delete
-                        </button>
+                        {isAdmin && (
+                          <button
+                            className="inline-flex items-center gap-2 text-red-600 hover:text-red-800"
+                            onClick={() => handleDeletePermission(perm.id)}
+                          >
+                            <FaTrash /> Delete
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>

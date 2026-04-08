@@ -26,6 +26,22 @@ export const adminApi = {
     toggleApplication: (id) => client.post(`/courses/${id}/application`).then((r) => r.data),
   },
 
+  // Blogs
+  blogs: {
+    list: () => client.get('/blogs').then((r) => unwrap(r.data)),
+    get: (id) => client.get(`/blogs/${id}`).then((r) => unwrap(r.data)),
+    create: (formData) =>
+      client
+        .post('/blogs', formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+        .then((r) => unwrap(r.data)),
+    update: (id, formData) =>
+      client
+        .post(`/blogs/${id}?_method=PUT`, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+        .then((r) => unwrap(r.data)),
+    remove: (id) => client.delete(`/blogs/${id}`).then((r) => r.data),
+    toggleActive: (id) => client.post(`/blogs/${id}/toggle-active`).then((r) => r.data),
+  },
+
   // Course Categories
   categories: {
     list: () => client.get('/course-categories').then((r) => unwrap(r.data)),
@@ -170,6 +186,28 @@ export const adminApi = {
     years: () => client.get('/years').then((r) => unwrap(r.data)),
     departments: () => client.get('/departments').then((r) => unwrap(r.data)),
     positions: () => client.get('/positions').then((r) => unwrap(r.data)),
+  },
+
+  departments: {
+    list: () => client.get('/departments').then((r) => unwrap(r.data)),
+    get: (id) => client.get(`/departments/${id}`).then((r) => unwrap(r.data)),
+    create: (payload) => client.post('/departments', payload).then((r) => unwrap(r.data)),
+    update: (id, payload) => client.put(`/departments/${id}`, payload).then((r) => unwrap(r.data)),
+    remove: (id) => client.delete(`/departments/${id}`).then((r) => r.data),
+  },
+
+  partners: {
+    list: () => client.get('/partners').then((r) => unwrap(r.data)),
+    get: (id) => client.get(`/partners/${id}`).then((r) => unwrap(r.data)),
+    create: (formData) =>
+      client
+        .post('/partners', formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+        .then((r) => unwrap(r.data)),
+    update: (id, formData) =>
+      client
+        .post(`/partners/${id}?_method=PUT`, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+        .then((r) => unwrap(r.data)),
+    remove: (id) => client.delete(`/partners/${id}`).then((r) => r.data),
   },
 };
 

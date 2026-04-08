@@ -4,8 +4,16 @@ import { FaEdit, FaTrash, FaPlus, FaSpinner } from "react-icons/fa";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { adminApi } from "../../api/admin";
+import { useAuth } from "../../contexts/AuthContext";
 
 function RolesPage() {
+  const { user: authUser } = useAuth();
+  const currentRole = String(
+    authUser?.role?.name ??
+      authUser?.role ??
+      (Array.isArray(authUser?.roles) ? authUser.roles[0]?.name || authUser.roles[0] : "")
+  ).toLowerCase();
+  const isAdmin = currentRole === "admin";
   const [roles, setRoles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editingRole, setEditingRole] = useState(null);
@@ -79,6 +87,7 @@ function RolesPage() {
   };
 
   const handleDeleteRole = async (roleId) => {
+    if (!isAdmin) return;
     if (!window.confirm("Are you sure you want to delete this role?")) {
       return;
     }
@@ -188,12 +197,14 @@ function RolesPage() {
                       >
                         <FaEdit /> Edit
                       </button>
-                      <button
-                        className="inline-flex items-center gap-2 text-red-600 hover:text-red-800"
-                        onClick={() => handleDeleteRole(role.id)}
-                      >
-                        <FaTrash /> Delete
-                      </button>
+                      {isAdmin && (
+                        <button
+                          className="inline-flex items-center gap-2 text-red-600 hover:text-red-800"
+                          onClick={() => handleDeleteRole(role.id)}
+                        >
+                          <FaTrash /> Delete
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
