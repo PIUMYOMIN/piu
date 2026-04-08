@@ -2,31 +2,16 @@ import { useState, useEffect } from "react";
 import TeacherNavbar from "../components/teacher/TeacherNavbar";
 import TeacherSidebar from "../components/teacher/TeacherSidebar";
 import { Outlet } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function TeacherLayout() {
+  const { user } = useAuth();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [teacherName, setTeacherName] = useState("");
+  const teacherName = user?.name || "Teacher";
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
-
-  // Fetch teacher name from free API
-  useEffect(() => {
-    async function fetchTeacherName() {
-      try {
-        const res = await fetch("https://randomuser.me/api/");
-        const data = await res.json();
-
-        const firstName = data.results[0].name.first;
-        setTeacherName(firstName);
-      } catch (err) {
-        console.log("Failed to load teacher name", err);
-      }
-    }
-
-    fetchTeacherName();
-  }, []);
 
   // Auto-close sidebar on large screens
   useEffect(() => {
@@ -54,7 +39,7 @@ export default function TeacherLayout() {
         />
 
         <main className="flex-1 p-4 sm:p-6 min-h-[calc(100vh-84px)] overflow-auto bg-gray-100 lg:ml-80 transition-all duration-300">
-          <Outlet />
+          <Outlet context={{ teacherName }} />
         </main>
       </div>
     </div>

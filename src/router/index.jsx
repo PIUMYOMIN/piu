@@ -73,6 +73,8 @@ import ChangePassword from "../pages/admin/ChangePassword";
 import Admission2 from "../pages/user/Admission2";
 import TeamProfile from "../pages/user/TeamProfile";
 import StudentProfile from "../pages/student/StudentProfile";
+import TeacherDashboard from "../pages/teacher/TeacherDashboard";
+import TeacherProfile from "../pages/teacher/TeacherProfile";
 import Admission from "../pages/user/Admission";
 import ApplicationFormSubmitSuccessful from "../pages/user/ApplicationFormSubmitSuccessful";
 import ContactFormSubmittedSuccessful from "../pages/user/ContactFormSubmittedSuccessful";
@@ -218,7 +220,7 @@ const router = createBrowserRouter([
         <StudentLayout />
       </PrivateRoute>
     ),
-    children: [{ path: "/piu/student", element: <StudentProfile /> }],
+    children: [{ index: true, element: <StudentProfile /> }],
   },
   {
     path: "piu/teacher",
@@ -227,7 +229,10 @@ const router = createBrowserRouter([
         <TeacherLayout />
       </PrivateRoute>
     ),
-    children: [],
+    children: [
+      { index: true, element: <TeacherDashboard /> },
+      { path: "profile", element: <TeacherProfile /> },
+    ],
   },
 ]);
 

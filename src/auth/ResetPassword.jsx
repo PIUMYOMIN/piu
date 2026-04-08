@@ -1,8 +1,9 @@
 import React, { useMemo, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { v2 } from "../utils/api";
 
 export default function ResetPassword() {
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const token = searchParams.get("token") || "";
   const emailFromQuery = searchParams.get("email") || "";
@@ -49,6 +50,9 @@ export default function ResetPassword() {
       setSuccess(res?.message || "Password reset successfully. You can login now.");
       setPassword("");
       setPasswordConfirmation("");
+      setTimeout(() => {
+        navigate("/login");
+      }, 1500);
     } catch (err) {
       setError(err?.response?.data?.message || "Unable to reset password.");
     } finally {

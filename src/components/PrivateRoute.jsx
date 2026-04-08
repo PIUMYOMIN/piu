@@ -1,13 +1,9 @@
 // src/components/PrivateRoute.jsx
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
-import { useEffect } from "react";
 
-const PrivateRoute = ({ children, role }) => {
+const PrivateRoute = ({ children, role, requiredRole }) => {
   const { isAuthenticated, user, loading } = useAuth();
-
-  useEffect(() => {
-  }, [isAuthenticated, user, role, loading]);
 
   if (loading) {
     return (
@@ -26,9 +22,13 @@ const PrivateRoute = ({ children, role }) => {
     return <Navigate to="/login" replace />;
   }
 
-  // Check if user has role
-  if (role && user.role !== role) {
+  const expectedRole = requiredRole || role;
+  const currentRole = String(
+    user?.role ?? (Array.isArray(user?.roles) ? user.roles[0] : "")
+  ).toLowerCase();
 
+  // Check if user has role
+  if (expectedRole && currentRole !== String(expectedRole).toLowerCase()) {
     return <Navigate to="/" replace />;
   }
 

@@ -2,31 +2,16 @@ import { useState, useEffect } from "react";
 import StudentNavbar from "./../components/student/StudentNavbar"
 import StudentSidebar from "./../components/student/StudentSidebar"
 import { Outlet } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function StudentLayout() {
+  const { user } = useAuth();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [studentName, setStudentName] = useState("");
+  const studentName = user?.name || "Student";
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
-
-  // Fetch student name from free API
-  useEffect(() => {
-    async function fetchName() {
-      try {
-        const res = await fetch("https://randomuser.me/api/");
-        const data = await res.json();
-
-        const firstName = data.results[0].name.first;
-        setStudentName(firstName);
-      } catch (error) {
-        console.log("Error loading student name", error);
-      }
-    }
-
-    fetchName();
-  }, []);
 
   // Auto-close sidebar on desktop
   useEffect(() => {
