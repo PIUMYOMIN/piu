@@ -28,10 +28,10 @@ const PublicRoute = ({ children }) => {
       return <Navigate to="/piu/student" replace />;
     } else if (role === "teacher") {
       return <Navigate to="/piu/teacher" replace />;
-    } else if (role === "user") {
+    } else if (role === "user" || role === "") {
       return <Navigate to="/piu/user" replace />;
     } else {
-      return <Navigate to="/" replace />;
+      return <Navigate to="/piu/user" replace />;
     }
   }
 

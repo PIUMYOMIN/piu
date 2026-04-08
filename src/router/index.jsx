@@ -239,7 +239,7 @@ const router = createBrowserRouter([
   {
     path: "piu/user",
     element: (
-      <PrivateRoute requiredRole="user">
+      <PrivateRoute>
         <UserDashboardLayout />
       </PrivateRoute>
     ),
