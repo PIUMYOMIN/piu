@@ -1,7 +1,7 @@
 // src/utils/api.js
 import axios from 'axios';
 import config from '../config';
-import { executeRecaptcha } from './recaptchaV3';
+import { cleanupRecaptcha, executeRecaptcha } from './recaptchaV3';
 
 const API_BASE_URL = config.apiBaseUrl;
 const API_V1_URL = `${API_BASE_URL}/api/v1`;
@@ -23,23 +23,31 @@ function createApiClient(baseURL) {
         requestConfig.headers.Authorization = `Bearer ${token}`;
       }
 
-      const method = (requestConfig.method || 'get').toLowerCase();
-      const shouldRecaptcha = ['post', 'put', 'patch', 'delete'].includes(method);
+      const shouldRecaptcha = requestConfig.recaptcha === true || Boolean(requestConfig.recaptcha?.enabled);
 
       if (shouldRecaptcha) {
+        const method = (requestConfig.method || 'get').toLowerCase();
         const rawUrl = requestConfig.url || '';
-        const action = `api_${method}_${String(rawUrl).replace(/[^a-zA-Z0-9_/-]/g, '').slice(0, 80)}`
-          .replaceAll('/', '_')
-          .replaceAll('-', '_')
-          .replace(/_+/g, '_')
-          .replace(/^_+|_+$/g, '');
+        const action =
+          requestConfig.recaptcha?.action ||
+          `api_${method}_${String(rawUrl).replace(/[^a-zA-Z0-9_/-]/g, '').slice(0, 80)}`
+            .replaceAll('/', '_')
+            .replaceAll('-', '_')
+            .replace(/_+/g, '_')
+            .replace(/^_+|_+$/g, '');
 
-        const recaptchaToken = await executeRecaptcha(action);
-        if (recaptchaToken) {
-          requestConfig.headers['X-Recaptcha-Token'] = recaptchaToken;
-          requestConfig.headers['X-Recaptcha-Action'] = action;
+        try {
+          const recaptchaToken = await executeRecaptcha(action);
+          if (recaptchaToken) {
+            requestConfig.headers['X-Recaptcha-Token'] = recaptchaToken;
+            requestConfig.headers['X-Recaptcha-Action'] = action;
+          }
+        } finally {
+          cleanupRecaptcha();
         }
       }
+
+      delete requestConfig.recaptcha;
 
       return requestConfig;
     },
@@ -70,7 +78,10 @@ export const v1 = {
   submitApplicationForm: (payload) => apiClient.post('/application-form/submit', payload).then((r) => r.data),
   submitContactForm: (formData) =>
     apiClient
-      .post('/contact/form-submit', formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+      .post('/contact/form-submit', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        recaptcha: { enabled: true, action: 'contact_form_submit' },
+      })
       .then((r) => r.data),
 };
 
@@ -103,7 +114,10 @@ export const v2 = {
   // Admissions
   submitAdmission: (formData) =>
     apiClient
-      .post('/admissions', formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+      .post('/admissions', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        recaptcha: { enabled: true, action: 'admission_form_submit' },
+      })
       .then((r) => r.data),
 };
 
@@ -115,4 +129,3 @@ export function toStorageUrl(pathOrUrl) {
 }
 
 export default apiClient;
-

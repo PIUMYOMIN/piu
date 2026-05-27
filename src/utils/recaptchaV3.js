@@ -112,3 +112,16 @@ export async function executeRecaptcha(action) {
     return null;
   }
 }
+
+export function cleanupRecaptcha() {
+  if (!canUseDom()) return;
+
+  document
+    .querySelectorAll('script[data-recaptcha-v3="true"], script[src*="recaptcha/api.js"]')
+    .forEach((script) => script.remove());
+
+  document.querySelectorAll(".grecaptcha-badge").forEach((badge) => badge.remove());
+
+  loadPromise = null;
+  readyPromise = null;
+}

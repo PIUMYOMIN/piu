@@ -1,11 +1,35 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { FaDownload } from "react-icons/fa";
 import adminApi from "../../api/admin";
 import { toStorageUrl } from "../../utils/api";
+
+function getSubmissionYear(admission) {
+  if (!admission?.created_at) return "";
+  const date = new Date(admission.created_at);
+  if (Number.isNaN(date.getTime())) return "";
+  return String(date.getFullYear());
+}
+
+function csvValue(value) {
+  const text = String(value ?? "");
+  return `"${text.replace(/"/g, '""')}"`;
+}
+
+function getDocumentDownloadName(pathOrUrl, fallbackName) {
+  if (!pathOrUrl || typeof pathOrUrl !== "string") return fallbackName;
+  const cleanPath = pathOrUrl.split("?")[0].split("#")[0];
+  const fileName = cleanPath.split("/").filter(Boolean).pop();
+  return fileName || fallbackName;
+}
 
 function AdmissionPage() {
   const navigate = useNavigate();
   const [selectedCourseId, setSelectedCourseId] = useState("");
+  const [selectedYear, setSelectedYear] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [documentFilter, setDocumentFilter] = useState("");
+  const [sortOrder, setSortOrder] = useState("newest");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [admissions, setAdmissions] = useState([]);
@@ -13,31 +37,26 @@ function AdmissionPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
 
-  useEffect(() => {
-    let mounted = true;
-    async function load() {
-      setLoading(true);
-      setError("");
-      try {
-        const [admissionsData, coursesData] = await Promise.all([
-          adminApi.admissions.list(),
-          adminApi.courses.list(),
-        ]);
-        if (!mounted) return;
-        setAdmissions(Array.isArray(admissionsData) ? admissionsData : []);
-        setCourses(Array.isArray(coursesData) ? coursesData : []);
-      } catch (e) {
-        if (!mounted) return;
-        setError(e?.response?.data?.message || e?.message || "Failed to load admissions");
-      } finally {
-        if (mounted) setLoading(false);
-      }
+  const loadAdmissions = useCallback(async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const [admissionsData, coursesData] = await Promise.all([
+        adminApi.admissions.list(),
+        adminApi.courses.list(),
+      ]);
+      setAdmissions(Array.isArray(admissionsData) ? admissionsData : []);
+      setCourses(Array.isArray(coursesData) ? coursesData : []);
+    } catch (e) {
+      setError(e?.response?.data?.message || e?.message || "Failed to load admissions");
+    } finally {
+      setLoading(false);
     }
-    load();
-    return () => {
-      mounted = false;
-    };
   }, []);
+
+  useEffect(() => {
+    loadAdmissions();
+  }, [loadAdmissions]);
 
   const coursesById = useMemo(() => {
     const map = new Map();
@@ -47,14 +66,71 @@ function AdmissionPage() {
 
   const courseOptions = useMemo(() => {
     return courses
-      .map((c) => ({ id: String(c.id), title: c.title }))
+      .map((c) => ({ id: String(c.id), title: c.title || `Course #${c.id}` }))
       .sort((a, b) => a.title.localeCompare(b.title));
   }, [courses]);
 
+  const yearlySubmissionStats = useMemo(() => {
+    const counts = new Map();
+
+    for (const admission of admissions) {
+      const year = getSubmissionYear(admission);
+      if (!year) continue;
+      counts.set(year, (counts.get(year) || 0) + 1);
+    }
+
+    return Array.from(counts.entries())
+      .map(([year, count]) => ({ year, count }))
+      .sort((a, b) => Number(b.year) - Number(a.year));
+  }, [admissions]);
+
+  const yearOptions = useMemo(
+    () => yearlySubmissionStats.map((item) => item.year),
+    [yearlySubmissionStats]
+  );
+
   const filteredAdmissions = useMemo(() => {
-    if (!selectedCourseId) return admissions;
-    return admissions.filter((a) => String(a.course_id) === selectedCourseId);
-  }, [admissions, selectedCourseId]);
+    const normalizedSearch = searchTerm.trim().toLowerCase();
+
+    const filtered = admissions.filter((admission) => {
+      const course = coursesById.get(String(admission.course_id));
+      const matchesCourse = !selectedCourseId || String(admission.course_id) === selectedCourseId;
+      const matchesYear = !selectedYear || getSubmissionYear(admission) === selectedYear;
+      const hasRequiredDocuments =
+        Boolean(admission.education_certificate) && Boolean(admission.personal_statement);
+      const hasOptionalDocuments =
+        Boolean(admission.language_proficiency) ||
+        Boolean(admission.profile) ||
+        Boolean(admission.other_document);
+
+      const matchesDocumentFilter =
+        !documentFilter ||
+        (documentFilter === "complete" && hasRequiredDocuments) ||
+        (documentFilter === "missing" && !hasRequiredDocuments) ||
+        (documentFilter === "optional" && hasOptionalDocuments);
+
+      const searchableText = [
+        admission.name,
+        admission.email,
+        admission.phone,
+        admission.national_id,
+        admission.student_id,
+        course?.title,
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+      const matchesSearch = !normalizedSearch || searchableText.includes(normalizedSearch);
+
+      return matchesCourse && matchesYear && matchesDocumentFilter && matchesSearch;
+    });
+
+    return [...filtered].sort((a, b) => {
+      const firstDate = new Date(a.created_at || 0).getTime();
+      const secondDate = new Date(b.created_at || 0).getTime();
+      return sortOrder === "oldest" ? firstDate - secondDate : secondDate - firstDate;
+    });
+  }, [admissions, coursesById, documentFilter, searchTerm, selectedCourseId, selectedYear, sortOrder]);
 
   const totalPages = Math.max(1, Math.ceil(filteredAdmissions.length / pageSize));
   const paginatedAdmissions = useMemo(() => {
@@ -64,16 +140,71 @@ function AdmissionPage() {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [selectedCourseId, admissions.length]);
+  }, [documentFilter, searchTerm, selectedCourseId, selectedYear, sortOrder, admissions.length]);
 
   const handleViewDetails = (admission) => {
     navigate(`/piu/admin/admission/${admission.id}`);
   };
 
+  const hasActiveFilters =
+    Boolean(selectedCourseId) ||
+    Boolean(selectedYear) ||
+    Boolean(searchTerm.trim()) ||
+    Boolean(documentFilter) ||
+    sortOrder !== "newest";
+
+  const handleClearFilters = () => {
+    setSelectedCourseId("");
+    setSelectedYear("");
+    setSearchTerm("");
+    setDocumentFilter("");
+    setSortOrder("newest");
+  };
+
+  const handleExportCsv = () => {
+    const headers = [
+      "Name",
+      "Email",
+      "Phone",
+      "Course",
+      "Submitted At",
+      "Education Certificate",
+      "Personal Statement",
+      "Other Document",
+    ];
+
+    const rows = filteredAdmissions.map((admission) => {
+      const course = coursesById.get(String(admission.course_id));
+      return [
+        admission.name,
+        admission.email,
+        admission.phone,
+        course?.title || `Course #${admission.course_id ?? ""}`,
+        admission.created_at,
+        admission.education_certificate ? "Yes" : "No",
+        admission.personal_statement ? "Yes" : "No",
+        admission.other_document ? "Yes" : "No",
+      ];
+    });
+
+    const csv = [headers, ...rows]
+      .map((row) => row.map(csvValue).join(","))
+      .join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `admissions-${selectedYear || "all-years"}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  };
+
   const formatDateTime = (value) => {
-    if (!value) return "—";
+    if (!value) return "-";
     const d = new Date(value);
-    if (Number.isNaN(d.getTime())) return "—";
+    if (Number.isNaN(d.getTime())) return "-";
     return d.toLocaleString();
   };
 
@@ -85,24 +216,192 @@ function AdmissionPage() {
         <p className="text-blue-100 mt-1">Review student applications</p>
       </div>
 
-      {/* Degree filter */}
-      <div className="p-6 border-b border-gray-200">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-          <label className="text-sm font-medium text-gray-700 whitespace-nowrap">
-            Filter by Course:
-          </label>
-          <select
-            value={selectedCourseId}
-            onChange={(e) => setSelectedCourseId(e.target.value)}
-            className="w-full sm:w-96 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+      {/* Submissions by year */}
+      <div className="p-6 border-b border-gray-200 bg-gray-50">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900">
+              Admission Form Submissions by Year
+            </h3>
+            <p className="text-sm text-gray-500 mt-1">
+              {admissions.length} total application{admissions.length === 1 ? "" : "s"} received
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setSelectedYear("")}
+            className={`px-4 py-2 rounded-lg border text-sm font-medium transition-colors ${selectedYear
+              ? "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
+              : "bg-[#002147] text-white border-[#002147]"
+              }`}
           >
-            <option value="">All Courses</option>
-            {courseOptions.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.title}
-              </option>
-            ))}
-          </select>
+            All Years
+          </button>
+        </div>
+
+        <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {yearlySubmissionStats.length > 0 ? (
+            yearlySubmissionStats.map((item) => (
+              <button
+                key={item.year}
+                type="button"
+                onClick={() => setSelectedYear(item.year)}
+                className={`text-left rounded-lg border p-4 transition-colors ${selectedYear === item.year
+                  ? "border-[#002147] bg-blue-50"
+                  : "border-gray-200 bg-white hover:border-blue-300 hover:bg-blue-50"
+                  }`}
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-sm font-medium text-gray-500">Year</span>
+                  {selectedYear === item.year && (
+                    <span className="rounded-full bg-[#002147] px-2 py-1 text-xs font-semibold text-white">
+                      Selected
+                    </span>
+                  )}
+                </div>
+                <div className="mt-2 text-2xl font-bold text-gray-900">{item.year}</div>
+                <div className="mt-1 text-sm text-gray-600">
+                  {item.count} submission{item.count === 1 ? "" : "s"}
+                </div>
+              </button>
+            ))
+          ) : (
+            <div className="sm:col-span-2 lg:col-span-4 rounded-lg border border-dashed border-gray-300 bg-white p-6 text-center text-sm text-gray-500">
+              No yearly submission data available yet.
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Filters */}
+      <div className="p-4 sm:p-6 border-b border-gray-200">
+        <div className="flex flex-col gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-4">
+            <div className="sm:col-span-2 lg:col-span-4 xl:col-span-3 min-w-0">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Search Applicant
+              </label>
+              <div className="relative">
+                <i className="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                <input
+                  type="search"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Name, email, phone, ID..."
+                  className="w-full min-w-0 pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                />
+              </div>
+            </div>
+
+            <div className="lg:col-span-2 min-w-0">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Year
+              </label>
+              <select
+                value={selectedYear}
+                onChange={(e) => setSelectedYear(e.target.value)}
+                className="w-full min-w-0 px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+              >
+                <option value="">All Years</option>
+                {yearOptions.map((year) => (
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="sm:col-span-2 lg:col-span-3 xl:col-span-3 min-w-0">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Course
+              </label>
+              <select
+                value={selectedCourseId}
+                onChange={(e) => setSelectedCourseId(e.target.value)}
+                className="w-full min-w-0 px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+              >
+                <option value="">All Courses</option>
+                {courseOptions.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.title}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="lg:col-span-2 min-w-0">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Documents
+              </label>
+              <select
+                value={documentFilter}
+                onChange={(e) => setDocumentFilter(e.target.value)}
+                className="w-full min-w-0 px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+              >
+                <option value="">All Documents</option>
+                <option value="complete">Required Complete</option>
+                <option value="missing">Missing Required</option>
+                <option value="optional">Has Optional Files</option>
+              </select>
+            </div>
+
+            <div className="lg:col-span-1 xl:col-span-2 min-w-0">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Sort
+              </label>
+              <select
+                value={sortOrder}
+                onChange={(e) => setSortOrder(e.target.value)}
+                className="w-full min-w-0 px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+              >
+                <option value="newest">Newest First</option>
+                <option value="oldest">Oldest First</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center sm:justify-between gap-3">
+            <div className="text-sm text-gray-600 order-2 sm:order-1">
+              Showing {filteredAdmissions.length} of {admissions.length} application
+              {admissions.length === 1 ? "" : "s"}
+              {hasActiveFilters && (
+                <span className="ml-0 sm:ml-2 mt-1 sm:mt-0 block sm:inline text-blue-700">
+                  Filters are active
+                </span>
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 sm:flex sm:flex-wrap gap-2 order-1 sm:order-2">
+              <button
+                type="button"
+                onClick={loadAdmissions}
+                disabled={loading}
+                className="inline-flex w-full sm:w-auto items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+              >
+                <i className="fas fa-sync-alt"></i>
+                Refresh
+              </button>
+              <button
+                type="button"
+                onClick={handleClearFilters}
+                disabled={!hasActiveFilters}
+                className="inline-flex w-full sm:w-auto items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+              >
+                <i className="fas fa-times"></i>
+                Reset
+              </button>
+              <button
+                type="button"
+                onClick={handleExportCsv}
+                disabled={filteredAdmissions.length === 0}
+                className="inline-flex w-full sm:w-auto items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-[#002147] text-sm font-medium text-white hover:bg-[#00356f] disabled:opacity-50"
+              >
+                <i className="fas fa-download"></i>
+                Export CSV
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -159,13 +458,27 @@ function AdmissionPage() {
                   const certificateUrl = toStorageUrl(admission.education_certificate);
                   const statementUrl = toStorageUrl(admission.personal_statement);
                   const otherUrl = toStorageUrl(admission.other_document);
+                  const certificateName = getDocumentDownloadName(
+                    admission.education_certificate,
+                    `education-certificate-${admission.id}`
+                  );
+                  const statementName = getDocumentDownloadName(
+                    admission.personal_statement,
+                    `personal-statement-${admission.id}`
+                  );
+                  const otherName = getDocumentDownloadName(
+                    admission.other_document,
+                    `other-document-${admission.id}`
+                  );
                   return (
                 <tr key={admission.id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {(currentPage - 1) * pageSize + index + 1}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {admission.name}
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        <div className="font-medium text-gray-900">{admission.name}</div>
+                        <div className="text-gray-500">{admission.email || "-"}</div>
+                        <div className="text-gray-500">{admission.phone || "-"}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {course?.title || `Course #${admission.course_id ?? "-"}`}
@@ -173,59 +486,104 @@ function AdmissionPage() {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                     {formatDateTime(admission.created_at)}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
                     {certificateUrl ? (
-                      <a
-                        href={certificateUrl}
-                        className="inline-flex items-center hover:text-blue-800 hover:underline"
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        <i className="fas fa-file-pdf mr-2 text-red-500"></i>
-                        View
-                      </a>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <a
+                              href={certificateUrl}
+                              className="inline-flex items-center text-blue-600 hover:text-blue-800 hover:underline"
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              <i className="fas fa-file-pdf mr-2 text-red-500"></i>
+                              View
+                            </a>
+                            <a
+                              href={certificateUrl}
+                              download={certificateName}
+                              className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-black shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                              title="Download education certificate"
+                              aria-label="Download education certificate"
+                            >
+                              <FaDownload className="text-sm" />
+                            </a>
+                          </div>
                     ) : (
                       <span className="text-gray-400 text-sm">-</span>
                     )}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
                     {statementUrl ? (
-                      <a
-                        href={statementUrl}
-                        className="inline-flex items-center hover:text-blue-800 hover:underline"
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        <i className="fas fa-file-alt mr-2 text-blue-500"></i>
-                        View
-                      </a>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <a
+                              href={statementUrl}
+                              className="inline-flex items-center text-blue-600 hover:text-blue-800 hover:underline"
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              <i className="fas fa-file-alt mr-2 text-blue-500"></i>
+                              View
+                            </a>
+                            <a
+                              href={statementUrl}
+                              download={statementName}
+                              className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-[#002147] text-white shadow-sm hover:bg-[#00356f] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                              title="Download personal statement"
+                              aria-label="Download personal statement"
+                            >
+                              <FaDownload className="text-sm" />
+                            </a>
+                          </div>
                     ) : (
                       <span className="text-gray-400 text-sm">-</span>
                     )}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
                     {otherUrl ? (
-                      <a
-                        href={otherUrl}
-                        className="inline-flex items-center hover:text-blue-800 hover:underline"
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        <i className="fas fa-file-word mr-2 text-blue-700"></i>
-                        View
-                      </a>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <a
+                              href={otherUrl}
+                              className="inline-flex items-center text-blue-600 hover:text-blue-800 hover:underline"
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              <i className="fas fa-file-word mr-2 text-blue-700"></i>
+                              View
+                            </a>
+                            <a
+                              href={otherUrl}
+                              download={otherName}
+                              className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-[#002147] text-white shadow-sm hover:bg-[#00356f] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                              title="Download other document"
+                              aria-label="Download other document"
+                            >
+                              <FaDownload className="text-sm" />
+                            </a>
+                          </div>
                     ) : (
                       <span className="text-gray-400 text-sm">-</span>
                     )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <button 
-                      className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors text-sm font-medium"
-                      onClick={() => handleViewDetails(admission)}
-                    >
-                      <i className="fas fa-eye mr-2"></i>
-                      View Details
-                    </button>
+                        <div className="flex flex-wrap gap-2">
+                          <button
+                            type="button"
+                            className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors text-sm font-medium"
+                            onClick={() => handleViewDetails(admission)}
+                          >
+                            <i className="fas fa-eye mr-2"></i>
+                            View Details
+                          </button>
+                          {admission.email && (
+                            <a
+                              href={`mailto:${admission.email}`}
+                              className="inline-flex items-center bg-white text-gray-700 px-3 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors text-sm font-medium"
+                            >
+                              <i className="fas fa-envelope mr-2"></i>
+                              Email
+                            </a>
+                          )}
+                        </div>
                   </td>
                 </tr>
                   );
@@ -238,10 +596,9 @@ function AdmissionPage() {
                       <i className="fas fa-file-alt text-4xl mb-3 text-gray-300"></i>
                       <p className="font-medium">No admissions found</p>
                       <p className="text-sm mt-1">
-                        {selectedCourseId 
-                          ? `for ${coursesById.get(selectedCourseId)?.title || `course #${selectedCourseId}`}` 
-                          : "No applications have been submitted yet"
-                        }
+                        {hasActiveFilters
+                          ? "Try changing or resetting the active filters"
+                          : "No applications have been submitted yet"}
                       </p>
                     </div>
                   </td>
