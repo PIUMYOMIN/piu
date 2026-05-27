@@ -208,6 +208,201 @@ function AdmissionPage() {
     return d.toLocaleString();
   };
 
+  const renderDocumentActions = (url, fileName, iconClass, iconColor, label) => {
+    if (!url) {
+      return <span className="text-gray-400 text-sm">-</span>;
+    }
+
+    return (
+      <div className="flex flex-wrap items-center gap-2">
+        <a
+          href={url}
+          className="inline-flex items-center text-blue-600 hover:text-blue-800 hover:underline"
+          target="_blank"
+          rel="noreferrer"
+        >
+          <i className={`${iconClass} mr-2 ${iconColor}`}></i>
+          View
+        </a>
+        <a
+          href={url}
+          download={fileName}
+          className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          title={`Download ${label}`}
+          aria-label={`Download ${label}`}
+        >
+          <FaDownload className="text-sm" />
+        </a>
+      </div>
+    );
+  };
+
+  const renderAdmissionRow = (admission, index) => {
+    const course = coursesById.get(String(admission.course_id));
+    const certificateUrl = toStorageUrl(admission.education_certificate);
+    const statementUrl = toStorageUrl(admission.personal_statement);
+    const otherUrl = toStorageUrl(admission.other_document);
+    const certificateName = getDocumentDownloadName(
+      admission.education_certificate,
+      `education-certificate-${admission.id}`
+    );
+    const statementName = getDocumentDownloadName(
+      admission.personal_statement,
+      `personal-statement-${admission.id}`
+    );
+    const otherName = getDocumentDownloadName(
+      admission.other_document,
+      `other-document-${admission.id}`
+    );
+
+    return (
+      <tr key={admission.id} className="hover:bg-gray-50 transition-colors">
+        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+          {(currentPage - 1) * pageSize + index + 1}
+        </td>
+        <td className="px-4 py-4 min-w-[220px] text-sm">
+          <div className="font-medium text-gray-900">{admission.name}</div>
+          <div className="text-gray-500 break-all">{admission.email || "-"}</div>
+          <div className="text-gray-500">{admission.phone || "-"}</div>
+        </td>
+        <td className="px-4 py-4 min-w-[180px] text-sm text-gray-900">
+          {course?.title || `Course #${admission.course_id ?? "-"}`}
+        </td>
+        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
+          {formatDateTime(admission.created_at)}
+        </td>
+        <td className="px-4 py-4 whitespace-nowrap text-sm">
+          {renderDocumentActions(
+            certificateUrl,
+            certificateName,
+            "fas fa-file-pdf",
+            "text-red-500",
+            "education certificate"
+          )}
+        </td>
+        <td className="px-4 py-4 whitespace-nowrap text-sm">
+          {renderDocumentActions(
+            statementUrl,
+            statementName,
+            "fas fa-file-alt",
+            "text-blue-500",
+            "personal statement"
+          )}
+        </td>
+        <td className="px-4 py-4 whitespace-nowrap text-sm">
+          {renderDocumentActions(
+            otherUrl,
+            otherName,
+            "fas fa-file-word",
+            "text-blue-700",
+            "other document"
+          )}
+        </td>
+        <td className="px-4 py-4 whitespace-nowrap">
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              className="bg-green-500 text-white p-2 rounded-lg hover:bg-green-600 transition-colors text-sm font-medium"
+              onClick={() => handleViewDetails(admission)}
+            >
+              <i className="fas fa-eye mr-2"></i>
+              View Details
+            </button>
+            {admission.email && (
+              <a
+                href={`mailto:${admission.email}`}
+                className="inline-flex items-center bg-white text-gray-700 px-3 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors text-sm font-medium"
+              >
+                <i className="fas fa-envelope mr-2"></i>
+                Email
+              </a>
+            )}
+          </div>
+        </td>
+      </tr>
+    );
+  };
+
+  const renderAdmissionCard = (admission, index) => {
+    const course = coursesById.get(String(admission.course_id));
+    const certificateUrl = toStorageUrl(admission.education_certificate);
+    const statementUrl = toStorageUrl(admission.personal_statement);
+    const otherUrl = toStorageUrl(admission.other_document);
+    const certificateName = getDocumentDownloadName(
+      admission.education_certificate,
+      `education-certificate-${admission.id}`
+    );
+    const statementName = getDocumentDownloadName(
+      admission.personal_statement,
+      `personal-statement-${admission.id}`
+    );
+    const otherName = getDocumentDownloadName(
+      admission.other_document,
+      `other-document-${admission.id}`
+    );
+
+    return (
+      <div key={admission.id} className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <div className="text-xs font-medium text-gray-500">
+              #{(currentPage - 1) * pageSize + index + 1}
+            </div>
+            <div className="mt-1 font-semibold text-gray-900 break-words">{admission.name}</div>
+            <div className="mt-1 text-sm text-gray-500 break-all">{admission.email || "-"}</div>
+            <div className="text-sm text-gray-500">{admission.phone || "-"}</div>
+          </div>
+          <button
+            type="button"
+            className="shrink-0 rounded-lg bg-green-500 px-3 py-2 text-sm font-medium text-white hover:bg-green-600"
+            onClick={() => handleViewDetails(admission)}
+          >
+            View
+          </button>
+        </div>
+
+        <div className="mt-4 grid grid-cols-1 gap-3 text-sm">
+          <div>
+            <div className="text-xs font-semibold uppercase text-gray-500">Applied Course</div>
+            <div className="mt-1 text-gray-900">{course?.title || `Course #${admission.course_id ?? "-"}`}</div>
+          </div>
+          <div>
+            <div className="text-xs font-semibold uppercase text-gray-500">Submitted</div>
+            <div className="mt-1 text-gray-700">{formatDateTime(admission.created_at)}</div>
+          </div>
+        </div>
+
+        <div className="mt-4 border-t border-gray-100 pt-4">
+          <div className="text-xs font-semibold uppercase text-gray-500">Documents</div>
+          <div className="mt-3 space-y-3">
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-sm text-gray-700">Education Certificate</span>
+              {renderDocumentActions(certificateUrl, certificateName, "fas fa-file-pdf", "text-red-500", "education certificate")}
+            </div>
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-sm text-gray-700">Personal Statement</span>
+              {renderDocumentActions(statementUrl, statementName, "fas fa-file-alt", "text-blue-500", "personal statement")}
+            </div>
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-sm text-gray-700">Other Document</span>
+              {renderDocumentActions(otherUrl, otherName, "fas fa-file-word", "text-blue-700", "other document")}
+            </div>
+          </div>
+        </div>
+
+        {admission.email && (
+          <a
+            href={`mailto:${admission.email}`}
+            className="mt-4 inline-flex w-full items-center justify-center rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+          >
+            <i className="fas fa-envelope mr-2"></i>
+            Email Applicant
+          </a>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className="max-w-8xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
       {/* Header */}
@@ -406,39 +601,67 @@ function AdmissionPage() {
       </div>
 
       {/* Table */}
-      <div className="p-6">
+      <div className="p-4 sm:p-6">
         {error && (
           <div className="mb-4 p-3 rounded-lg border border-red-200 bg-red-50 text-red-700 text-sm">
             {error}
           </div>
         )}
 
-        <div className="overflow-x-auto rounded-lg border border-gray-200">
-          <table className="w-full">
+        <div className="lg:hidden">
+          {loading && (
+            <div className="rounded-lg border border-gray-200 bg-white px-6 py-8 text-center text-sm text-gray-500">
+              Loading admissions...
+            </div>
+          )}
+
+          {!loading && paginatedAdmissions.length > 0 && (
+            <div className="space-y-4">
+              {paginatedAdmissions.map((admission, index) => renderAdmissionCard(admission, index))}
+            </div>
+          )}
+
+          {!loading && filteredAdmissions.length === 0 && (
+            <div className="rounded-lg border border-gray-200 bg-white px-6 py-8 text-center">
+              <div className="flex flex-col items-center justify-center text-gray-500">
+                <i className="fas fa-file-alt text-4xl mb-3 text-gray-300"></i>
+                <p className="font-medium">No admissions found</p>
+                <p className="text-sm mt-1">
+                  {hasActiveFilters
+                    ? "Try changing or resetting the active filters"
+                    : "No applications have been submitted yet"}
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="hidden lg:block overflow-x-auto rounded-lg border border-gray-200">
+          <table className="min-w-[1180px] w-full">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   #
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Applicant Name
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Applied Course
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Submitted
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Education Certificate
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Personal Statement
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Other Document
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
@@ -453,141 +676,7 @@ function AdmissionPage() {
               )}
 
               {!loading &&
-                paginatedAdmissions.map((admission, index) => {
-                  const course = coursesById.get(String(admission.course_id));
-                  const certificateUrl = toStorageUrl(admission.education_certificate);
-                  const statementUrl = toStorageUrl(admission.personal_statement);
-                  const otherUrl = toStorageUrl(admission.other_document);
-                  const certificateName = getDocumentDownloadName(
-                    admission.education_certificate,
-                    `education-certificate-${admission.id}`
-                  );
-                  const statementName = getDocumentDownloadName(
-                    admission.personal_statement,
-                    `personal-statement-${admission.id}`
-                  );
-                  const otherName = getDocumentDownloadName(
-                    admission.other_document,
-                    `other-document-${admission.id}`
-                  );
-                  return (
-                <tr key={admission.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {(currentPage - 1) * pageSize + index + 1}
-                  </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">
-                        <div className="font-medium text-gray-900">{admission.name}</div>
-                        <div className="text-gray-500">{admission.email || "-"}</div>
-                        <div className="text-gray-500">{admission.phone || "-"}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {course?.title || `Course #${admission.course_id ?? "-"}`}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                    {formatDateTime(admission.created_at)}
-                  </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    {certificateUrl ? (
-                          <div className="flex flex-wrap items-center gap-2">
-                            <a
-                              href={certificateUrl}
-                              className="inline-flex items-center text-blue-600 hover:text-blue-800 hover:underline"
-                              target="_blank"
-                              rel="noreferrer"
-                            >
-                              <i className="fas fa-file-pdf mr-2 text-red-500"></i>
-                              View
-                            </a>
-                            <a
-                              href={certificateUrl}
-                              download={certificateName}
-                              className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-black shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                              title="Download education certificate"
-                              aria-label="Download education certificate"
-                            >
-                              <FaDownload className="text-sm" />
-                            </a>
-                          </div>
-                    ) : (
-                      <span className="text-gray-400 text-sm">-</span>
-                    )}
-                  </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    {statementUrl ? (
-                          <div className="flex flex-wrap items-center gap-2">
-                            <a
-                              href={statementUrl}
-                              className="inline-flex items-center text-blue-600 hover:text-blue-800 hover:underline"
-                              target="_blank"
-                              rel="noreferrer"
-                            >
-                              <i className="fas fa-file-alt mr-2 text-blue-500"></i>
-                              View
-                            </a>
-                            <a
-                              href={statementUrl}
-                              download={statementName}
-                              className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-[#002147] text-white shadow-sm hover:bg-[#00356f] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                              title="Download personal statement"
-                              aria-label="Download personal statement"
-                            >
-                              <FaDownload className="text-sm" />
-                            </a>
-                          </div>
-                    ) : (
-                      <span className="text-gray-400 text-sm">-</span>
-                    )}
-                  </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    {otherUrl ? (
-                          <div className="flex flex-wrap items-center gap-2">
-                            <a
-                              href={otherUrl}
-                              className="inline-flex items-center text-blue-600 hover:text-blue-800 hover:underline"
-                              target="_blank"
-                              rel="noreferrer"
-                            >
-                              <i className="fas fa-file-word mr-2 text-blue-700"></i>
-                              View
-                            </a>
-                            <a
-                              href={otherUrl}
-                              download={otherName}
-                              className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-[#002147] text-white shadow-sm hover:bg-[#00356f] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                              title="Download other document"
-                              aria-label="Download other document"
-                            >
-                              <FaDownload className="text-sm" />
-                            </a>
-                          </div>
-                    ) : (
-                      <span className="text-gray-400 text-sm">-</span>
-                    )}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex flex-wrap gap-2">
-                          <button
-                            type="button"
-                            className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors text-sm font-medium"
-                            onClick={() => handleViewDetails(admission)}
-                          >
-                            <i className="fas fa-eye mr-2"></i>
-                            View Details
-                          </button>
-                          {admission.email && (
-                            <a
-                              href={`mailto:${admission.email}`}
-                              className="inline-flex items-center bg-white text-gray-700 px-3 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors text-sm font-medium"
-                            >
-                              <i className="fas fa-envelope mr-2"></i>
-                              Email
-                            </a>
-                          )}
-                        </div>
-                  </td>
-                </tr>
-                  );
-                })}
+                paginatedAdmissions.map((admission, index) => renderAdmissionRow(admission, index))}
 
               {!loading && filteredAdmissions.length === 0 && (
                 <tr>

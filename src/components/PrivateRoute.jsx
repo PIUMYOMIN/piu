@@ -1,6 +1,7 @@
 // src/components/PrivateRoute.jsx
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { getDashboardPathForUser, resolveUserRole } from "../utils/authRouting";
 
 const PrivateRoute = ({ children, role, requiredRole }) => {
   const { isAuthenticated, user, loading } = useAuth();
@@ -23,12 +24,7 @@ const PrivateRoute = ({ children, role, requiredRole }) => {
   }
 
   const expectedRole = requiredRole || role;
-  const rawRole = String(
-    user?.role?.name ??
-      user?.role ??
-      (Array.isArray(user?.roles) ? user.roles[0]?.name || user.roles[0] : "")
-  ).toLowerCase();
-  const currentRole = rawRole === "faculty" ? "teacher" : rawRole;
+  const currentRole = resolveUserRole(user);
 
   // Check if user has role (supports string or array)
   if (expectedRole) {
@@ -37,7 +33,7 @@ const PrivateRoute = ({ children, role, requiredRole }) => {
       : [String(expectedRole).toLowerCase()];
 
     if (!allowedRoles.includes(currentRole)) {
-      return <Navigate to="/" replace />;
+      return <Navigate to={getDashboardPathForUser(user)} replace />;
     }
   }
 

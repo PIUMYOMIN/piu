@@ -1,18 +1,10 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
-
-function resolveRole(user) {
-  const role = String(
-    user?.role?.name ??
-      user?.role ??
-      (Array.isArray(user?.roles) ? user.roles[0]?.name || user.roles[0] : "")
-  ).toLowerCase();
-  return role === "faculty" ? "teacher" : role;
-}
+import { resolveUserRole } from "../utils/authRouting";
 
 export default function RoleRoute({ children, allowedRoles = [], fallbackTo = "/piu/admin" }) {
   const { user } = useAuth();
-  const role = resolveRole(user);
+  const role = resolveUserRole(user);
   const allow = allowedRoles.map((r) => String(r).toLowerCase());
 
   if (!allow.includes(role)) {

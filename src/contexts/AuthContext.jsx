@@ -98,6 +98,12 @@ export const AuthProvider = ({ children }) => {
   };
 
   // Logout user
+  const logoutLocal = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setUser(null);
+  };
+
   const logout = async () => {
     setLoading(true);
     try {
@@ -105,9 +111,7 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      setUser(null);
+      logoutLocal();
       setLoading(false);
     }
   };
@@ -120,6 +124,7 @@ export const AuthProvider = ({ children }) => {
     login,
     studentPortalLogin,
     logout,
+    logoutLocal,
     isAuthenticated: !!user,
   };
 

@@ -59,7 +59,10 @@ function createApiClient(baseURL) {
     (error) => {
       if (error.response?.status === 401) {
         localStorage.removeItem('token');
-        window.location.href = '/login';
+        localStorage.removeItem('user');
+        if (!window.location.pathname.startsWith('/login')) {
+          window.location.assign('/login');
+        }
       }
       return Promise.reject(error);
     }

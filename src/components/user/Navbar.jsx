@@ -3,22 +3,16 @@ import { Link, useNavigate } from "react-router-dom";
 import { FaSearch, FaUserCircle, FaCaretDown, FaSignOutAlt } from "react-icons/fa";
 import Logo from "../../assets/logo.png";
 import { useAuth } from "../../contexts/AuthContext";
+import { getDashboardPathForRole, resolveUserRole } from "../../utils/authRouting";
 
 function getUserRole(user) {
-  const raw =
-    user?.role?.name ??
-    user?.role ??
-    (Array.isArray(user?.roles) ? user.roles[0]?.name || user.roles[0] : "");
-  return String(raw || "").toLowerCase();
+  return resolveUserRole(user);
 }
 
 function getProfilePathByRole(role) {
-  if (role === "admin") return "/piu/admin/profile";
-  if (role === "registrar") return "/piu/admin/profile";
-  if (role === "student") return "/piu/student";
-  if (role === "teacher") return "/piu/admin/profile";
-  if (role === "user") return "/piu/user";
-  return "/piu/user";
+  if (role === "admin" || role === "registrar") return "/piu/admin/profile";
+  if (role === "teacher") return "/piu/teacher/profile";
+  return getDashboardPathForRole(role);
 }
 
 export default function Navbar() {

@@ -1,6 +1,7 @@
 // src/components/PublicRoute.jsx
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { getDashboardPathForUser } from "../utils/authRouting";
 
 const PublicRoute = ({ children }) => {
   const { isAuthenticated, user, loading } = useAuth();
@@ -15,27 +16,7 @@ const PublicRoute = ({ children }) => {
 
   // If user is authenticated, redirect to appropriate dashboard
   if (isAuthenticated) {
-    const rawRole = String(
-      user?.role?.name ??
-        user?.role ??
-        (Array.isArray(user?.roles) ? user.roles[0]?.name || user.roles[0] : "")
-    ).toLowerCase();
-    const role = rawRole === "faculty" ? "teacher" : rawRole;
-
-    // Redirect based on user role
-    if (role === "admin") {
-      return <Navigate to="/piu/admin" replace />;
-    } else if (role === "registrar") {
-      return <Navigate to="/piu/admin" replace />;
-    } else if (role === "student") {
-      return <Navigate to="/piu/student" replace />;
-    } else if (role === "teacher") {
-      return <Navigate to="/piu/admin" replace />;
-    } else if (role === "user" || role === "") {
-      return <Navigate to="/piu/user" replace />;
-    } else {
-      return <Navigate to="/piu/user" replace />;
-    }
+    return <Navigate to={getDashboardPathForUser(user)} replace />;
   }
 
   return children;

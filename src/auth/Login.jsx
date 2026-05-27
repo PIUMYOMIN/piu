@@ -1,20 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-
-function resolveRole(user) {
-  const roleFromField = user?.role?.name || user?.role;
-  if (roleFromField) {
-    const role = String(roleFromField).toLowerCase();
-    return role === "faculty" ? "teacher" : role;
-  }
-  if (Array.isArray(user?.roles) && user.roles.length > 0) {
-    const firstRole = user.roles[0];
-    const role = String(firstRole?.name || firstRole).toLowerCase();
-    return role === "faculty" ? "teacher" : role;
-  }
-  return "";
-}
+import { getDashboardPathForRole, resolveUserRole } from '../utils/authRouting';
 
 export default function Login() {
   const [portal, setPortal] = useState('user');
@@ -23,7 +10,7 @@ export default function Login() {
   const [studentCredential, setStudentCredential] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
-  const { login, studentPortalLogin, loading } = useAuth();
+  const { login, logoutLocal, studentPortalLogin, loading } = useAuth();
 
   const getErrorMessage = (err, fallback) => {
     const data = err?.response?.data;
@@ -45,8 +32,16 @@ export default function Login() {
           setError('Please enter email/student ID and password.');
           return;
         }
-        await studentPortalLogin(studentCredential, password);
-        navigate('/piu/student');
+        const studentData = await studentPortalLogin(studentCredential, password);
+        const role = resolveUserRole(studentData?.user);
+
+        if (role !== "student") {
+          logoutLocal();
+          setError('This account is not a student account.');
+          return;
+        }
+
+        navigate(getDashboardPathForRole(role), { replace: true });
         return;
       }
 
@@ -56,36 +51,27 @@ export default function Login() {
       }
 
       const userData = await login(email, password);
-      const role = resolveRole(userData?.user);
+      const role = resolveUserRole(userData?.user);
 
-      if (portal === 'user') {
-        navigate('/piu/user');
+      if (portal === 'user' && role !== 'user') {
+        logoutLocal();
+        setError('This account is not a user account. Please choose the correct portal.');
         return;
       }
 
-      if (portal === 'admin' && role !== 'admin') {
+      if (portal === 'admin' && role !== 'admin' && role !== 'registrar') {
+        logoutLocal();
         setError('This account is not an admin account.');
         return;
       }
 
       if (portal === 'teacher' && role !== 'teacher') {
+        logoutLocal();
         setError('This account is not a teacher account.');
         return;
       }
 
-      if (role === 'admin') {
-        navigate('/piu/admin');
-      } else if (role === 'registrar') {
-        navigate('/piu/admin');
-      } else if (role === 'student') {
-        navigate('/piu/student');
-      } else if (role === 'teacher') {
-        navigate('/piu/admin');
-      } else if (role === 'user') {
-        navigate('/piu/user');
-      } else {
-        navigate('/');
-      }
+      navigate(getDashboardPathForRole(role), { replace: true });
     } catch (err) {
       const fallback =
         portal === "user"
