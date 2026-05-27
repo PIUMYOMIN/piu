@@ -1,7 +1,7 @@
 // src/router/index.jsx
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import Home from "../pages/user/Home";
-import Contact from "../pages/user/Contact";
+import Contact from "../pages/user/contact";
 import President from "../pages/user/President";
 import Courses from "../pages/user/Courses";
 import CourseCategories from "../pages/admin/CourseCategories";
@@ -293,6 +293,7 @@ const router = createBrowserRouter([
       { path: "modules", element: <ModulesList /> },
       { path: "modules/add", element: <ModuleForm /> },
       { path: "modules/edit/:id", element: <ModuleForm /> },
+      { path: "*", element: <Navigate to="/piu/admin" replace /> },
     ],
   },
   {
