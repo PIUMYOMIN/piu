@@ -15,6 +15,7 @@ export default function ModuleForm() {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({});
 
   useEffect(() => {
     if (!isEdit) return;
@@ -48,16 +49,36 @@ export default function ModuleForm() {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    if (fieldErrors[name]) {
+      setFieldErrors((prev) => ({ ...prev, [name]: null }));
+    }
+  };
+
+  const firstError = (field) => {
+    const fieldError = fieldErrors[field];
+    return Array.isArray(fieldError) ? fieldError[0] : fieldError;
+  };
+
+  const validate = () => {
+    const nextErrors = {};
+    if (!formData.name.trim()) nextErrors.name = "Module name is required";
+    if (!formData.module_code.trim()) nextErrors.module_code = "Module code is required";
+    if (!formData.credit || Number(formData.credit) < 1) nextErrors.credit = "Credit must be at least 1";
+    setFieldErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!validate()) return;
+
     setSaving(true);
     setError("");
+    setFieldErrors({});
     try {
       const payload = {
-        name: formData.name,
-        module_code: formData.module_code,
+        name: formData.name.trim(),
+        module_code: formData.module_code.trim(),
         credit: Number(formData.credit),
       };
       if (isEdit) {
@@ -68,6 +89,7 @@ export default function ModuleForm() {
       navigate("/piu/admin/modules");
     } catch (e) {
       setError(e?.response?.data?.message || e?.message || "Failed to save module");
+      setFieldErrors(e?.response?.data?.errors || {});
     } finally {
       setSaving(false);
     }
@@ -92,8 +114,9 @@ export default function ModuleForm() {
             value={formData.name}
             onChange={handleChange}
             required
-            className="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm px-4 py-2"
+            className={`mt-1 block w-full border rounded-lg shadow-sm px-4 py-2 ${firstError("name") ? "border-red-400" : "border-gray-300"}`}
           />
+          {firstError("name") && <p className="mt-1 text-sm text-red-600">{firstError("name")}</p>}
         </div>
 
         <div>
@@ -104,8 +127,9 @@ export default function ModuleForm() {
             value={formData.module_code}
             onChange={handleChange}
             required
-            className="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm px-4 py-2"
+            className={`mt-1 block w-full border rounded-lg shadow-sm px-4 py-2 uppercase ${firstError("module_code") ? "border-red-400" : "border-gray-300"}`}
           />
+          {firstError("module_code") && <p className="mt-1 text-sm text-red-600">{firstError("module_code")}</p>}
         </div>
 
         <div>
@@ -117,8 +141,9 @@ export default function ModuleForm() {
             value={formData.credit}
             onChange={handleChange}
             required
-            className="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm px-4 py-2"
+            className={`mt-1 block w-full border rounded-lg shadow-sm px-4 py-2 ${firstError("credit") ? "border-red-400" : "border-gray-300"}`}
           />
+          {firstError("credit") && <p className="mt-1 text-sm text-red-600">{firstError("credit")}</p>}
         </div>
 
         <div className="flex items-center gap-3">

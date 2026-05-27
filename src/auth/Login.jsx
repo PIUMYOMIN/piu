@@ -25,6 +25,16 @@ export default function Login() {
   const navigate = useNavigate();
   const { login, studentPortalLogin, loading } = useAuth();
 
+  const getErrorMessage = (err, fallback) => {
+    const data = err?.response?.data;
+    if (data?.errors && typeof data.errors === "object") {
+      const first = Object.values(data.errors)[0];
+      if (Array.isArray(first) && first[0]) return first[0];
+      if (typeof first === "string") return first;
+    }
+    return data?.message || data?.error || fallback;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -81,7 +91,7 @@ export default function Login() {
         portal === "user"
           ? "No matching account in the user table. Please choose the correct portal."
           : "Invalid login credentials.";
-      const message = err.response?.data?.message || err.response?.data?.error || fallback;
+      const message = getErrorMessage(err, fallback);
       setError(message);
     }
   };
@@ -95,7 +105,18 @@ export default function Login() {
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+          <button
+            type="button"
+            onClick={() => setPortal('user')}
+            className={`w-full rounded-md border px-4 py-2 text-sm text-left transition ${
+              portal === "user"
+                ? "border-green-700 bg-green-50 text-green-900"
+                : "border-gray-300 bg-white hover:border-green-600 hover:bg-green-50"
+            }`}
+          >
+            User Portal
+          </button>
           <button
             type="button"
             onClick={() => setPortal('admin')}
@@ -135,7 +156,11 @@ export default function Login() {
           <div className="rounded-md border border-green-200 bg-green-50 px-3 py-2 text-sm font-medium text-green-800">
             {portal === "student"
               ? "Student Portal: use email or student ID, and password."
-              : "User Portal: normal users can login directly with email and password."}
+              : portal === "admin"
+              ? "Admin Portal: admin and registrar accounts."
+              : portal === "teacher"
+              ? "Teacher Portal: teacher accounts."
+              : "User Portal: normal users can login with email and password."}
           </div>
 
           <div className="rounded-md shadow-sm space-y-4">

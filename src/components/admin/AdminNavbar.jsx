@@ -79,7 +79,7 @@ const AdminNavbar = ({ toggleSidebar, isSidebarOpen }) => {
           <span>Admissions</span>
         </Link>
         <Link 
-          to="/piu/admin/list" 
+          to="/piu/admin/course-list" 
           className="flex items-center space-x-2 hover:text-blue-200 transition-colors"
         >
           <FaBook />
@@ -219,7 +219,7 @@ const AdminNavbar = ({ toggleSidebar, isSidebarOpen }) => {
               Admissions
             </Link>
             <Link 
-              to="/piu/admin/list" 
+              to="/piu/admin/course-list" 
               className="flex items-center px-4 py-3 hover:bg-[#002147] transition-colors"
               onClick={() => setIsMobileMenuOpen(false)}
             >

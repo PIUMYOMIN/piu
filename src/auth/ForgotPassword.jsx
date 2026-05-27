@@ -8,6 +8,16 @@ export default function ForgotPassword() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
+  const getErrorMessage = (err, fallback) => {
+    const data = err?.response?.data;
+    if (data?.errors && typeof data.errors === "object") {
+      const first = Object.values(data.errors)[0];
+      if (Array.isArray(first) && first[0]) return first[0];
+      if (typeof first === "string") return first;
+    }
+    return data?.message || fallback;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -23,7 +33,7 @@ export default function ForgotPassword() {
       const res = await v2.forgotPassword(email.trim());
       setSuccess(res?.message || "Password reset link has been sent to your email.");
     } catch (err) {
-      setError(err?.response?.data?.message || "Unable to send reset link.");
+      setError(getErrorMessage(err, "Unable to send reset link."));
     } finally {
       setLoading(false);
     }
@@ -68,4 +78,3 @@ export default function ForgotPassword() {
     </div>
   );
 }
-

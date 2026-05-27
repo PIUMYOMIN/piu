@@ -67,7 +67,6 @@ export default function Admission() {
       if (!course_id) newError.course_id = "Apply course is required";
       if (!(profile instanceof File)) newError.profile = "Profile picture is required";
       if (!(personal_statement instanceof File)) newError.personal_statement = "Personal statement is required";
-      if (!(language_proficiency instanceof File)) newError.language_proficiency = "Language proficiency document is required";
       if (!(education_certificate instanceof File)) newError.education_certificate = "Education certificate is required";
       // other_document is optional
     }
@@ -129,21 +128,8 @@ export default function Admission() {
     try {
       const responseData = await v2.submitAdmission(formData);
 
-      // Only redirect after backend confirms email was sent to applicant (and admin).
-      const applicantSent = responseData?.mail?.applicant_confirmed === true;
-      const adminSent = responseData?.mail?.admin_notified === true;
-
-      if (responseData?.success && applicantSent && adminSent) {
+      if (responseData?.success) {
         navigate("/admissions/application-form/successfully-submitted");
-        return;
-      }
-
-      if (responseData?.success && (!applicantSent || !adminSent)) {
-        setError({
-          form:
-            responseData?.mail?.error ||
-            "Your application was submitted, but the confirmation email could not be sent. Please contact support or try again later.",
-        });
         return;
       }
 
@@ -207,7 +193,7 @@ export default function Admission() {
       <div className="mb-6 rounded-2xl bg-gradient-to-r from-blue-900 to-indigo-800 p-6 text-white">
         <div className="text-2xl md:text-3xl font-bold">Admission Application</div>
         <div className="mt-1 text-sm md:text-base text-blue-100">
-          Submit your application and upload the required documents. We’ll email you after a successful submission.
+          Submit your application and upload the required documents. We'll email you after a successful submission.
         </div>
         <div className="mt-3 text-sm text-blue-100">
           Help line: <span className="font-semibold text-white">+09-793200074</span>
@@ -666,7 +652,7 @@ export default function Admission() {
                 className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
                 htmlFor="grid-profile"
               >
-                Language Proficiency Document <span className="text-red-600">*</span>
+                Language Proficiency Document
               </label>
               <input
                 className={`appearance-none block w-full bg-gray-200 text-gray-700 border ${error.language_proficiency
@@ -689,7 +675,7 @@ export default function Admission() {
                 className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
                 htmlFor="grid-profile"
               >
-                Other Document <span className="text-red-600">*</span>
+                Other Document
               </label>
               <input
                 className={`appearance-none block w-full bg-gray-200 text-gray-700 border ${error.other_document

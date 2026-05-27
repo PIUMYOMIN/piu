@@ -47,6 +47,14 @@ export default function ModulesList() {
     });
   }, [modules, search]);
 
+  const getUsageCount = (module) => {
+    return Number(module?.curriculums_count || 0)
+      + Number(module?.assignments_count || 0)
+      + Number(module?.subjects_count || 0)
+      + Number(module?.gradings_count || 0)
+      + Number(module?.student_assignments_count || 0);
+  };
+
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
   const paginated = useMemo(() => {
     const start = (currentPage - 1) * pageSize;
@@ -56,6 +64,12 @@ export default function ModulesList() {
   useEffect(() => {
     setCurrentPage(1);
   }, [search]);
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
 
   const remove = async (module) => {
     if (!isAdmin) return;
@@ -108,13 +122,14 @@ export default function ModulesList() {
                 <th className="px-4 py-2 border">Module Name</th>
                 <th className="px-4 py-2 border">Module Code</th>
                 <th className="px-4 py-2 border">Credit</th>
+                <th className="px-4 py-2 border">Used In</th>
                 <th className="px-4 py-2 border">Actions</th>
               </tr>
             </thead>
             <tbody>
               {loading && (
                 <tr>
-                  <td colSpan="5" className="text-center py-6 text-gray-500 border">
+                  <td colSpan="6" className="text-center py-6 text-gray-500 border">
                     Loading modules...
                   </td>
                 </tr>
@@ -127,12 +142,22 @@ export default function ModulesList() {
                     <td className="px-4 py-2 border">{m.name}</td>
                     <td className="px-4 py-2 border">{m.module_code}</td>
                     <td className="px-4 py-2 border">{m.credit}</td>
+                    <td className="px-4 py-2 border">
+                      <span className={getUsageCount(m) > 0 ? "text-amber-700" : "text-gray-500"}>
+                        {getUsageCount(m)}
+                      </span>
+                    </td>
                     <td className="px-4 py-2 border space-x-4">
                       <Link to={`/piu/admin/modules/edit/${m.id}`} className="text-blue-600 hover:underline">
                         Edit
                       </Link>
                       {isAdmin && (
-                        <button className="text-red-600 hover:underline" onClick={() => remove(m)}>
+                        <button
+                          className="text-red-600 hover:underline disabled:cursor-not-allowed disabled:opacity-40"
+                          onClick={() => remove(m)}
+                          disabled={getUsageCount(m) > 0}
+                          title={getUsageCount(m) > 0 ? "Remove related records before deleting this module" : "Delete module"}
+                        >
                           Delete
                         </button>
                       )}
@@ -142,7 +167,7 @@ export default function ModulesList() {
 
               {!loading && filtered.length === 0 && (
                 <tr>
-                  <td colSpan="5" className="text-center py-4 text-gray-500 border">
+                  <td colSpan="6" className="text-center py-4 text-gray-500 border">
                     No modules found
                   </td>
                 </tr>

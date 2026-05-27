@@ -92,6 +92,20 @@ const AddCurriculum = () => {
     }
   };
 
+  const firstError = (field) => {
+    const error = errors[field];
+    return Array.isArray(error) ? error[0] : error;
+  };
+
+  const getPlainTextFromHtml = (html) => {
+    if (!html) return "";
+    return String(html)
+      .replace(/<[^>]*>/g, " ")
+      .replace(/&nbsp;/gi, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+  };
+
   const validateForm = () => {
     const newErrors = {};
     
@@ -99,20 +113,20 @@ const AddCurriculum = () => {
       newErrors.title = "Title is required";
     }
     
-    if (!formData.description.trim()) {
+    if (!getPlainTextFromHtml(formData.description)) {
       newErrors.description = "Description is required";
     }
     
     if (!formData.course_id) {
-      newErrors.course = "Course is required";
+      newErrors.course_id = "Course is required";
     }
     
     if (!formData.year_id) {
-      newErrors.year = "Year is required";
+      newErrors.year_id = "Year is required";
     }
     
     if (!formData.module_id) {
-      newErrors.moduleCode = "Module is required";
+      newErrors.module_id = "Module is required";
     }
     
     setErrors(newErrors);
@@ -128,7 +142,7 @@ const AddCurriculum = () => {
 
     try {
       const payload = {
-        title: formData.title,
+        title: formData.title.trim(),
         description: formData.description,
         course_id: Number(formData.course_id),
         year_id: Number(formData.year_id),
@@ -143,6 +157,7 @@ const AddCurriculum = () => {
       navigate("/piu/admin/curriculum-list");
     } catch (e2) {
       setLoadError(e2?.response?.data?.message || e2?.message || "Failed to save curriculum");
+      setErrors(e2?.response?.data?.errors || {});
     } finally {
       setIsSubmitting(false);
     }
@@ -200,17 +215,17 @@ const AddCurriculum = () => {
                 value={formData.title}
                 onChange={handleChange}
                 className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:outline-none ${
-                  errors.title 
+                  firstError("title") 
                     ? "border-red-500 focus:ring-red-200" 
                     : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                 }`}
                 placeholder="Enter curriculum title"
                 required
               />
-              {errors.title && (
+              {firstError("title") && (
                 <p className="mt-1 text-sm text-red-600 flex items-center">
                   <i className="fas fa-exclamation-circle mr-1"></i>
-                  {errors.title}
+                  {firstError("title")}
                 </p>
               )}
             </div>
@@ -225,7 +240,7 @@ const AddCurriculum = () => {
                 value={formData.course_id}
                 onChange={handleChange}
                 className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:outline-none ${
-                  errors.course 
+                  firstError("course_id") 
                     ? "border-red-500 focus:ring-red-200" 
                     : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                 }`}
@@ -238,10 +253,10 @@ const AddCurriculum = () => {
                   </option>
                 ))}
               </select>
-              {errors.course && (
+              {firstError("course_id") && (
                 <p className="mt-1 text-sm text-red-600 flex items-center">
                   <i className="fas fa-exclamation-circle mr-1"></i>
-                  {errors.course}
+                  {firstError("course_id")}
                 </p>
               )}
             </div>
@@ -256,7 +271,7 @@ const AddCurriculum = () => {
                 value={formData.year_id}
                 onChange={handleChange}
                 className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:outline-none ${
-                  errors.year 
+                  firstError("year_id") 
                     ? "border-red-500 focus:ring-red-200" 
                     : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                 }`}
@@ -269,10 +284,10 @@ const AddCurriculum = () => {
                   </option>
                 ))}
               </select>
-              {errors.year && (
+              {firstError("year_id") && (
                 <p className="mt-1 text-sm text-red-600 flex items-center">
                   <i className="fas fa-exclamation-circle mr-1"></i>
-                  {errors.year}
+                  {firstError("year_id")}
                 </p>
               )}
             </div>
@@ -287,7 +302,7 @@ const AddCurriculum = () => {
                 value={formData.module_id}
                 onChange={handleChange}
                 className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:outline-none ${
-                  errors.moduleCode 
+                  firstError("module_id") 
                     ? "border-red-500 focus:ring-red-200" 
                     : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                 }`}
@@ -296,14 +311,14 @@ const AddCurriculum = () => {
                 <option value="">Select Module</option>
                 {moduleOptions.map((m) => (
                   <option key={m.id} value={String(m.id)}>
-                    {m.module_code ? `${m.module_code} — ${m.name}` : m.name}
+                    {m.module_code ? `${m.module_code} - ${m.name}` : m.name}
                   </option>
                 ))}
               </select>
-              {errors.moduleCode && (
+              {firstError("module_id") && (
                 <p className="mt-1 text-sm text-red-600 flex items-center">
                   <i className="fas fa-exclamation-circle mr-1"></i>
-                  {errors.moduleCode}
+                  {firstError("module_id")}
                 </p>
               )}
             </div>
@@ -322,10 +337,10 @@ const AddCurriculum = () => {
               className="h-48 mb-16"
               placeholder="Enter detailed curriculum description..."
             />
-            {errors.description && (
+            {firstError("description") && (
               <p className="mt-1 text-sm text-red-600 flex items-center">
                 <i className="fas fa-exclamation-circle mr-1"></i>
-                {errors.description}
+                {firstError("description")}
               </p>
             )}
           </div>

@@ -126,6 +126,7 @@ const router = createBrowserRouter([
       { path: "/", element: <Home /> },
       { path: "/campus", element: <Campus /> },
       { path: "/admission", element: <Admission2 /> },
+      { path: "/admissions", element: <Navigate to="/admissions/application-form" replace /> },
       { path: "/admissions/application-form", element: <Admission /> },
       { path: "/admissions/application-form/successfully-submitted", element: <ApplicationFormSubmitSuccessful /> },
       { path: "/about-us", element: <About /> },
@@ -204,6 +205,7 @@ const router = createBrowserRouter([
         ),
       },
       { path: "course-list", element: <CourseList /> },
+      { path: "list", element: <Navigate to="/piu/admin/course-list" replace /> },
       {
         path: "course-categories",
         element: (

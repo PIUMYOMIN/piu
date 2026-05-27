@@ -35,12 +35,10 @@ export default function Course() {
         const coursesData = await v2.getCourses();
 
         // Process image URLs
-        const processedCourses = coursesData.map(course => {
-          // Handle image URL properly
-          let imageUrl = course.image;
-          imageUrl = toStorageUrl(imageUrl) || imageUrl;
-          return { ...course, image: imageUrl };
-        });
+        const processedCourses = coursesData.map(course => ({
+          ...course,
+          image: course.image_url || toStorageUrl(course.image) || course.image,
+        }));
 
         setCourses(processedCourses);
         setFilteredCourses(processedCourses.slice(0, 8));
@@ -96,7 +94,7 @@ export default function Course() {
     if (!imagePath) {
       return "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80";
     }
-    return toStorageUrl(imagePath) || imagePath;
+    return imagePath;
   };
 
   const getColorClass = (categoryId) => {

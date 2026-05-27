@@ -75,8 +75,8 @@ export default function NewCourse() {
         ic_phone: course.ic_phone || "",
         course_category_id: course.course_category_id || "",
         image: null,
-        is_active: course.is_active || true,
-        application_sts: course.application_sts || true
+        is_active: Boolean(course.is_active),
+        application_sts: Boolean(course.application_sts)
       });
 
       if (course.image) {
@@ -214,7 +214,7 @@ export default function NewCourse() {
 
       // Navigate back after a short delay
       setTimeout(() => {
-        navigate("/piu/admin/list");
+        navigate("/piu/admin/course-list");
       }, 1500);
 
     } catch (error) {
@@ -240,7 +240,7 @@ export default function NewCourse() {
   };
 
   const handleCancel = () => {
-    navigate("/piu/admin/list");
+    navigate("/piu/admin/course-list");
   };
 
   const modules = {

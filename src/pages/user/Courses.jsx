@@ -19,18 +19,12 @@ export default function Course() {
 
         // If API already returns full URLs, use them directly
         // If not, construct the URL properly
-        const processedCourses = data.map(course => {
-          // Handle image URL
-          let imageUrl = course.image;
-          imageUrl = toStorageUrl(course.image) || course.image;
-
-          return {
-            ...course,
-            image: imageUrl,
-            // Ensure category exists
-            category: course.category || course.course_category || null
-          };
-        });
+        const processedCourses = data.map(course => ({
+          ...course,
+          image: course.image_url || toStorageUrl(course.image) || course.image,
+          // Ensure category exists
+          category: course.category || course.course_category || null
+        }));
 
         // Filter only active courses if your API returns is_active field
         const activeCourses = processedCourses.filter(course =>
@@ -177,7 +171,6 @@ export default function Course() {
                 <div className="relative overflow-hidden">
                   <img
                     src={
-                      toStorageUrl(course.image) ||
                       course.image ||
                       "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
                     }

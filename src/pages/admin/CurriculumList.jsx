@@ -61,9 +61,9 @@ const CurriculumList = () => {
   const filteredCurriculums = useMemo(() => {
     const q = searchTerm.trim().toLowerCase();
     return curriculums.filter((curriculum) => {
-      const module = modulesById.get(String(curriculum.module_id));
-      const course = coursesById.get(String(curriculum.course_id));
-      const year = yearsById.get(String(curriculum.year_id));
+      const module = curriculum.module || modulesById.get(String(curriculum.module_id));
+      const course = curriculum.course || coursesById.get(String(curriculum.course_id));
+      const year = curriculum.year || yearsById.get(String(curriculum.year_id));
 
       const matchesSearch =
         !q ||
@@ -231,9 +231,9 @@ const CurriculumList = () => {
 
               {!loading &&
                 filteredCurriculums.map((curriculum) => {
-                  const course = coursesById.get(String(curriculum.course_id));
-                  const year = yearsById.get(String(curriculum.year_id));
-                  const module = modulesById.get(String(curriculum.module_id));
+                  const course = curriculum.course || coursesById.get(String(curriculum.course_id));
+                  const year = curriculum.year || yearsById.get(String(curriculum.year_id));
+                  const module = curriculum.module || modulesById.get(String(curriculum.module_id));
                   const status = curriculum.status || curriculum.is_active;
                   const isActive =
                     status === true ? true : status === false ? false : String(status || "active").toLowerCase() === "active";

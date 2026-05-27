@@ -15,6 +15,16 @@ export default function ResetPassword() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
+  const getErrorMessage = (err, fallback) => {
+    const data = err?.response?.data;
+    if (data?.errors && typeof data.errors === "object") {
+      const first = Object.values(data.errors)[0];
+      if (Array.isArray(first) && first[0]) return first[0];
+      if (typeof first === "string") return first;
+    }
+    return data?.message || fallback;
+  };
+
   const isInvalid = useMemo(() => !token, [token]);
 
   const handleSubmit = async (e) => {
@@ -54,7 +64,7 @@ export default function ResetPassword() {
         navigate("/login");
       }, 1500);
     } catch (err) {
-      setError(err?.response?.data?.message || "Unable to reset password.");
+      setError(getErrorMessage(err, "Unable to reset password."));
     } finally {
       setLoading(false);
     }
@@ -121,4 +131,3 @@ export default function ResetPassword() {
     </div>
   );
 }
-

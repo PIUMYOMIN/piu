@@ -19,8 +19,7 @@ const CourseList = () => {
 
   // Fetch courses and categories from API
   useEffect(() => {
-    fetchCourses();
-    fetchCategories();
+    fetchInitialData();
   }, []);
 
   // Apply filters when search or filters change
@@ -63,6 +62,63 @@ const CourseList = () => {
     }
   };
 
+  const buildCourseViewModel = (course, categoryList = categories) => {
+    const category = course.category || categoryList.find(cat => String(cat.id) === String(course.course_category_id));
+
+    return {
+      id: course.id,
+      title: course.title,
+      slug: course.slug,
+      description: course.description,
+      image: course.image_url || course.image || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80",
+      category: category?.name || "Other",
+      category_id: course.course_category_id,
+      course_category_id: course.course_category_id,
+      duration: course.duration || "N/A",
+      startDate: course.start_date || "N/A",
+      endDate: course.end_date || "N/A",
+      total_seat: course.total_seat || "0",
+      enrolled: "0",
+      is_active: Boolean(course.is_active),
+      application_sts: Boolean(course.application_sts),
+      fees: course.fees || "N/A",
+      ic_name: course.ic_name || "Not assigned",
+      ic_phone: course.ic_phone || "N/A",
+      user_id: course.user_id,
+      created_at: course.created_at,
+      updated_at: course.updated_at,
+      active: Boolean(course.is_active),
+      applicantOpen: Boolean(course.application_sts),
+      fee: course.fees || "N/A",
+      instructor: course.ic_name || "Not assigned",
+      seats: parseInt(course.total_seat) || 0
+    };
+  };
+
+  const fetchInitialData = async () => {
+    try {
+      setLoading(true);
+      setLoadingCategories(true);
+      setError(null);
+
+      const [coursesData, categoriesData] = await Promise.all([
+        adminApi.courses.list(),
+        adminApi.categories.list(),
+      ]);
+
+      const safeCategories = Array.isArray(categoriesData) ? categoriesData : [];
+      setCategories(safeCategories);
+      setCourses((Array.isArray(coursesData) ? coursesData : []).map(course => buildCourseViewModel(course, safeCategories)));
+    } catch (error) {
+      console.error("Error fetching course data:", error);
+      setError("Failed to load courses. Please try again.");
+      showToast("Failed to load courses. Please try again.", "error");
+    } finally {
+      setLoading(false);
+      setLoadingCategories(false);
+    }
+  };
+
   const fetchCourses = async () => {
     try {
       setLoading(true);
@@ -70,38 +126,7 @@ const CourseList = () => {
 
       const coursesData = await adminApi.courses.list();
 
-      // Transform API data to match frontend format
-      const transformedCourses = coursesData.map(course => ({
-        id: course.id,
-        title: course.title,
-        slug: course.slug,
-        description: course.description,
-        image: course.image || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80",
-        category: getCategoryName(course.course_category_id),
-        category_id: course.course_category_id,
-        course_category_id: course.course_category_id,
-        duration: course.duration || "N/A",
-        startDate: course.start_date || "N/A",
-        endDate: course.end_date || "N/A",
-        total_seat: course.total_seat || "0",
-        enrolled: "0", // You'll need to get this from enrollments API
-        is_active: course.is_active || false,
-        application_sts: course.application_sts || 0,
-        fees: course.fees || "N/A",
-        ic_name: course.ic_name || "Not assigned",
-        ic_phone: course.ic_phone || "N/A",
-        user_id: course.user_id,
-        created_at: course.created_at,
-        updated_at: course.updated_at,
-        // Additional fields for UI
-        active: course.is_active || false,
-        applicantOpen: course.application_sts === 1 || course.application_sts === true,
-        fee: course.fees || "N/A",
-        instructor: course.ic_name || "Not assigned",
-        seats: parseInt(course.total_seat) || 0
-      }));
-
-      setCourses(transformedCourses);
+      setCourses((Array.isArray(coursesData) ? coursesData : []).map(course => buildCourseViewModel(course)));
     } catch (error) {
       console.error("❌ Error fetching courses:", error);
       setError("Failed to load courses. Please try again.");
@@ -109,24 +134,6 @@ const CourseList = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  // Helper function to get category name from fetched categories
-  const getCategoryName = (categoryId) => {
-    if (!categories || categories.length === 0) {
-      // Fallback if categories not loaded yet
-      const defaultCategories = {
-        1: "Certificate",
-        2: "Master",
-        3: "Bachelor",
-        4: "Diploma",
-        5: "PhD"
-      };
-      return defaultCategories[categoryId] || "Other";
-    }
-
-    const category = categories.find(cat => cat.id === categoryId);
-    return category ? category.name : "Other";
   };
 
   const filterCourses = () => {

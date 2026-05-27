@@ -43,6 +43,11 @@ const CategoryForm = ({ category = null, onSuccess, onCancel, mode = "create" })
     setToast({ message, type });
   };
 
+  const firstError = (field) => {
+    const error = errors[field];
+    return Array.isArray(error) ? error[0] : error;
+  };
+
   const validateForm = () => {
     const newErrors = {};
     
@@ -205,16 +210,16 @@ const CategoryForm = ({ category = null, onSuccess, onCancel, mode = "create" })
                 disabled={isSubmitting}
                 autoFocus
               />
-              {errors.name && (
+              {firstError("name") && (
                 <div className="absolute right-3 top-3">
                   <FaExclamationTriangle className="text-red-500" />
                 </div>
               )}
             </div>
-            {errors.name && (
+            {firstError("name") && (
               <p className="mt-1 text-sm text-red-600 flex items-center">
                 <FaExclamationTriangle className="mr-1" size={12} />
-                {errors.name}
+                {firstError("name")}
               </p>
             )}
             <p className="mt-1 text-xs text-gray-500">
@@ -238,16 +243,16 @@ const CategoryForm = ({ category = null, onSuccess, onCancel, mode = "create" })
                 disabled={isSubmitting}
                 rows="4"
               />
-              {errors.description && (
+              {firstError("description") && (
                 <div className="absolute right-3 top-3">
                   <FaExclamationTriangle className="text-red-500" />
                 </div>
               )}
             </div>
-            {errors.description && (
+            {firstError("description") && (
               <p className="mt-1 text-sm text-red-600 flex items-center">
                 <FaExclamationTriangle className="mr-1" size={12} />
-                {errors.description}
+                {firstError("description")}
               </p>
             )}
             <div className="flex justify-between mt-1">

@@ -102,11 +102,11 @@ export default function CourseDetails() {
 
   // Handle image URL
   const getImageUrl = () => {
-    if (!courseDetails.image) {
+    if (!courseDetails.image_url && !courseDetails.image) {
       return "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80";
     }
 
-    return toStorageUrl(courseDetails.image) || courseDetails.image;
+    return courseDetails.image_url || toStorageUrl(courseDetails.image) || courseDetails.image;
   };
 
   return (

@@ -15,6 +15,16 @@ export default function Register() {
   const navigate = useNavigate();
   const { register, loading } = useAuth();
 
+  const getErrorMessage = (err, fallback) => {
+    const data = err?.response?.data;
+    if (data?.errors && typeof data.errors === "object") {
+      const first = Object.values(data.errors)[0];
+      if (Array.isArray(first) && first[0]) return first[0];
+      if (typeof first === "string") return first;
+    }
+    return data?.message || data?.error || fallback;
+  };
+
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -41,13 +51,13 @@ export default function Register() {
       await register(formData);
       setSuccess("Registration successful! Redirecting...");
       setTimeout(() => {
-        navigate("/piu/admin");
+        navigate("/piu/user");
       }, 2000);
     } catch (error) {
-      const errorMessage =
-        error.response?.data?.message ||
-        error.response?.data?.error ||
-        "An error occurred while registering. Please try again.";
+      const errorMessage = getErrorMessage(
+        error,
+        "An error occurred while registering. Please try again."
+      );
       setError(errorMessage);
     }
   };

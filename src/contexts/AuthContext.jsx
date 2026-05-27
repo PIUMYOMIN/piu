@@ -20,7 +20,9 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const loadUser = async () => {
       const token = localStorage.getItem('token');
-      if (!token) {
+      const hasUsableToken = token && token !== 'undefined' && token !== 'null';
+      if (!hasUsableToken) {
+        localStorage.removeItem('token');
         setLoading(false);
         setInitialized(true);
         return;
@@ -47,7 +49,8 @@ export const AuthProvider = ({ children }) => {
     try {
       const responseData = await v2.register(userData);
       const { token, user } = responseData;
-      localStorage.setItem('token', token);
+      if (token) localStorage.setItem('token', token);
+      else localStorage.removeItem('token');
       localStorage.setItem('user', JSON.stringify(user || {}));
       setUser(user);
       return responseData;
@@ -62,7 +65,8 @@ export const AuthProvider = ({ children }) => {
     try {
       const responseData = await v2.login({ email, password });
       const { token, user } = responseData;
-      localStorage.setItem('token', token);
+      if (token) localStorage.setItem('token', token);
+      else localStorage.removeItem('token');
       localStorage.setItem('user', JSON.stringify(user || {}));
       setUser(user);
       return responseData;
@@ -83,7 +87,8 @@ export const AuthProvider = ({ children }) => {
         password,
       });
       const { token, user } = responseData;
-      localStorage.setItem('token', token);
+      if (token) localStorage.setItem('token', token);
+      else localStorage.removeItem('token');
       localStorage.setItem('user', JSON.stringify(user || {}));
       setUser(user);
       return responseData;
