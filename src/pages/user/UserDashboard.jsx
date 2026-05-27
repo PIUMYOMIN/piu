@@ -115,6 +115,9 @@ export default function UserDashboard() {
             }
             alt="User profile"
             className="h-20 w-20 rounded-full border object-cover"
+            loading="lazy"
+            decoding="async"
+            fetchPriority="low"
           />
           <label className="cursor-pointer rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100">
             Change Photo

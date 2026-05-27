@@ -67,6 +67,9 @@ export default function FacultiesDetails() {
                                 src={toStorageUrl(profileDetails.profile) || "https://via.placeholder.com/320x320?text=PIU"}
                                 alt={profileDetails.name}
                                 className="h-full w-full object-cover"
+                                loading="lazy"
+                                decoding="async"
+                                fetchPriority="low"
                                 onError={(e) => {
                                     e.target.src = "https://via.placeholder.com/320x320?text=PIU";
                                 }}

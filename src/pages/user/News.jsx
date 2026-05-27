@@ -146,6 +146,9 @@ export default function NewsPage() {
                         src={getImageUrl(image)}
                         alt={title}
                         className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        loading="lazy"
+                        decoding="async"
+                        fetchPriority="low"
                         onError={(e) => {
                           e.target.src =
                             "https://images.unsplash.com/photo-1588681664899-f142ff2dc9b1?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80";

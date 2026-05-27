@@ -213,6 +213,9 @@ export default function NewsDetails() {
                 src={toStorageUrl(newsDetails.image) || newsDetails.image}
                 alt={newsDetails.title}
                 className="w-full h-auto rounded-xl shadow-lg"
+                loading="eager"
+                decoding="async"
+                fetchPriority="high"
                 onError={(e) => {
                   e.target.src = "https://images.unsplash.com/photo-1588681664899-f142ff2dc9b1?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80";
                 }}
@@ -271,6 +274,9 @@ export default function NewsDetails() {
                             src={toStorageUrl(news.image) || news.image}
                             alt={news.title}
                             className="w-full h-full object-cover rounded-lg"
+                            loading="lazy"
+                            decoding="async"
+                            fetchPriority="low"
                           />
                         </div>
                       )}

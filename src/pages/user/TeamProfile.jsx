@@ -36,6 +36,9 @@ export default function TeamProfile() {
             src={toStorageUrl(teamProfileDetails.profile)}
             alt=""
             className="w-96"
+            loading="lazy"
+            decoding="async"
+            fetchPriority="low"
             onError={(e) => {
               e.currentTarget.src = "https://via.placeholder.com/384x384?text=PIU";
             }}

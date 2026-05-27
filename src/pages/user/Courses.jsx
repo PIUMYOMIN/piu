@@ -176,6 +176,9 @@ export default function Course() {
                     }
                     alt={course.title}
                     className="object-cover w-full h-48 hover:scale-105 transition-transform duration-500 ease-in-out"
+                    loading="lazy"
+                    decoding="async"
+                    fetchPriority="low"
                     onError={(e) => {
                       e.currentTarget.src =
                         "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80";

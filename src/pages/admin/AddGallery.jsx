@@ -6,6 +6,12 @@ import { toStorageUrl } from "../../utils/api";
 const AddGallery = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const parseIsActive = (value) => {
+    if (typeof value === "boolean") return value;
+    if (typeof value === "number") return value === 1;
+    const normalized = String(value ?? "").trim().toLowerCase();
+    return normalized === "1" || normalized === "true" || normalized === "yes";
+  };
 
   const [formData, setFormData] = useState({
     image_tag: "",
@@ -34,7 +40,7 @@ const AddGallery = () => {
             link1: g?.link1 || "",
             link2: g?.link2 || "",
             image: null,
-            is_active: typeof g?.is_active === "boolean" ? g.is_active : true,
+            is_active: parseIsActive(g?.is_active),
           });
           setImagePreview(toStorageUrl(g?.image) || g?.image || "");
         }

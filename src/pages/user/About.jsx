@@ -94,7 +94,7 @@ export default function About() {
           </div>
           <div className="lg:w-4/12 font-robotoSlab text-center text-slate-500">
             <Link to="/team/vennayaka">
-              <img src={Principal} alt="" className="object-cover" />
+              <img src={Principal} alt="" className="object-cover" loading="lazy" decoding="async" fetchPriority="low" />
               <p className="text-xl">Ven.Nayaka</p>
               <p>President of PIU</p>
             </Link>

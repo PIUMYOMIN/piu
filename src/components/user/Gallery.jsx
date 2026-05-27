@@ -191,6 +191,9 @@ export default function Gallery({ variant = "page" }) {
                       src={getImageUrl(gallery.image)}
                       alt={gallery.image_tag || "Gallery image"}
                       className="w-full h-auto transition-transform duration-500 group-hover:scale-105"
+                      loading="lazy"
+                      decoding="async"
+                      fetchPriority="low"
                       onError={(e) => {
                         e.target.src =
                           "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80";
@@ -391,6 +394,9 @@ export default function Gallery({ variant = "page" }) {
                         src={getImageUrl(gallery.image)}
                         alt={gallery.image_tag || 'Gallery image'}
                         className="w-full h-auto transition-transform duration-500 group-hover:scale-110"
+                        loading="lazy"
+                        decoding="async"
+                        fetchPriority="low"
                         onError={(e) => {
                           e.target.src = "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80";
                         }}

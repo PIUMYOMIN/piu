@@ -129,6 +129,9 @@ export default function CourseDetails() {
               src={getImageUrl()}
               alt={courseDetails.title}
               className="w-full h-auto max-h-[500px] object-cover"
+              loading="eager"
+              decoding="async"
+              fetchPriority="high"
               onError={(e) => {
                 e.target.src = "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80";
               }}

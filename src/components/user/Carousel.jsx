@@ -78,6 +78,9 @@ const Carousel = () => {
                 src={slide.slide_image}
                 alt={slide.title || "Slide"}
                 className="w-full h-[300px] sm:h-[400px] md:h-[500px] object-cover"
+                loading={index === 0 ? "eager" : "lazy"}
+                decoding="async"
+                fetchPriority={index === 0 ? "high" : "low"}
                 onError={(e) => {
                   e.target.src =
                     "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80";

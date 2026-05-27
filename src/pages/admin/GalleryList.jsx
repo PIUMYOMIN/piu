@@ -5,6 +5,12 @@ import { toStorageUrl } from "../../utils/api";
 
 const GalleryList = () => {
   const navigate = useNavigate();
+  const parseIsActive = (value) => {
+    if (typeof value === "boolean") return value;
+    if (typeof value === "number") return value === 1;
+    const normalized = String(value ?? "").trim().toLowerCase();
+    return normalized === "1" || normalized === "true" || normalized === "yes";
+  };
 
   const [gallery, setGallery] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -63,10 +69,7 @@ const GalleryList = () => {
       const tag = String(item.image_tag || "");
       const matchesSearch = !q || tag.toLowerCase().includes(q);
 
-      const isActive =
-        typeof item.is_active === "boolean"
-          ? item.is_active
-          : String(item.is_active ?? "").toLowerCase() === "true";
+      const isActive = parseIsActive(item.is_active);
 
       const matchesStatus =
         statusFilter === "all" ||
@@ -175,10 +178,7 @@ const GalleryList = () => {
 
               {!loading && filteredGallery.length > 0 ? (
                 filteredGallery.map((item, index) => {
-                  const isActive =
-                    typeof item.is_active === "boolean"
-                      ? item.is_active
-                      : String(item.is_active ?? "").toLowerCase() === "true";
+                  const isActive = parseIsActive(item.is_active);
                   const img = toStorageUrl(item.image) || item.image || "";
                   return (
                   <tr key={item.id} className="hover:bg-gray-50 transition-colors">

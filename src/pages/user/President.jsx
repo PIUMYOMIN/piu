@@ -6,7 +6,7 @@ export default function president() {
     <div className="bg-slate-200 md:p-5 py-1 mt-6">
       <div className="my-3 md:flex flex-row">
         <div className="md:w-full">
-          <img src={President} alt="" className="object-cover" />
+          <img src={President} alt="" className="object-cover" loading="lazy" decoding="async" fetchPriority="low" />
         </div>
         <div className="w-3/2 md:ml-20">
           <h2 className="text-3xl py-2">About</h2>
