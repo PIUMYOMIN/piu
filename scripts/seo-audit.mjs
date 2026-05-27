@@ -1,4 +1,6 @@
 import { spawn } from "node:child_process";
+import { readFile } from "node:fs/promises";
+import { resolve } from "node:path";
 
 function getArgTarget() {
   const t = process.argv[2];
@@ -27,18 +29,41 @@ function run(cmd, args) {
   });
 }
 
+async function getFrontendAuditPaths() {
+  try {
+    const sitemapPath = resolve(process.cwd(), "public", "sitemap.xml");
+    const sitemap = await readFile(sitemapPath, "utf8");
+    const matches = [...sitemap.matchAll(/<loc>(.*?)<\/loc>/g)];
+    const paths = matches
+      .map((match) => {
+        try {
+          return new URL(match[1]).pathname || "/";
+        } catch {
+          return null;
+        }
+      })
+      .filter(Boolean);
+
+    return paths.length > 0 ? [...new Set(paths)] : ["/"];
+  } catch {
+    return ["/"];
+  }
+}
+
 const target = getArgTarget();
 const url = getUrl(target);
 const outDir = target === "frontend" ? ".lhci/frontend" : ".lhci/backend";
 
 if (target === "frontend") {
+  const paths = await getFrontendAuditPaths();
+
   // For frontend, audit the built SPA directly (no dependency on dev server binding/loopback).
   await run("npm", ["run", "build"]);
   await run("npx", [
     "lhci",
     "autorun",
     "--collect.staticDistDir=dist",
-    "--collect.url=/",
+    ...paths.map((path) => `--collect.url=${path}`),
     "--collect.numberOfRuns=1",
     "--collect.settings.preset=desktop",
     "--upload.target=filesystem",

@@ -48,7 +48,7 @@ export default function Home() {
                   News & events
                 </Link>
                 <Link
-                  to="/contact"
+                  to="/contact-us"
                   className="inline-flex items-center justify-center rounded-xl bg-white/10 hover:bg-white/15 px-4 py-3 font-semibold"
                 >
                   Contact us

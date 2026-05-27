@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { FaArrowLeft } from 'react-icons/fa';
 import LoadingSpinner from "../../components/user/LoadingSpinner";
 import { v1, toStorageUrl } from "../../utils/api";
+import { stripHtml, truncateText, useSeo } from "../../seo";
 
 export default function FacultiesDetails() {
     const { slug } = useParams();
@@ -24,6 +25,25 @@ export default function FacultiesDetails() {
 
         fetchProfileDetails();
     }, [slug]);
+
+    useSeo(
+        profileDetails
+            ? {
+                title: profileDetails.name || "Faculty Profile",
+                description: truncateText(
+                    stripHtml(profileDetails.description || profileDetails.position?.name || "Read about PIU faculty members."),
+                    160
+                ),
+                canonicalPath: `/faculties/${slug}`,
+                image: toStorageUrl(profileDetails.profile) || profileDetails.profile,
+                type: "profile",
+            }
+            : {
+                title: "Faculty Profile",
+                description: "Read biographies and academic profiles of PIU faculty members.",
+                canonicalPath: `/faculties/${slug}`,
+            }
+    );
 
     if (loading) {
         return (

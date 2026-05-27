@@ -17,6 +17,7 @@ import {
 } from "react-icons/fa";
 import LoadingSpinner from "../../components/user/LoadingSpinner";
 import { v2, toStorageUrl } from "../../utils/api";
+import { stripHtml, truncateText, useSeo } from "../../seo";
 
 export default function CourseDetails() {
   const { slug } = useParams();
@@ -65,6 +66,33 @@ export default function CourseDetails() {
     }
   };
 
+  const getImageUrl = () => {
+    if (!courseDetails?.image_url && !courseDetails?.image) {
+      return "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80";
+    }
+
+    return courseDetails.image_url || toStorageUrl(courseDetails.image) || courseDetails.image;
+  };
+
+  useSeo(
+    courseDetails
+      ? {
+          title: courseDetails.title || "Course Details",
+          description: truncateText(
+            stripHtml(courseDetails.description || courseDetails.requirement || "Explore course details at PIU."),
+            160
+          ),
+          canonicalPath: `/courses/${slug}`,
+          image: getImageUrl(),
+          type: "article",
+        }
+      : {
+          title: "Course Details",
+          description: "Explore course information, requirements, and enrollment details at PIU.",
+          canonicalPath: `/courses/${slug}`,
+        }
+  );
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -99,15 +127,6 @@ export default function CourseDetails() {
   const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentUrl)}`;
   const twitterUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(currentUrl)}&text=${encodeURIComponent(shareTitle)}`;
   const telegramUrl = `https://t.me/share/url?url=${encodeURIComponent(currentUrl)}&text=${encodeURIComponent(shareTitle)}`;
-
-  // Handle image URL
-  const getImageUrl = () => {
-    if (!courseDetails.image_url && !courseDetails.image) {
-      return "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80";
-    }
-
-    return courseDetails.image_url || toStorageUrl(courseDetails.image) || courseDetails.image;
-  };
 
   return (
     <div className="max-w-7xl mx-auto bg-white py-8 px-4">

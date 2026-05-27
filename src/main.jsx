@@ -7,6 +7,7 @@ import App from './App';
 import { AuthProvider } from './contexts/AuthContext';
 import { AuthInitializer } from './components/AuthInitializer';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { prepareRecaptcha } from './utils/recaptchaV3';
 import './index.css';
 
 const LoadingSpinner = () => (
@@ -18,9 +19,20 @@ const LoadingSpinner = () => (
   </div>
 );
 
+const RecaptchaBootstrap = () => {
+  React.useEffect(() => {
+    prepareRecaptcha().catch(() => {
+      // Mutating requests still handle missing tokens gracefully.
+    });
+  }, []);
+
+  return null;
+};
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <ErrorBoundary>
+      <RecaptchaBootstrap />
       <AuthProvider>
         <AuthInitializer fallback={<LoadingSpinner />}>
           <Suspense fallback={<LoadingSpinner />}>

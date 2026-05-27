@@ -85,246 +85,412 @@ import ContactFormSubmittedSuccessful from "../pages/user/ContactFormSubmittedSu
 import PrivateRoute from "../components/PrivateRoute";
 import PublicRoute from "../components/PublicRoute";
 import RoleRoute from "../components/RoleRoute";
+import { RouteSeo } from "../seo";
+
+const withSeo = (element, seo) => (
+  <>
+    <RouteSeo {...seo} />
+    {element}
+  </>
+);
+
+const publicSeo = (title, description, extra = {}) => ({
+  title,
+  description,
+  ...extra,
+});
+
+const privateSeo = (title, description = "Secure PIU dashboard page.", extra = {}) => ({
+  title,
+  description,
+  noindex: true,
+  ...extra,
+});
 
 const router = createBrowserRouter([
   {
     path: "/login",
-    element: (
+    element: withSeo(
       <PublicRoute>
         <Login />
-      </PublicRoute>
+      </PublicRoute>,
+      privateSeo("Login", "Access your PIU account.")
     ),
   },
   {
     path: "/register",
-    element: (
+    element: withSeo(
       <PublicRoute>
         <Register />
-      </PublicRoute>
+      </PublicRoute>,
+      privateSeo("Register", "Create a PIU account.")
     ),
   },
   {
     path: "/forgot-password",
-    element: (
+    element: withSeo(
       <PublicRoute>
         <ForgotPassword />
-      </PublicRoute>
+      </PublicRoute>,
+      privateSeo("Forgot Password", "Reset access to your PIU account.")
     ),
   },
   {
     path: "/reset-password",
-    element: (
+    element: withSeo(
       <PublicRoute>
         <ResetPassword />
-      </PublicRoute>
+      </PublicRoute>,
+      privateSeo("Reset Password", "Choose a new password for your PIU account.")
     ),
   },
   {
     path: "/",
     element: <UserLayout />,
     children: [
-      { path: "/", element: <Home /> },
-      { path: "/campus", element: <Campus /> },
-      { path: "/admission", element: <Admission2 /> },
+      {
+        path: "/",
+        element: withSeo(
+          <Home />,
+          publicSeo(
+            "Home",
+            "Discover academics, admissions, news, and student life at Phaung Daw Oo International University."
+          )
+        ),
+      },
+      {
+        path: "/campus",
+        element: withSeo(
+          <Campus />,
+          publicSeo("Campus", "Explore the PIU campus experience in Mandalay, Myanmar.")
+        ),
+      },
+      {
+        path: "/admission",
+        element: withSeo(
+          <Admission2 />,
+          publicSeo(
+            "Admissions Overview",
+            "Review PIU admission requirements, tuition details, and the application guide."
+          )
+        ),
+      },
       { path: "/admissions", element: <Navigate to="/admissions/application-form" replace /> },
-      { path: "/admissions/application-form", element: <Admission /> },
-      { path: "/admissions/application-form/successfully-submitted", element: <ApplicationFormSubmitSuccessful /> },
-      { path: "/about-us", element: <About /> },
-      { path: "/courses", element: <Courses /> },
-      { path: "/courses/:slug", element: <CourseDetails /> },
-      { path: "/team/:slug", element: <TeamProfile /> },
-      { path: "/news/:slug", element: <NewsDetails /> },
-      { path: "/news", element: <NewsPage /> },
-      { path: "/search", element: <SearchResults /> },
-      { path: "/gallery", element: <Gallery variant="page" /> },
-      { path: "/contact-us", element: <Contact /> },
-      { path: "/contact/thank-you-for-contacting-us", element: <ContactFormSubmittedSuccessful /> },
-      { path: "/president-of-piu", element: <President /> },
-      { path: "/faculties", element: <Faculties /> },
-      { path: "/faculties/:slug", element: <FacultiesDetails /> },
+      {
+        path: "/admissions/application-form",
+        element: withSeo(
+          <Admission />,
+          publicSeo(
+            "Apply for Admission",
+            "Submit your admission application to PIU and upload the required documents online."
+          )
+        ),
+      },
+      {
+        path: "/admissions/application-form/successfully-submitted",
+        element: withSeo(
+          <ApplicationFormSubmitSuccessful />,
+          privateSeo("Application Submitted", "Admission submission confirmation page.")
+        ),
+      },
+      {
+        path: "/about-us",
+        element: withSeo(
+          <About />,
+          publicSeo(
+            "About Us",
+            "Learn the history, mission, and vision of Phaung Daw Oo International University."
+          )
+        ),
+      },
+      {
+        path: "/courses",
+        element: withSeo(
+          <Courses />,
+          publicSeo(
+            "Courses",
+            "Browse undergraduate, diploma, certificate, and advanced programs offered by PIU."
+          )
+        ),
+      },
+      {
+        path: "/courses/:slug",
+        element: withSeo(
+          <CourseDetails />,
+          publicSeo("Course Details", "Explore course information, requirements, and enrollment details at PIU.")
+        ),
+      },
+      {
+        path: "/team/:slug",
+        element: withSeo(
+          <TeamProfile />,
+          publicSeo("Team Profile", "Meet PIU leadership and academic team members.")
+        ),
+      },
+      {
+        path: "/news/:slug",
+        element: withSeo(
+          <NewsDetails />,
+          publicSeo("News Details", "Read the latest PIU announcements, updates, and stories.")
+        ),
+      },
+      {
+        path: "/news",
+        element: withSeo(
+          <NewsPage />,
+          publicSeo("News & Events", "Stay up to date with PIU news, announcements, and campus events.")
+        ),
+      },
+      {
+        path: "/search",
+        element: withSeo(
+          <SearchResults />,
+          privateSeo("Search Results", "Internal site search results page.")
+        ),
+      },
+      {
+        path: "/gallery",
+        element: withSeo(
+          <Gallery variant="page" />,
+          publicSeo("Gallery", "View photos and moments from PIU programs, campus life, and events.")
+        ),
+      },
+      {
+        path: "/contact-us",
+        element: withSeo(
+          <Contact />,
+          publicSeo("Contact Us", "Get in touch with Phaung Daw Oo International University in Mandalay.")
+        ),
+      },
+      {
+        path: "/contact/thank-you-for-contacting-us",
+        element: withSeo(
+          <ContactFormSubmittedSuccessful />,
+          privateSeo("Contact Submitted", "Contact form submission confirmation page.")
+        ),
+      },
+      {
+        path: "/president-of-piu",
+        element: withSeo(
+          <President />,
+          publicSeo(
+            "President of PIU",
+            "Read about the founder president and educational vision behind Phaung Daw Oo International University."
+          )
+        ),
+      },
+      {
+        path: "/faculties",
+        element: withSeo(
+          <Faculties />,
+          publicSeo("Faculties", "Meet the faculty members and academic leaders at PIU.")
+        ),
+      },
+      {
+        path: "/faculties/:slug",
+        element: withSeo(
+          <FacultiesDetails />,
+          publicSeo("Faculty Profile", "Read biographies and academic profiles of PIU faculty members.")
+        ),
+      },
       { path: "*", element: <Navigate to="/" /> },
     ],
   },
   {
     path: "piu/admin",
-    element: (
+    element: withSeo(
       <PrivateRoute requiredRole={["admin", "teacher", "registrar"]}>
         <AdminLayout />
-      </PrivateRoute>
+      </PrivateRoute>,
+      privateSeo("Admin Dashboard", "Private PIU administration area.")
     ),
     children: [
-      { index: true, element: <Dashboard /> },
-      { path: "profile", element: <ProfileSetting /> },
-      { path: "change-password", element: <ChangePassword /> },
+      { index: true, element: withSeo(<Dashboard />, privateSeo("Dashboard")) },
+      { path: "profile", element: withSeo(<ProfileSetting />, privateSeo("Profile Settings")) },
+      { path: "change-password", element: withSeo(<ChangePassword />, privateSeo("Change Password")) },
       {
         path: "users",
-        element: (
+        element: withSeo(
           <RoleRoute allowedRoles={["admin"]}>
             <AdminUsers />
-          </RoleRoute>
+          </RoleRoute>,
+          privateSeo("Users")
         ),
       },
       {
         path: "users-role",
-        element: (
+        element: withSeo(
           <RoleRoute allowedRoles={["admin"]}>
             <UserRoles />
-          </RoleRoute>
+          </RoleRoute>,
+          privateSeo("User Roles")
         ),
       },
       {
         path: "user-permission",
-        element: (
+        element: withSeo(
           <RoleRoute allowedRoles={["admin"]}>
             <UserPermissions />
-          </RoleRoute>
+          </RoleRoute>,
+          privateSeo("User Permissions")
         ),
       },
       {
         path: "admission",
-        element: (
+        element: withSeo(
           <RoleRoute allowedRoles={["admin", "registrar"]}>
             <AdmissionPage />
-          </RoleRoute>
+          </RoleRoute>,
+          privateSeo("Admission Management")
         ),
       },
       {
         path: "admission/:id",
-        element: (
+        element: withSeo(
           <RoleRoute allowedRoles={["admin", "registrar"]}>
             <AdmissionDetails />
-          </RoleRoute>
+          </RoleRoute>,
+          privateSeo("Admission Details")
         ),
       },
       {
         path: "admission/details",
-        element: (
+        element: withSeo(
           <RoleRoute allowedRoles={["admin", "registrar"]}>
             <AdmissionDetails />
-          </RoleRoute>
+          </RoleRoute>,
+          privateSeo("Admission Details")
         ),
       },
-      { path: "course-list", element: <CourseList /> },
+      { path: "course-list", element: withSeo(<CourseList />, privateSeo("Course List")) },
       { path: "list", element: <Navigate to="/piu/admin/course-list" replace /> },
       {
         path: "course-categories",
-        element: (
+        element: withSeo(
           <RoleRoute allowedRoles={["admin", "registrar"]}>
             <CourseCategories />
-          </RoleRoute>
+          </RoleRoute>,
+          privateSeo("Course Categories")
         ),
       },
-      { path: "new/:id?", element: <NewCourse /> },
-      { path: "blog-list", element: <BlogsList /> },
-      { path: "add-blog", element: <BlogsForm /> },
-      { path: "add-blog/edit/:id", element: <BlogsForm /> },
-      { path: "news", element: <NewsList /> },
-      { path: "add-news", element: <NewsForm /> },
-      { path: "edit/:id", element: <NewsForm /> },
-      { path: "campus-list", element: <CampusList /> },
-      { path: "new-campus", element: <CampusForm /> },
-      { path: "campus/:id/edit", element: <CampusForm /> },
+      { path: "new/:id?", element: withSeo(<NewCourse />, privateSeo("Course Editor")) },
+      { path: "blog-list", element: withSeo(<BlogsList />, privateSeo("Blog List")) },
+      { path: "add-blog", element: withSeo(<BlogsForm />, privateSeo("Add Blog")) },
+      { path: "add-blog/edit/:id", element: withSeo(<BlogsForm />, privateSeo("Edit Blog")) },
+      { path: "news", element: withSeo(<NewsList />, privateSeo("News List")) },
+      { path: "add-news", element: withSeo(<NewsForm />, privateSeo("Add News")) },
+      { path: "edit/:id", element: withSeo(<NewsForm />, privateSeo("Edit News")) },
+      { path: "campus-list", element: withSeo(<CampusList />, privateSeo("Campus List")) },
+      { path: "new-campus", element: withSeo(<CampusForm />, privateSeo("Add Campus")) },
+      { path: "campus/:id/edit", element: withSeo(<CampusForm />, privateSeo("Edit Campus")) },
       {
         path: "team-list",
-        element: (
+        element: withSeo(
           <RoleRoute allowedRoles={["admin"]}>
             <TeamList />
-          </RoleRoute>
+          </RoleRoute>,
+          privateSeo("Team List")
         ),
       },
       {
         path: "add-team",
-        element: (
+        element: withSeo(
           <RoleRoute allowedRoles={["admin"]}>
             <AddTeam />
-          </RoleRoute>
+          </RoleRoute>,
+          privateSeo("Add Team Member")
         ),
       },
       {
         path: "add-team/edit/:id",
-        element: (
+        element: withSeo(
           <RoleRoute allowedRoles={["admin"]}>
             <AddTeam />
-          </RoleRoute>
+          </RoleRoute>,
+          privateSeo("Edit Team Member")
         ),
       },
-      { path: "event-list", element: <EventList /> },
-      { path: "add-event", element: <AddEvent /> },
-      { path: "events/edit/:id", element: <AddEvent /> },
-      { path: "curriculum-list", element: <CurriculumList /> },
-      { path: "add-curriculum", element: <AddCurriculum /> },
-      { path: "add-curriculum/edit/:id", element: <AddCurriculum /> },
+      { path: "event-list", element: withSeo(<EventList />, privateSeo("Event List")) },
+      { path: "add-event", element: withSeo(<AddEvent />, privateSeo("Add Event")) },
+      { path: "events/edit/:id", element: withSeo(<AddEvent />, privateSeo("Edit Event")) },
+      { path: "curriculum-list", element: withSeo(<CurriculumList />, privateSeo("Curriculum List")) },
+      { path: "add-curriculum", element: withSeo(<AddCurriculum />, privateSeo("Add Curriculum")) },
+      { path: "add-curriculum/edit/:id", element: withSeo(<AddCurriculum />, privateSeo("Edit Curriculum")) },
       {
         path: "slider",
-        element: (
+        element: withSeo(
           <RoleRoute allowedRoles={["admin"]}>
             <SliderList />
-          </RoleRoute>
+          </RoleRoute>,
+          privateSeo("Slider Management")
         ),
       },
-      { path: "mou", element: <MOUList /> },
-      { path: "mou/add", element: <AddMOU /> },
-      { path: "departments", element: <DepartmentList /> },
-      { path: "departments/new", element: <AddDepartment /> },
-      { path: "departments/edit/:id", element: <AddDepartment /> },
-      { path: "positions", element: <PositionList /> },
-      { path: "positions/new", element: <AddPosition /> },
-      { path: "positions/edit/:id", element: <AddPosition /> },
-      { path: "seminars", element: <SeminarList /> },
-      { path: "seminars/add", element: <AddSeminar /> },
-      { path: "seminars/edit/:id", element: <AddSeminar /> },
-      { path: "gallery", element: <GalleryList /> },
-      { path: "gallery/add", element: <AddGallery /> },
-      { path: "gallery/add/:id", element: <AddGallery /> },
-      { path: "students", element: <AllStudents /> },
-      { path: "students/add", element: <AddStudent /> },
-      { path: "students/edit/:id", element: <AddStudent /> },
-      { path: "students/:id/details", element: <StudentDetails /> },
-      { path: "students/add-grading", element: <AddStudentGrading /> },
-      { path: "students/grading", element: <StudentGradingList /> },
-      { path: "students/:id/grading", element: <StudentYearView /> },
-      { path: "students/:studentId/grading/:year", element: <StudentSemesterView /> },
-      { path: "students/:studentId/:year/:semester", element: <StudentGradeView /> },
-      { path: "students/:studentId/:year/:semester/new", element: <GradeForm /> },
-      { path: "students/:studentId/:year/:semester/edit/:gradeId", element: <GradeForm /> },
-      { path: "assignments", element: <AssignmentsList /> },
-      { path: "assignments/add", element: <AddAssignment /> },
-      { path: "assignments/edit/:id", element: <AddAssignment /> },
-      { path: "modules", element: <ModulesList /> },
-      { path: "modules/add", element: <ModuleForm /> },
-      { path: "modules/edit/:id", element: <ModuleForm /> },
+      { path: "mou", element: withSeo(<MOUList />, privateSeo("MOU List")) },
+      { path: "mou/add", element: withSeo(<AddMOU />, privateSeo("Add MOU")) },
+      { path: "departments", element: withSeo(<DepartmentList />, privateSeo("Departments")) },
+      { path: "departments/new", element: withSeo(<AddDepartment />, privateSeo("Add Department")) },
+      { path: "departments/edit/:id", element: withSeo(<AddDepartment />, privateSeo("Edit Department")) },
+      { path: "positions", element: withSeo(<PositionList />, privateSeo("Positions")) },
+      { path: "positions/new", element: withSeo(<AddPosition />, privateSeo("Add Position")) },
+      { path: "positions/edit/:id", element: withSeo(<AddPosition />, privateSeo("Edit Position")) },
+      { path: "seminars", element: withSeo(<SeminarList />, privateSeo("Seminars")) },
+      { path: "seminars/add", element: withSeo(<AddSeminar />, privateSeo("Add Seminar")) },
+      { path: "seminars/edit/:id", element: withSeo(<AddSeminar />, privateSeo("Edit Seminar")) },
+      { path: "gallery", element: withSeo(<GalleryList />, privateSeo("Gallery Management")) },
+      { path: "gallery/add", element: withSeo(<AddGallery />, privateSeo("Add Gallery")) },
+      { path: "gallery/add/:id", element: withSeo(<AddGallery />, privateSeo("Edit Gallery")) },
+      { path: "students", element: withSeo(<AllStudents />, privateSeo("Students")) },
+      { path: "students/add", element: withSeo(<AddStudent />, privateSeo("Add Student")) },
+      { path: "students/edit/:id", element: withSeo(<AddStudent />, privateSeo("Edit Student")) },
+      { path: "students/:id/details", element: withSeo(<StudentDetails />, privateSeo("Student Details")) },
+      { path: "students/add-grading", element: withSeo(<AddStudentGrading />, privateSeo("Add Student Grading")) },
+      { path: "students/grading", element: withSeo(<StudentGradingList />, privateSeo("Student Grading")) },
+      { path: "students/:id/grading", element: withSeo(<StudentYearView />, privateSeo("Student Year View")) },
+      { path: "students/:studentId/grading/:year", element: withSeo(<StudentSemesterView />, privateSeo("Student Semester View")) },
+      { path: "students/:studentId/:year/:semester", element: withSeo(<StudentGradeView />, privateSeo("Student Grade View")) },
+      { path: "students/:studentId/:year/:semester/new", element: withSeo(<GradeForm />, privateSeo("New Grade")) },
+      { path: "students/:studentId/:year/:semester/edit/:gradeId", element: withSeo(<GradeForm />, privateSeo("Edit Grade")) },
+      { path: "assignments", element: withSeo(<AssignmentsList />, privateSeo("Assignments")) },
+      { path: "assignments/add", element: withSeo(<AddAssignment />, privateSeo("Add Assignment")) },
+      { path: "assignments/edit/:id", element: withSeo(<AddAssignment />, privateSeo("Edit Assignment")) },
+      { path: "modules", element: withSeo(<ModulesList />, privateSeo("Modules")) },
+      { path: "modules/add", element: withSeo(<ModuleForm />, privateSeo("Add Module")) },
+      { path: "modules/edit/:id", element: withSeo(<ModuleForm />, privateSeo("Edit Module")) },
       { path: "*", element: <Navigate to="/piu/admin" replace /> },
     ],
   },
   {
     path: "piu/student",
-    element: (
+    element: withSeo(
       <PrivateRoute requiredRole="student">
         <StudentLayout />
-      </PrivateRoute>
+      </PrivateRoute>,
+      privateSeo("Student Portal", "Private student portal.")
     ),
-    children: [{ index: true, element: <StudentProfile /> }],
+    children: [{ index: true, element: withSeo(<StudentProfile />, privateSeo("Student Profile")) }],
   },
   {
     path: "piu/teacher",
-    element: (
+    element: withSeo(
       <PrivateRoute requiredRole="teacher">
         <TeacherLayout />
-      </PrivateRoute>
+      </PrivateRoute>,
+      privateSeo("Teacher Portal", "Private teacher portal.")
     ),
     children: [
-      { index: true, element: <TeacherDashboard /> },
-      { path: "profile", element: <TeacherProfile /> },
+      { index: true, element: withSeo(<TeacherDashboard />, privateSeo("Teacher Dashboard")) },
+      { path: "profile", element: withSeo(<TeacherProfile />, privateSeo("Teacher Profile")) },
     ],
   },
   {
     path: "piu/user",
-    element: (
+    element: withSeo(
       <PrivateRoute requiredRole="user">
         <UserDashboardLayout />
-      </PrivateRoute>
+      </PrivateRoute>,
+      privateSeo("User Dashboard", "Private PIU user dashboard.")
     ),
-    children: [{ index: true, element: <UserDashboard /> }],
+    children: [{ index: true, element: withSeo(<UserDashboard />, privateSeo("User Dashboard")) }],
   },
 ]);
 

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import LoadingSpinner from "../../components/user/LoadingSpinner";
 import { v1, toStorageUrl } from "../../utils/api";
+import { stripHtml, truncateText, useSeo } from "../../seo";
 
 export default function TeamProfile() {
   const { slug } = useParams();
@@ -23,6 +24,25 @@ export default function TeamProfile() {
       fetchTeamProfile();
     },
     [slug]
+  );
+
+  useSeo(
+    teamProfileDetails
+      ? {
+          title: teamProfileDetails.name || "Team Profile",
+          description: truncateText(
+            stripHtml(teamProfileDetails.description || teamProfileDetails.position?.name || "Meet the PIU team."),
+            160
+          ),
+          canonicalPath: `/team/${slug}`,
+          image: toStorageUrl(teamProfileDetails.profile) || teamProfileDetails.profile,
+          type: "profile",
+        }
+      : {
+          title: "Team Profile",
+          description: "Meet PIU leadership and academic team members.",
+          canonicalPath: `/team/${slug}`,
+        }
   );
 
   if (loading || !teamProfileDetails) {

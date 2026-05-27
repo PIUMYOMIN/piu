@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import LoadingSpinner from "../../components/user/LoadingSpinner";
 import { v1, v2, toStorageUrl } from "../../utils/api";
+import { truncateText, useSeo } from "../../seo";
 
 function containsQuery(value, query) {
   return String(value || "").toLowerCase().includes(query);
@@ -126,6 +127,18 @@ export default function SearchResults() {
       return p;
     });
   };
+
+  useSeo({
+    title: query ? `Search: ${query}` : "Search Results",
+    description: truncateText(
+      query
+        ? `Search results for "${query}" across PIU courses, news, events, and faculties.`
+        : "Search across PIU courses, news, events, and faculties.",
+      160
+    ),
+    canonicalPath: "/search",
+    noindex: true,
+  });
 
   if (!query) {
     return (

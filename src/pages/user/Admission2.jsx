@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import { useNavigate } from "react-router-dom";
 // import './App.css';
 
 function Admission2() {
+  const navigate = useNavigate();
   const [page, setPage] = useState(1);
   const [formData, setFormData] = useState({
     firstName: '',
@@ -49,7 +51,7 @@ function Admission2() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Add form submission logic here
+    navigate("/admissions/application-form");
   };
 
   return (
@@ -94,6 +96,9 @@ function Admission2() {
             {open === true && (
                 <>
                 <h2 className="text-center mb-5 text-xl font-bold">University Admission Form</h2>
+                <p className="mb-4 text-sm text-gray-600">
+                  Continue through this guide, then we&apos;ll take you to the protected application form.
+                </p>
                 <form onSubmit={handleSubmit}>
                 {page === 1 && (
                     <div className="space-y-4">
@@ -211,7 +216,7 @@ function Admission2() {
                     </div>
                     <div className="flex justify-between mt-5">
                         <button type="button" onClick={handleBack} className="p-1 px-5 bg-gray-500 text-white rounded hover:bg-gray-600">Back</button>
-                        <button type="submit" className="p-1 px-3 bg-blue-500 text-white rounded hover:bg-blue-600">Submit</button>
+                        <button type="submit" className="p-1 px-3 bg-blue-500 text-white rounded hover:bg-blue-600">Continue to Application Form</button>
                     </div>
                     </div>
                 )}

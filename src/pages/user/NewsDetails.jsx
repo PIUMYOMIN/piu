@@ -3,6 +3,7 @@ import { useParams, useLocation } from "react-router-dom";
 import LoadingSpinner from "../../components/user/LoadingSpinner";
 import { FaCalendarAlt, FaUser, FaArrowLeft, FaShareAlt, FaPrint, FaFacebook, FaTwitter, FaLinkedin, FaWhatsapp } from "react-icons/fa";
 import { v2, toStorageUrl } from "../../utils/api";
+import { stripHtml, truncateText, useSeo } from "../../seo";
 
 export default function NewsDetails() {
   const { slug } = useParams();
@@ -11,6 +12,7 @@ export default function NewsDetails() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [relatedNews, setRelatedNews] = useState([]);
+  const [newsletterMessage, setNewsletterMessage] = useState("");
 
   useEffect(() => {
     const fetchNewsDetails = async () => {
@@ -86,6 +88,43 @@ export default function NewsDetails() {
   const printPage = () => {
     window.print();
   };
+
+  const handleNewsletterSubmit = (e) => {
+    e.preventDefault();
+    setNewsletterMessage("Newsletter signup is not available yet. Please use the contact page for updates.");
+  };
+
+  useSeo(
+    newsDetails
+      ? {
+          title: newsDetails.title || "News Details",
+          description: truncateText(
+            stripHtml(newsDetails.body || newsDetails.excerpt || "Read the latest updates from PIU."),
+            160
+          ),
+          canonicalPath: `/news/${slug}`,
+          image: toStorageUrl(newsDetails.image) || newsDetails.image,
+          type: "article",
+          structuredData: {
+            "@context": "https://schema.org",
+            "@type": "NewsArticle",
+            headline: newsDetails.title,
+            datePublished: newsDetails.created_at,
+            dateModified: newsDetails.updated_at || newsDetails.created_at,
+            image: newsDetails.image ? [toStorageUrl(newsDetails.image) || newsDetails.image] : undefined,
+            mainEntityOfPage: `https://www.piueducation.org/news/${slug}`,
+            publisher: {
+              "@type": "CollegeOrUniversity",
+              name: "Phaung Daw Oo International University",
+            },
+          },
+        }
+      : {
+          title: "News Details",
+          description: "Read the latest PIU announcements, updates, and stories.",
+          canonicalPath: `/news/${slug}`,
+        }
+  );
 
   if (loading) {
     return (
@@ -324,7 +363,7 @@ export default function NewsDetails() {
             <p className="mb-4 opacity-90">
               Subscribe to our newsletter for the latest news and updates.
             </p>
-            <form className="space-y-3">
+            <form className="space-y-3" onSubmit={handleNewsletterSubmit}>
               <input
                 type="email"
                 placeholder="Your email address"
@@ -338,6 +377,9 @@ export default function NewsDetails() {
                 Subscribe Now
               </button>
             </form>
+            {newsletterMessage && (
+              <p className="mt-3 text-sm text-white/90">{newsletterMessage}</p>
+            )}
           </div>
         </div>
       </div>
