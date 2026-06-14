@@ -5,6 +5,8 @@ import { toStorageUrl } from "../../utils/api";
 import { useAuth } from "../../contexts/AuthContext";
 import { useFloatingToast } from "../../hooks/useFloatingToast";
 import { getApiErrorMessage } from "../../utils/apiErrors";
+import ManagementFilters, { PUBLISH_FILTER_OPTIONS } from "../../components/admin/ManagementFilters";
+import { parseIsActive } from "../../components/admin/StatusToggle";
 
 export default function BlogsList() {
   const { user: authUser } = useAuth();
@@ -20,6 +22,7 @@ export default function BlogsList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
 
   const load = async () => {
     setLoading(true);
@@ -42,13 +45,24 @@ export default function BlogsList() {
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return blogs;
-    return blogs.filter(
-      (b) =>
+    return blogs.filter((b) => {
+      const matchesSearch =
+        !q ||
         String(b?.title || "").toLowerCase().includes(q) ||
-        String(b?.description || "").toLowerCase().includes(q)
-    );
-  }, [blogs, search]);
+        String(b?.description || "").toLowerCase().includes(q);
+      const isActive = parseIsActive(b?.is_active);
+      const matchesStatus =
+        statusFilter === "all" ||
+        (statusFilter === "active" && isActive) ||
+        (statusFilter === "inactive" && !isActive);
+      return matchesSearch && matchesStatus;
+    });
+  }, [blogs, search, statusFilter]);
+
+  const resetFilters = () => {
+    setSearch("");
+    setStatusFilter("all");
+  };
 
   const remove = async (blog) => {
     if (!isAdmin) return;
@@ -85,17 +99,21 @@ export default function BlogsList() {
       <div className="p-6">
         {error && <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div>}
 
-        <div className="flex justify-between items-center mb-6 gap-4">
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search blogs..."
-            className="px-4 py-2 w-full sm:w-72 border border-gray-300 rounded-lg"
-          />
-          <button onClick={() => navigate("/piu/admin/add-blog")} className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg">
-            New Blog
-          </button>
-        </div>
+        <ManagementFilters
+          searchValue={search}
+          onSearchChange={setSearch}
+          searchPlaceholder="Search blogs..."
+          showStatus
+          statusValue={statusFilter}
+          onStatusChange={setStatusFilter}
+          statusOptions={PUBLISH_FILTER_OPTIONS}
+          onReset={resetFilters}
+          actions={
+            <button onClick={() => navigate("/piu/admin/add-blog")} className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg">
+              New Blog
+            </button>
+          }
+        />
 
         <div className="overflow-x-auto rounded-lg border border-gray-200">
           <table className="w-full">

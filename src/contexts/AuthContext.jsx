@@ -130,6 +130,20 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const refreshUser = async () => {
+    const data = await v2.getProfile();
+    const nextUser = data.user;
+    const nextAccountType = resolveAccountType(
+      nextUser,
+      data.account_type || accountType || ACCOUNT_TYPES.STAFF
+    );
+    setUser(nextUser);
+    setAccountType(nextAccountType);
+    localStorage.setItem('user', JSON.stringify(nextUser || {}));
+    localStorage.setItem('account_type', nextAccountType);
+    return nextUser;
+  };
+
   const value = {
     user,
     accountType,
@@ -140,6 +154,7 @@ export const AuthProvider = ({ children }) => {
     studentPortalLogin,
     logout,
     logoutLocal,
+    refreshUser,
     isAuthenticated: !!user,
     isStudent: accountType === ACCOUNT_TYPES.STUDENT,
   };

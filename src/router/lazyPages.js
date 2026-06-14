@@ -84,6 +84,12 @@ export const ChangePassword = lazy(() => import("../pages/admin/ChangePassword")
 export const CourseCategories = lazy(() => import("../pages/admin/CourseCategories"));
 
 // Student / teacher / user portals
+export const StudentDashboard = lazy(() => import("../pages/student/StudentDashboard"));
+export const StudentCourses = lazy(() => import("../pages/student/StudentCourses"));
+export const StudentGrades = lazy(() => import("../pages/student/StudentGrades"));
+export const StudentAssignments = lazy(() => import("../pages/student/StudentAssignments"));
+export const StudentAttendance = lazy(() => import("../pages/student/StudentAttendance"));
+export const StudentMessages = lazy(() => import("../pages/student/StudentMessages"));
 export const StudentProfile = lazy(() => import("../pages/student/StudentProfile"));
 export const UserDashboard = lazy(() => import("../pages/user/UserDashboard"));
 export const TeacherDashboard = lazy(() => import("../pages/teacher/TeacherDashboard"));

@@ -4,6 +4,7 @@ import { toStorageUrl } from "../../utils/api";
 import { useAuth } from "../../contexts/AuthContext";
 import { useFloatingToast } from "../../hooks/useFloatingToast";
 import { getApiErrorMessage } from "../../utils/apiErrors";
+import ManagementFilters from "../../components/admin/ManagementFilters";
 
 function normalizeRole(role) {
   const v = String(role || "").toLowerCase();
@@ -41,6 +42,7 @@ function Users() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
+  const [roleFilter, setRoleFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
   const [updatingRoleId, setUpdatingRoleId] = useState(null);
@@ -72,15 +74,17 @@ function Users() {
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return users;
     return users.filter((u) => {
-      return (
+      const matchesSearch =
+        !q ||
         String(u?.name || "").toLowerCase().includes(q) ||
         String(u?.email || "").toLowerCase().includes(q) ||
-        String(u?.phone || "").toLowerCase().includes(q)
-      );
+        String(u?.phone || "").toLowerCase().includes(q);
+      const matchesRole =
+        roleFilter === "all" || getUserRoleLabel(u) === roleFilter;
+      return matchesSearch && matchesRole;
     });
-  }, [users, search]);
+  }, [users, search, roleFilter]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
   const paginatedUsers = useMemo(() => {
@@ -90,7 +94,20 @@ function Users() {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [search]);
+  }, [search, roleFilter]);
+
+  const roleOptions = useMemo(() => {
+    const roles = [...new Set(users.map((u) => getUserRoleLabel(u)).filter(Boolean))].sort();
+    return [
+      { value: "all", label: "All Roles" },
+      ...roles.map((role) => ({ value: role, label: role.charAt(0).toUpperCase() + role.slice(1) })),
+    ];
+  }, [users]);
+
+  const resetFilters = () => {
+    setSearch("");
+    setRoleFilter("all");
+  };
 
   const openCreate = () => {
     setModal({
@@ -218,19 +235,25 @@ function Users() {
           </div>
         )}
 
-        <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between mb-4">
-          <div className="relative w-full sm:w-96">
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search by name / email / phone..."
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          <div className="text-sm text-gray-600">
-            {loading ? "Loading..." : `Showing ${paginatedUsers.length} of ${filtered.length} (total ${users.length})`}
-          </div>
-        </div>
+        <ManagementFilters
+          searchValue={search}
+          onSearchChange={setSearch}
+          searchPlaceholder="Search by name / email / phone..."
+          filters={[
+            {
+              key: "role",
+              value: roleFilter,
+              onChange: setRoleFilter,
+              options: roleOptions,
+            },
+          ]}
+          onReset={resetFilters}
+          summary={
+            loading
+              ? "Loading..."
+              : `Showing ${paginatedUsers.length} of ${filtered.length} (total ${users.length})`
+          }
+        />
 
         <div className="overflow-x-auto rounded-lg border border-gray-200">
           <table className="w-full text-sm text-left text-gray-600">

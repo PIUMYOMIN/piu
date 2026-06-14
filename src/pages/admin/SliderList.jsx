@@ -3,6 +3,7 @@ import { adminApi } from "../../api/admin";
 import { toStorageUrl } from "../../utils/api";
 import { useFloatingToast } from "../../hooks/useFloatingToast";
 import { getApiErrorMessage } from "../../utils/apiErrors";
+import ManagementFilters from "../../components/admin/ManagementFilters";
 
 const emptyForm = {
   title: "",
@@ -18,6 +19,8 @@ const SliderList = () => {
   const [sliders, setSliders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [editingSlider, setEditingSlider] = useState(null); // {mode:'edit'|'create', data: {...}}
 
   const load = async () => {
@@ -46,6 +49,27 @@ const SliderList = () => {
       status: typeof s.is_active === "boolean" ? s.is_active : Boolean(s.status),
     }));
   }, [sliders]);
+
+  const filteredSliders = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return normalized.filter((slider) => {
+      const matchesSearch =
+        !q ||
+        String(slider.title || "").toLowerCase().includes(q) ||
+        String(slider.description || "").toLowerCase().includes(q) ||
+        String(slider.image_tag || "").toLowerCase().includes(q);
+      const matchesStatus =
+        statusFilter === "all" ||
+        (statusFilter === "active" && slider.status) ||
+        (statusFilter === "inactive" && !slider.status);
+      return matchesSearch && matchesStatus;
+    });
+  }, [normalized, search, statusFilter]);
+
+  const resetFilters = () => {
+    setSearch("");
+    setStatusFilter("all");
+  };
 
   const openCreate = () => setEditingSlider({ mode: "create", data: { ...emptyForm } });
   const openEdit = (s) =>
@@ -159,6 +183,17 @@ const SliderList = () => {
           </div>
         )}
 
+        <ManagementFilters
+          searchValue={search}
+          onSearchChange={setSearch}
+          searchPlaceholder="Search slides..."
+          showStatus
+          statusValue={statusFilter}
+          onStatusChange={setStatusFilter}
+          onReset={resetFilters}
+          summary={`Showing ${filteredSliders.length} of ${normalized.length} slides`}
+        />
+
         {loading && (
           <div className="py-10 text-center text-gray-500">Loading slides...</div>
         )}
@@ -166,7 +201,7 @@ const SliderList = () => {
         {/* Slider Cards Grid */}
         {!loading && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {normalized.map((slider) => (
+            {filteredSliders.map((slider) => (
               <div key={slider.id} className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
               {/* Image */}
               <div className="h-48 overflow-hidden">

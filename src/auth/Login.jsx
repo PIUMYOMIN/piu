@@ -14,8 +14,9 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [studentId, setStudentId] = useState('');
   const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
-  const { login, logoutLocal, studentPortalLogin, loading } = useAuth();
+  const { login, logoutLocal, studentPortalLogin } = useAuth();
 
   const getErrorMessage = (err, fallback) => {
     const data = err?.response?.data;
@@ -30,11 +31,13 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setIsSubmitting(true);
 
     try {
       if (portal === 'student') {
-        if (!studentId || !password) {
+        if (!studentId.trim() || !password) {
           setError('Please enter your student ID and password.');
+          setIsSubmitting(false);
           return;
         }
         const studentData = await studentPortalLogin(studentId.trim(), password);
@@ -47,7 +50,7 @@ export default function Login() {
         }
 
         navigate(
-          buildDashboardPath(getDashboardPathForRole(role), STUDENT_TABS.PROFILE),
+          buildDashboardPath(getDashboardPathForRole(role), STUDENT_TABS.DASHBOARD),
           { replace: true }
         );
         return;
@@ -55,6 +58,7 @@ export default function Login() {
 
       if (!email || !password) {
         setError('Please fill in all fields');
+        setIsSubmitting(false);
         return;
       }
 
@@ -96,6 +100,8 @@ export default function Login() {
           : "Invalid login credentials.";
       const message = getErrorMessage(err, fallback);
       setError(message);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -158,7 +164,7 @@ export default function Login() {
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="rounded-md border border-green-200 bg-green-50 px-3 py-2 text-sm font-medium text-green-800">
             {portal === "student"
-              ? `Student Portal: sign in with your Student ID and default password (${STUDENT_DEFAULT_PASSWORD}).`
+              ? `Student Portal: sign in with your Student ID and default password (password123).`
               : portal === "admin"
               ? "Admin Portal: admin and registrar accounts."
               : portal === "teacher"
@@ -252,10 +258,10 @@ export default function Login() {
           <div>
             <button
               type="submit"
-              disabled={loading}
+              disabled={isSubmitting}
               className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
             >
-              {loading ? (
+              {isSubmitting ? (
                 <div className="flex items-center">
                   <svg
                     className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"

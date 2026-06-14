@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import ManagementFilters from "../../components/admin/ManagementFilters";
 
 function CampusList() {
   const navigate = useNavigate();
@@ -60,6 +61,11 @@ function CampusList() {
     return matchesSearch && matchesStatus;
   });
 
+  const resetFilters = () => {
+    setSearchTerm("");
+    setStatusFilter("all");
+  };
+
   return (
     <div className="max-w-8xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
       {/* Header */}
@@ -69,50 +75,30 @@ function CampusList() {
       </div>
 
       <div className="p-6">
-        {/* Search and Add Button */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-          <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-            <div className="relative w-full sm:w-64">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <i className="fas fa-search text-gray-400"></i>
-              </div>
-              <input
-                type="text"
-                placeholder="Search campuses..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-              />
-            </div>
-            
-            <div className="relative w-full sm:w-40">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <i className="fas fa-filter text-gray-400"></i>
-              </div>
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="pl-10 pr-10 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none outline-none"
-              >
-                <option value="all">All Status</option>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-                <option value="under-construction">Under Construction</option>
-              </select>
-              <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                <i className="fas fa-chevron-down text-gray-400"></i>
-              </div>
-            </div>
-          </div>
-          
-          <Link
-            to="/piu/admin/campus/new"
-            className="flex items-center justify-center bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors whitespace-nowrap w-full sm:w-auto"
-          >
-            <i className="fas fa-plus-circle mr-2"></i>
-            Add Campus
-          </Link>
-        </div>
+        <ManagementFilters
+          searchValue={searchTerm}
+          onSearchChange={setSearchTerm}
+          searchPlaceholder="Search campuses..."
+          showStatus
+          statusValue={statusFilter}
+          onStatusChange={setStatusFilter}
+          statusOptions={[
+            { value: "all", label: "All Status" },
+            { value: "active", label: "Active" },
+            { value: "inactive", label: "Inactive" },
+            { value: "under-construction", label: "Under Construction" },
+          ]}
+          onReset={resetFilters}
+          actions={
+            <Link
+              to="/piu/admin/campus/new"
+              className="flex items-center justify-center bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors whitespace-nowrap w-full lg:w-auto"
+            >
+              <i className="fas fa-plus-circle mr-2"></i>
+              Add Campus
+            </Link>
+          }
+        />
 
         {/* Campus Table */}
         <div className="overflow-x-auto rounded-lg border border-gray-200">

@@ -4,6 +4,7 @@ import { FaSearch, FaTag, FaUserCheck, FaPlusCircle, FaEdit, FaTrash, FaToggleOn
 import { adminApi } from "../../api/admin";
 import { useFloatingToast } from "../../hooks/useFloatingToast";
 import { getApiErrorMessage } from "../../utils/apiErrors";
+import ManagementFilters from "../../components/admin/ManagementFilters";
 
 const CourseList = () => {
   const navigate = useNavigate();
@@ -233,6 +234,17 @@ const CourseList = () => {
     return Math.round((parseInt(enrolled) / parseInt(seats)) * 100);
   };
 
+  const categoryFilterOptions = [
+    { value: "all", label: "All Categories" },
+    ...uniqueCategories.filter(Boolean).map((category) => ({ value: category, label: category })),
+  ];
+
+  const resetFilters = () => {
+    setSearchTerm("");
+    setCategoryFilter("all");
+    setStatusFilter("all");
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -263,93 +275,43 @@ const CourseList = () => {
           </div>
         )}
 
-        {/* Search and Add Button */}
-        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 gap-4">
-          <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">
-            {/* Search Input */}
-            <div className="relative w-full sm:w-64">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <FaSearch className="text-gray-400" />
-              </div>
-              <input
-                type="text"
-                placeholder="Search courses..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
-              />
+        <ManagementFilters
+          searchValue={searchTerm}
+          onSearchChange={setSearchTerm}
+          searchPlaceholder="Search courses..."
+          filters={[
+            {
+              key: "category",
+              value: categoryFilter,
+              onChange: setCategoryFilter,
+              options: loadingCategories
+                ? [{ value: "all", label: "Loading categories..." }]
+                : categoryFilterOptions,
+            },
+          ]}
+          showStatus
+          statusValue={statusFilter}
+          onStatusChange={setStatusFilter}
+          onReset={resetFilters}
+          actions={
+            <div className="flex gap-2 w-full lg:w-auto">
+              <button
+                onClick={() => navigate("/piu/admin/course-categories")}
+                className="flex items-center justify-center bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors whitespace-nowrap w-full lg:w-auto group"
+              >
+                <FaTag className="mr-2" />
+                Manage Categories
+              </button>
+              <button
+                onClick={() => navigate("/piu/admin/new")}
+                className="flex items-center justify-center bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors whitespace-nowrap w-full lg:w-auto group"
+              >
+                <FaPlusCircle className="mr-2 group-hover:rotate-90 transition-transform" />
+                New Course
+              </button>
             </div>
-
-            {/* Filters */}
-            <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-              {/* Category Filter */}
-              <div className="relative w-full sm:w-40">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FaTag className="text-gray-400" />
-                </div>
-                <select
-                  value={categoryFilter}
-                  onChange={(e) => setCategoryFilter(e.target.value)}
-                  className="pl-10 pr-10 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none outline-none bg-white"
-                  disabled={loadingCategories}
-                >
-                  <option value="all">All Categories</option>
-                  {loadingCategories ? (
-                    <option>Loading categories...</option>
-                  ) : (
-                    uniqueCategories.map(category => (
-                      <option key={category} value={category}>{category}</option>
-                    ))
-                  )}
-                </select>
-                <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                  {loadingCategories ? (
-                    <FaSpinner className="animate-spin text-gray-400" />
-                  ) : (
-                    <FaSearch className="text-gray-400" />
-                  )}
-                </div>
-              </div>
-
-              {/* Status Filter */}
-              <div className="relative w-full sm:w-40">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FaUserCheck className="text-gray-400" />
-                </div>
-                <select
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                  className="pl-10 pr-10 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none outline-none bg-white"
-                >
-                  <option value="all">All Status</option>
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
-                </select>
-                <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                  <FaSearch className="text-gray-400" />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Add Course Button */}
-          <div className="flex gap-2 w-full lg:w-auto">
-            <button
-              onClick={() => navigate("/piu/admin/course-categories")}
-              className="flex items-center justify-center bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors whitespace-nowrap w-full lg:w-auto group"
-            >
-              <FaTag className="mr-2" />
-              Manage Categories
-            </button>
-            <button
-              onClick={() => navigate("/piu/admin/new")}
-              className="flex items-center justify-center bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors whitespace-nowrap w-full lg:w-auto group"
-            >
-              <FaPlusCircle className="mr-2 group-hover:rotate-90 transition-transform" />
-              New Course
-            </button>
-          </div>
-        </div>
+          }
+        />
 
         {/* Courses Table */}
         <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">

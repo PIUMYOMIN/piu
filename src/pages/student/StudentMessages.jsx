@@ -1,0 +1,24 @@
+import React from "react";
+import { StudentHero, Panel } from "../../components/student/StudentUi";
+
+export default function StudentMessages({ type = "inbox" }) {
+  const isInbox = type === "inbox";
+
+  return (
+    <div className="mx-auto max-w-7xl space-y-6">
+      <StudentHero
+        eyebrow="Messages"
+        title={isInbox ? "Inbox" : "Sent Messages"}
+        subtitle="Faculty and admin announcements will appear here."
+      />
+
+      <Panel title={isInbox ? "Inbox" : "Sent"}>
+        <div className="rounded-lg border border-dashed border-gray-300 bg-gray-50 p-8 text-center text-sm text-gray-500">
+          {isInbox
+            ? "No messages in your inbox yet."
+            : "You have not sent any messages yet."}
+        </div>
+      </Panel>
+    </div>
+  );
+}

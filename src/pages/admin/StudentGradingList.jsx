@@ -1,10 +1,12 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaSearch, FaEye, FaSort, FaSortUp, FaSortDown } from "react-icons/fa";
+import { FaEye, FaSort, FaSortUp, FaSortDown } from "react-icons/fa";
+import ManagementFilters from "../../components/admin/ManagementFilters";
 
 export default function StudentGradingList() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
+  const [programFilter, setProgramFilter] = useState("all");
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'ascending' });
 
   const students = [
@@ -44,12 +46,22 @@ export default function StudentGradingList() {
   { id: 34, name: "Gabriel (SPN)", studentId: "ST034", program: "Business", year: "4th", semester: "2nd" },
   { id: 35, name: "Asmodeus", studentId: "ST035", program: "ICT", year: "3rd", semester: "1st" },
 ];
-  // Filter students based on search term
-  const filteredStudents = students.filter(student =>
-    student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    student.studentId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    student.program.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const programOptions = useMemo(() => {
+    const programs = [...new Set(students.map((s) => s.program))].sort();
+    return [
+      { value: "all", label: "All Programs" },
+      ...programs.map((p) => ({ value: p, label: p })),
+    ];
+  }, []);
+
+  const filteredStudents = students.filter((student) => {
+    const matchesSearch =
+      student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      student.studentId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      student.program.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesProgram = programFilter === "all" || student.program === programFilter;
+    return matchesSearch && matchesProgram;
+  });
 
   // Sort students
   const sortedStudents = React.useMemo(() => {
@@ -82,30 +94,34 @@ export default function StudentGradingList() {
     return <FaSortDown className="ml-1" />;
   };
 
+  const resetFilters = () => {
+    setSearchTerm("");
+    setProgramFilter("all");
+  };
+
   return (
     <div className="w-full mx-auto bg-white rounded-lg shadow-md overflow-hidden">
       {/* Page Header */}
-      <div className="bg-[#002147] px-6 py-4 flex flex-col md:flex-row md:items-center md:justify-between">
-        <h2 className="text-xl font-bold text-white mb-2 md:mb-0">Student Grading</h2>
-        <div className="relative w-full md:w-64">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <FaSearch className="text-gray-400" />
-          </div>
-          <input
-            type="text"
-            placeholder="Search students..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 pr-4 py-2 w-full rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
+      <div className="bg-[#002147] px-6 py-4">
+        <h2 className="text-xl font-bold text-white">Student Grading</h2>
       </div>
 
       <div className="p-6">
-        {/* Results Count */}
-        <div className="mb-4 text-sm text-gray-600">
-          Showing {filteredStudents.length} of {students.length} students
-        </div>
+        <ManagementFilters
+          searchValue={searchTerm}
+          onSearchChange={setSearchTerm}
+          searchPlaceholder="Search students..."
+          filters={[
+            {
+              key: "program",
+              value: programFilter,
+              onChange: setProgramFilter,
+              options: programOptions,
+            },
+          ]}
+          onReset={resetFilters}
+          summary={`Showing ${filteredStudents.length} of ${students.length} students`}
+        />
 
         {/* Table */}
         <div className="overflow-x-auto">

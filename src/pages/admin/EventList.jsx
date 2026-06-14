@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import ManagementFilters from "../../components/admin/ManagementFilters";
 
 const EventList = () => {
   const navigate = useNavigate();
@@ -73,8 +74,13 @@ const EventList = () => {
     return matchesSearch && matchesStatus && matchesCategory;
   });
 
-  // Get unique categories for filter
   const categories = [...new Set(events.map(event => event.category))];
+
+  const resetFilters = () => {
+    setSearchTerm("");
+    setStatusFilter("all");
+    setCategoryFilter("all");
+  };
 
   // Format date for display
   const formatDate = (dateString) => {
@@ -91,72 +97,43 @@ const EventList = () => {
       </div>
 
       <div className="p-6">
-        {/* Search and Add Button */}
-        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 gap-4">
-          <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">
-            <div className="relative w-full sm:w-64">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <i className="fas fa-search text-gray-400"></i>
-              </div>
-              <input
-                type="text"
-                placeholder="Search events..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-              />
-            </div>
-            
-            <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-              <div className="relative w-full sm:w-40">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <i className="fas fa-filter text-gray-400"></i>
-                </div>
-                <select
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                  className="pl-10 pr-10 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none outline-none"
-                >
-                  <option value="all">All Status</option>
-                  <option value="published">Published</option>
-                  <option value="draft">Draft</option>
-                </select>
-                <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                  <i className="fas fa-chevron-down text-gray-400"></i>
-                </div>
-              </div>
-              
-              <div className="relative w-full sm:w-40">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <i className="fas fa-tag text-gray-400"></i>
-                </div>
-                <select
-                  value={categoryFilter}
-                  onChange={(e) => setCategoryFilter(e.target.value)}
-                  className="pl-10 pr-10 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none outline-none"
-                >
-                  <option value="all">All Categories</option>
-                  {categories.map(category => (
-                    <option key={category} value={category}>
-                      {category.charAt(0).toUpperCase() + category.slice(1)}
-                    </option>
-                  ))}
-                </select>
-                <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                  <i className="fas fa-chevron-down text-gray-400"></i>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <Link
-            to="/piu/admin/events/new"
-            className="flex items-center justify-center bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors whitespace-nowrap w-full lg:w-auto"
-          >
-            <i className="fas fa-plus-circle mr-2"></i>
-            Add Event
-          </Link>
-        </div>
+        <ManagementFilters
+          searchValue={searchTerm}
+          onSearchChange={setSearchTerm}
+          searchPlaceholder="Search events..."
+          showStatus
+          statusValue={statusFilter}
+          onStatusChange={setStatusFilter}
+          statusOptions={[
+            { value: "all", label: "All Status" },
+            { value: "published", label: "Published" },
+            { value: "draft", label: "Draft" },
+          ]}
+          filters={[
+            {
+              key: "category",
+              value: categoryFilter,
+              onChange: setCategoryFilter,
+              options: [
+                { value: "all", label: "All Categories" },
+                ...categories.map((category) => ({
+                  value: category,
+                  label: category.charAt(0).toUpperCase() + category.slice(1),
+                })),
+              ],
+            },
+          ]}
+          onReset={resetFilters}
+          actions={
+            <Link
+              to="/piu/admin/events/new"
+              className="flex items-center justify-center bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors whitespace-nowrap w-full lg:w-auto"
+            >
+              <i className="fas fa-plus-circle mr-2"></i>
+              Add Event
+            </Link>
+          }
+        />
 
         {/* Events Table */}
         <div className="overflow-x-auto rounded-lg border border-gray-200">

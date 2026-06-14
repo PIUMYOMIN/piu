@@ -43,7 +43,9 @@ export const ADMIN_TABS = {
 };
 
 export const STUDENT_TABS = {
+  DASHBOARD: 'dashboard',
   PROFILE: 'profile',
+  CHANGE_PASSWORD: 'change-password',
   COURSES: 'courses',
   ASSIGNMENTS: 'assignments',
   GRADES: 'grades',

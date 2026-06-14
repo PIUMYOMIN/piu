@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import AddSeminar from "./AddSeminar";
+import ManagementFilters from "../../components/admin/ManagementFilters";
 
 function SeminarList() {
   const [seminars, setSeminars] = useState([
@@ -19,6 +20,35 @@ function SeminarList() {
   ]);
 
   const [editData, setEditData] = useState(null);
+  const [search, setSearch] = useState("");
+  const [locationFilter, setLocationFilter] = useState("all");
+
+  const locationOptions = useMemo(() => {
+    const locations = [...new Set(seminars.map((s) => s.location).filter(Boolean))];
+    return [
+      { value: "all", label: "All Locations" },
+      ...locations.map((loc) => ({ value: loc, label: loc })),
+    ];
+  }, [seminars]);
+
+  const filteredSeminars = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return seminars.filter((seminar) => {
+      const matchesSearch =
+        !q ||
+        String(seminar.name || "").toLowerCase().includes(q) ||
+        String(seminar.location || "").toLowerCase().includes(q) ||
+        String(seminar.city || "").toLowerCase().includes(q);
+      const matchesLocation =
+        locationFilter === "all" || seminar.location === locationFilter;
+      return matchesSearch && matchesLocation;
+    });
+  }, [seminars, search, locationFilter]);
+
+  const resetFilters = () => {
+    setSearch("");
+    setLocationFilter("all");
+  };
 
   const handleDelete = (id) => {
     setSeminars(seminars.filter((seminar) => seminar.id !== id));
@@ -37,6 +67,22 @@ function SeminarList() {
         All Seminars
       </h2>
 
+      <ManagementFilters
+        searchValue={search}
+        onSearchChange={setSearch}
+        searchPlaceholder="Search seminars..."
+        filters={[
+          {
+            key: "location",
+            value: locationFilter,
+            onChange: setLocationFilter,
+            options: locationOptions,
+          },
+        ]}
+        onReset={resetFilters}
+        summary={`Showing ${filteredSeminars.length} of ${seminars.length} seminars`}
+      />
+
       <table className="min-w-full border">
         <thead>
           <tr className="bg-gray-200">
@@ -50,40 +96,47 @@ function SeminarList() {
           </tr>
         </thead>
         <tbody>
-          {seminars.map((seminar) => (
-            <tr key={seminar.id}>
-              <td className="border p-2">{seminar.id}</td>
-              <td className="border p-2">
-                <img
-                  src={seminar.image}
-                  alt={seminar.name}
-                  className="w-16 h-16 object-cover"
-                />
-              </td>
-              <td className="border p-2">{seminar.name}</td>
-              <td className="border p-2">{seminar.startTime}</td>
-              <td className="border p-2">{seminar.date}</td>
-              <td className="border p-2">{seminar.location}</td>
-              <td className="border p-2 space-x-2">
-                <button
-                  className="bg-blue-600 text-white px-3 py-1 rounded"
-                  onClick={() => handleEdit(seminar)}
-                >
-                  Edit
-                </button>
-                <button
-                  className="bg-red-600 text-white px-3 py-1 rounded"
-                  onClick={() => handleDelete(seminar.id)}
-                >
-                  Delete
-                </button>
+          {filteredSeminars.length === 0 ? (
+            <tr>
+              <td colSpan="7" className="border p-4 text-center text-gray-500">
+                No seminars match your filters.
               </td>
             </tr>
-          ))}
+          ) : (
+            filteredSeminars.map((seminar) => (
+              <tr key={seminar.id}>
+                <td className="border p-2">{seminar.id}</td>
+                <td className="border p-2">
+                  <img
+                    src={seminar.image}
+                    alt={seminar.name}
+                    className="w-16 h-16 object-cover"
+                  />
+                </td>
+                <td className="border p-2">{seminar.name}</td>
+                <td className="border p-2">{seminar.startTime}</td>
+                <td className="border p-2">{seminar.date}</td>
+                <td className="border p-2">{seminar.location}</td>
+                <td className="border p-2 space-x-2">
+                  <button
+                    className="bg-blue-600 text-white px-3 py-1 rounded"
+                    onClick={() => handleEdit(seminar)}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    className="bg-red-600 text-white px-3 py-1 rounded"
+                    onClick={() => handleDelete(seminar.id)}
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            ))
+          )}
         </tbody>
       </table>
 
-      {/* Edit form shows up if editData exists */}
       {editData && (
         <div className="mt-6">
           <AddSeminar editData={editData} />

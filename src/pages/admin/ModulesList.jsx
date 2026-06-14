@@ -4,6 +4,7 @@ import { adminApi } from "../../api/admin";
 import { useAuth } from "../../contexts/AuthContext";
 import { useFloatingToast } from "../../hooks/useFloatingToast";
 import { getApiErrorMessage } from "../../utils/apiErrors";
+import ManagementFilters from "../../components/admin/ManagementFilters";
 
 export default function ModulesList() {
   const { showSuccess, showError, Toast } = useFloatingToast();
@@ -18,6 +19,7 @@ export default function ModulesList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
+  const [usageFilter, setUsageFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
 
@@ -40,17 +42,6 @@ export default function ModulesList() {
     load();
   }, []);
 
-  const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    if (!q) return modules;
-    return modules.filter((m) => {
-      return (
-        String(m?.name || "").toLowerCase().includes(q) ||
-        String(m?.module_code || "").toLowerCase().includes(q)
-      );
-    });
-  }, [modules, search]);
-
   const getUsageCount = (module) => {
     return Number(module?.curriculums_count || 0)
       + Number(module?.assignments_count || 0)
@@ -58,6 +49,22 @@ export default function ModulesList() {
       + Number(module?.gradings_count || 0)
       + Number(module?.student_assignments_count || 0);
   };
+
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return modules.filter((m) => {
+      const matchesSearch =
+        !q ||
+        String(m?.name || "").toLowerCase().includes(q) ||
+        String(m?.module_code || "").toLowerCase().includes(q);
+      const usage = getUsageCount(m);
+      const matchesUsage =
+        usageFilter === "all" ||
+        (usageFilter === "in-use" && usage > 0) ||
+        (usageFilter === "unused" && usage === 0);
+      return matchesSearch && matchesUsage;
+    });
+  }, [modules, search, usageFilter]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
   const paginated = useMemo(() => {
@@ -67,7 +74,7 @@ export default function ModulesList() {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [search]);
+  }, [search, usageFilter]);
 
   useEffect(() => {
     if (currentPage > totalPages) {
@@ -87,6 +94,11 @@ export default function ModulesList() {
       showError(getApiErrorMessage(e, "Failed to delete module"));
       setError(getApiErrorMessage(e, "Failed to delete module"));
     }
+  };
+
+  const resetFilters = () => {
+    setSearch("");
+    setUsageFilter("all");
   };
 
   return (
@@ -109,17 +121,25 @@ export default function ModulesList() {
           </div>
         )}
 
-        <div className="mb-4 flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search module name/code..."
-            className="w-full sm:w-80 border border-gray-300 rounded-lg px-4 py-2"
-          />
-          <div className="text-sm text-gray-600">
-            {loading ? "Loading..." : `Showing ${paginated.length} of ${filtered.length}`}
-          </div>
-        </div>
+        <ManagementFilters
+          searchValue={search}
+          onSearchChange={setSearch}
+          searchPlaceholder="Search module name/code..."
+          filters={[
+            {
+              key: "usage",
+              value: usageFilter,
+              onChange: setUsageFilter,
+              options: [
+                { value: "all", label: "All Modules" },
+                { value: "in-use", label: "In Use" },
+                { value: "unused", label: "Unused" },
+              ],
+            },
+          ]}
+          onReset={resetFilters}
+          summary={loading ? "Loading..." : `Showing ${paginated.length} of ${filtered.length}`}
+        />
 
         <div className="overflow-x-auto">
           <table className="w-full border border-gray-200">

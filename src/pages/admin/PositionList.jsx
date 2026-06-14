@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import ManagementFilters from "../../components/admin/ManagementFilters";
 
 const PositionList = () => {
   const navigate = useNavigate();
@@ -24,6 +25,8 @@ const PositionList = () => {
     pos.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const resetFilters = () => setSearchTerm("");
+
   return (
     <div className="max-w-7xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
       {/* Header */}
@@ -33,29 +36,22 @@ const PositionList = () => {
       </div>
 
       <div className="p-6">
-        {/* Search and Add Button */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-          <div className="relative w-full sm:w-64">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <i className="fas fa-search text-gray-400"></i>
-            </div>
-            <input
-              type="text"
-              placeholder="Search positions..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-            />
-          </div>
-          
-          <Link
-            to="/piu/admin/positions/new"
-            className="flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors whitespace-nowrap"
-          >
-            <i className="fas fa-plus-circle mr-2"></i>
-            Add Position
-          </Link>
-        </div>
+        <ManagementFilters
+          searchValue={searchTerm}
+          onSearchChange={setSearchTerm}
+          searchPlaceholder="Search positions..."
+          onReset={resetFilters}
+          actions={
+            <Link
+              to="/piu/admin/positions/new"
+              className="flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors whitespace-nowrap"
+            >
+              <i className="fas fa-plus-circle mr-2"></i>
+              Add Position
+            </Link>
+          }
+          summary={`Showing ${filteredPositions.length} of ${positions.length} positions`}
+        />
 
         {/* Positions Table */}
         <div className="overflow-x-auto rounded-lg border border-gray-200">
@@ -124,10 +120,7 @@ const PositionList = () => {
           </table>
         </div>
 
-        {/* Summary */}
-        <div className="mt-4 text-sm text-gray-600">
-          Showing {filteredPositions.length} of {positions.length} positions
-        </div>
+        {/* Summary moved to ManagementFilters */}
       </div>
     </div>
   );

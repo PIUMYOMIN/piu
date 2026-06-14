@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { adminApi } from "../../api/admin";
 import { useFloatingToast } from "../../hooks/useFloatingToast";
 import { getApiErrorMessage } from "../../utils/apiErrors";
+import ManagementFilters from "../../components/admin/ManagementFilters";
 
 const AssignmentsList = () => {
   const { showSuccess, showError, Toast } = useFloatingToast();
@@ -11,6 +12,8 @@ const AssignmentsList = () => {
   const [modules, setModules] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [search, setSearch] = useState("");
+  const [courseFilter, setCourseFilter] = useState("all");
 
   useEffect(() => {
     const load = async () => {
@@ -38,6 +41,35 @@ const AssignmentsList = () => {
 
   const coursesById = useMemo(() => new Map(courses.map((c) => [String(c.id), c])), [courses]);
   const modulesById = useMemo(() => new Map(modules.map((m) => [String(m.id), m])), [modules]);
+
+  const courseOptions = useMemo(
+    () => [
+      { value: "all", label: "All Courses" },
+      ...courses.map((c) => ({ value: String(c.id), label: c.title || `Course #${c.id}` })),
+    ],
+    [courses]
+  );
+
+  const filteredAssignments = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return assignments.filter((a) => {
+      const course = coursesById.get(String(a.course_id));
+      const module = modulesById.get(String(a.module_id));
+      const matchesSearch =
+        !q ||
+        String(a.name || "").toLowerCase().includes(q) ||
+        String(course?.title || "").toLowerCase().includes(q) ||
+        String(module?.module_code || "").toLowerCase().includes(q);
+      const matchesCourse =
+        courseFilter === "all" || String(a.course_id) === courseFilter;
+      return matchesSearch && matchesCourse;
+    });
+  }, [assignments, search, courseFilter, coursesById, modulesById]);
+
+  const resetFilters = () => {
+    setSearch("");
+    setCourseFilter("all");
+  };
 
   const remove = async (id) => {
     if (!window.confirm("Delete this assignment?")) return;
@@ -77,35 +109,60 @@ const AssignmentsList = () => {
           </div>
         )}
 
+        <ManagementFilters
+          searchValue={search}
+          onSearchChange={setSearch}
+          searchPlaceholder="Search assignments..."
+          filters={[
+            {
+              key: "course",
+              value: courseFilter,
+              onChange: setCourseFilter,
+              options: courseOptions,
+            },
+          ]}
+          onReset={resetFilters}
+          summary={`Showing ${filteredAssignments.length} of ${assignments.length} assignments`}
+        />
+
         <table className="w-full border border-gray-200">
           <thead>
             <tr className="bg-gray-100 text-left text-sm">
               <th className="px-4 py-2 border">#</th>
               <th className="px-4 py-2 border">Assignment</th>
               <th className="px-4 py-2 border">Course</th>
-              <th className="px-4 py-2 border">Module Code</th>
+              <th className="px-4 py-2 border">Module</th>
+              <th className="px-4 py-2 border">Subject</th>
               <th className="px-4 py-2 border">Actions</th>
             </tr>
           </thead>
           <tbody>
             {loading && (
               <tr>
-                <td colSpan="5" className="text-center py-6 text-gray-500 border">
+                <td colSpan="6" className="text-center py-6 text-gray-500 border">
                   Loading assignments...
                 </td>
               </tr>
             )}
 
-            {!loading && assignments.length > 0 ? (
-              assignments.map((a, index) => {
+            {!loading && filteredAssignments.length > 0 ? (
+              filteredAssignments.map((a, index) => {
                 const course = coursesById.get(String(a.course_id));
                 const module = modulesById.get(String(a.module_id));
+                const subjectName =
+                  typeof a.subject === "object" && a.subject !== null
+                    ? a.subject.name
+                    : a.subject || "—";
                 return (
                 <tr key={a.id} className="hover:bg-gray-50">
                   <td className="px-4 py-2 border">{index + 1}</td>
                   <td className="px-4 py-2 border">{a.name}</td>
                   <td className="px-4 py-2 border">{course?.title || "—"}</td>
-                  <td className="px-4 py-2 border">{module?.module_code || "—"}</td>
+                  <td className="px-4 py-2 border">
+                    {module?.module_code || "—"}
+                    {module?.name ? ` — ${module.name}` : ""}
+                  </td>
+                  <td className="px-4 py-2 border">{subjectName}</td>
                   <td className="px-4 py-2 border">
                     <div className="flex gap-3">
                       <Link
@@ -130,7 +187,7 @@ const AssignmentsList = () => {
               !loading && (
                 <tr>
                   <td
-                    colSpan="5"
+                    colSpan="6"
                     className="text-center py-4 text-gray-500 border"
                   >
                     No assignments found

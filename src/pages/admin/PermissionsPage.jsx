@@ -4,6 +4,7 @@ import { adminApi } from "../../api/admin";
 import { useAuth } from "../../contexts/AuthContext";
 import { useFloatingToast } from "../../hooks/useFloatingToast";
 import { getApiErrorMessage } from "../../utils/apiErrors";
+import ManagementFilters from "../../components/admin/ManagementFilters";
 
 function PermissionsPage() {
   const { user: authUser } = useAuth();
@@ -23,6 +24,7 @@ function PermissionsPage() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [newPermissionName, setNewPermissionName] = useState("");
   const [search, setSearch] = useState("");
+  const [roleFilter, setRoleFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
 
@@ -157,11 +159,29 @@ function PermissionsPage() {
     }
   };
 
-  const filteredPermissions = permissions.filter((p) =>
-    String(p?.name || "").toLowerCase().includes(search.trim().toLowerCase())
-  );
+  const filteredPermissions = permissions.filter((p) => {
+    const matchesSearch = String(p?.name || "").toLowerCase().includes(search.trim().toLowerCase());
+    if (roleFilter === "all") return matchesSearch;
+    const assigned = roles.some(
+      (role) =>
+        String(role.id) === roleFilter &&
+        role.permissions?.some((perm) => perm.id === p.id || perm === p.id)
+    );
+    return matchesSearch && assigned;
+  });
   const totalPages = Math.max(1, Math.ceil(filteredPermissions.length / pageSize));
   const paginatedPermissions = filteredPermissions.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
+  const resetFilters = () => {
+    setSearch("");
+    setRoleFilter("all");
+    setCurrentPage(1);
+  };
+
+  const roleOptions = [
+    { value: "all", label: "All Roles" },
+    ...roles.map((role) => ({ value: String(role.id), label: role.name })),
+  ];
 
   if (loading) {
     return (
@@ -178,24 +198,36 @@ function PermissionsPage() {
       
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-bold text-gray-800">All Permissions</h2>
-        <div className="flex items-center gap-2">
-          <input
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
+      </div>
+
+      <ManagementFilters
+        searchValue={search}
+        onSearchChange={(value) => {
+          setSearch(value);
+          setCurrentPage(1);
+        }}
+        searchPlaceholder="Search permission..."
+        filters={[
+          {
+            key: "role",
+            value: roleFilter,
+            onChange: (value) => {
+              setRoleFilter(value);
               setCurrentPage(1);
-            }}
-            placeholder="Search permission..."
-            className="border border-gray-300 rounded px-3 py-2 text-sm"
-          />
+            },
+            options: roleOptions,
+          },
+        ]}
+        onReset={resetFilters}
+        actions={
           <button
             onClick={() => setIsAddModalOpen(true)}
             className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded flex items-center gap-2"
           >
             <FaPlus /> Add New Permission
           </button>
-        </div>
-      </div>
+        }
+      />
 
       <div className="overflow-x-auto">
         <table className="table-auto w-full border border-gray-200">

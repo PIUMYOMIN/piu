@@ -1,8 +1,18 @@
 import React from "react";
-import { FaBars } from "react-icons/fa";
+import { FaBars, FaSignOutAlt } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
 import logo from "../../assets/logo.png";
 
 const StudentNavbar = ({ toggleSidebar, studentName }) => {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await logout();
+    navigate("/login", { replace: true });
+  };
+
   return (
     <nav className="bg-[#002147] text-white px-4 sm:px-6 py-3 flex justify-between items-center shadow-md z-50 fixed top-0 left-0 right-0">
       
@@ -29,11 +39,20 @@ const StudentNavbar = ({ toggleSidebar, studentName }) => {
         <span className="text-sm font-semibold sm:hidden">PDO University</span>
       </div>
 
-      {/* Right side – Dynamic Name */}
-      <div className="flex items-center">
-        <h1 className="text-base sm:text-lg md:text-xl font-semibold tracking-wide">
+      {/* Right side – Name + Logout */}
+      <div className="flex items-center gap-2 sm:gap-4">
+        <h1 className="hidden text-base font-semibold tracking-wide sm:block md:text-lg lg:text-xl">
           {studentName ? `${studentName}'s Dashboard` : "Student Dashboard"}
         </h1>
+        <button
+          type="button"
+          onClick={handleLogout}
+          className="inline-flex items-center gap-2 rounded-md border border-white/20 bg-white/10 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-white/20"
+          aria-label="Logout"
+        >
+          <FaSignOutAlt />
+          <span className="hidden sm:inline">Logout</span>
+        </button>
       </div>
 
     </nav>

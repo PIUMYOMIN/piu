@@ -4,6 +4,7 @@ import { adminApi } from "../../api/admin";
 import { toStorageUrl } from "../../utils/api";
 import { useFloatingToast } from "../../hooks/useFloatingToast";
 import { getApiErrorMessage } from "../../utils/apiErrors";
+import ManagementFilters from "../../components/admin/ManagementFilters";
 
 const GalleryList = () => {
   const navigate = useNavigate();
@@ -88,6 +89,11 @@ const GalleryList = () => {
     });
   }, [gallery, searchTerm, statusFilter]);
 
+  const resetFilters = () => {
+    setSearchTerm("");
+    setStatusFilter("all");
+  };
+
   return (
     <div className="max-w-8xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
       <Toast />
@@ -104,49 +110,24 @@ const GalleryList = () => {
           </div>
         )}
 
-        {/* Search and Add Button */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-          <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-            <div className="relative w-full sm:w-64">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <i className="fas fa-search text-gray-400"></i>
-              </div>
-              <input
-                type="text"
-                placeholder="Search by tag..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-              />
-            </div>
-            
-            <div className="relative w-full sm:w-40">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <i className="fas fa-filter text-gray-400"></i>
-              </div>
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="pl-10 pr-10 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none outline-none"
-              >
-                <option value="all">All Status</option>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-              </select>
-              <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                <i className="fas fa-chevron-down text-gray-400"></i>
-              </div>
-            </div>
-          </div>
-          
-          <button
-            onClick={() => navigate("/piu/admin/gallery/add")}
-            className="flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors whitespace-nowrap w-full sm:w-auto"
-          >
-            <i className="fas fa-plus-circle mr-2"></i>
-            Add Image
-          </button>
-        </div>
+        <ManagementFilters
+          searchValue={searchTerm}
+          onSearchChange={setSearchTerm}
+          searchPlaceholder="Search by tag..."
+          showStatus
+          statusValue={statusFilter}
+          onStatusChange={setStatusFilter}
+          onReset={resetFilters}
+          actions={
+            <button
+              onClick={() => navigate("/piu/admin/gallery/add")}
+              className="flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors whitespace-nowrap w-full sm:w-auto"
+            >
+              <i className="fas fa-plus-circle mr-2"></i>
+              Add Image
+            </button>
+          }
+        />
 
         {/* Gallery Table */}
         <div className="overflow-x-auto rounded-lg border border-gray-200">

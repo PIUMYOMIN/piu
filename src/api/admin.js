@@ -78,9 +78,10 @@ export const adminApi = {
         const data = unwrap(r.data);
         return data?.assignments || [];
       }),
-    // Note: backend `show` expects slug, not numeric id.
-    get: (slug) =>
-      client.get(`/assignments/${slug}`).then((r) => {
+    meta: () => client.get('/assignments').then((r) => unwrap(r.data)),
+    // Backend `show` accepts numeric id or slug.
+    get: (idOrSlug) =>
+      client.get(`/assignments/${idOrSlug}`).then((r) => {
         const data = unwrap(r.data);
         return data;
       }),

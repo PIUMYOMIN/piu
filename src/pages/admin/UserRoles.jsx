@@ -5,6 +5,7 @@ import { adminApi } from "../../api/admin";
 import { useAuth } from "../../contexts/AuthContext";
 import { useFloatingToast } from "../../hooks/useFloatingToast";
 import { getApiErrorMessage } from "../../utils/apiErrors";
+import ManagementFilters from "../../components/admin/ManagementFilters";
 
 function RolesPage() {
   const { user: authUser } = useAuth();
@@ -123,6 +124,11 @@ function RolesPage() {
   const totalPages = Math.max(1, Math.ceil(filteredRoles.length / pageSize));
   const paginatedRoles = filteredRoles.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
+  const resetFilters = () => {
+    setSearch("");
+    setCurrentPage(1);
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -138,24 +144,25 @@ function RolesPage() {
       
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-bold text-gray-800">User Roles</h2>
-        <div className="flex items-center gap-2">
-          <input
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setCurrentPage(1);
-            }}
-            placeholder="Search role..."
-            className="border border-gray-300 rounded px-3 py-2 text-sm"
-          />
+      </div>
+
+      <ManagementFilters
+        searchValue={search}
+        onSearchChange={(value) => {
+          setSearch(value);
+          setCurrentPage(1);
+        }}
+        searchPlaceholder="Search role..."
+        onReset={resetFilters}
+        actions={
           <button
             onClick={() => setIsAddModalOpen(true)}
             className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded flex items-center gap-2"
           >
             <FaPlus /> Add New Role
           </button>
-        </div>
-      </div>
+        }
+      />
 
       <div className="overflow-x-auto">
         <table className="w-full border-collapse">

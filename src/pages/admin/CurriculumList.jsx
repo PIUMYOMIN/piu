@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { adminApi } from "../../api/admin";
 import { useFloatingToast } from "../../hooks/useFloatingToast";
 import { getApiErrorMessage } from "../../utils/apiErrors";
+import ManagementFilters from "../../components/admin/ManagementFilters";
 
 const CurriculumList = () => {
   const navigate = useNavigate();
@@ -101,6 +102,13 @@ const CurriculumList = () => {
       .sort((a, b) => a.name.localeCompare(b.name));
   }, [years]);
 
+  const resetFilters = () => {
+    setSearchTerm("");
+    setCourseFilter("all");
+    setYearFilter("all");
+    setStatusFilter("all");
+  };
+
   return (
     <div className="max-w-8xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
       <Toast />
@@ -117,93 +125,44 @@ const CurriculumList = () => {
           </div>
         )}
 
-        {/* Search and Filters */}
-        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 gap-4">
-          <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">
-            <div className="relative w-full sm:w-64">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <i className="fas fa-search text-gray-400"></i>
-              </div>
-              <input
-                type="text"
-                placeholder="Search curricula..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-              />
-            </div>
-            
-            <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-              <div className="relative w-full sm:w-48">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <i className="fas fa-graduation-cap text-gray-400"></i>
-                </div>
-                <select
-                  value={courseFilter}
-                  onChange={(e) => setCourseFilter(e.target.value)}
-                  className="pl-10 pr-10 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none outline-none"
-                >
-                  <option value="all">All Courses</option>
-                  {courseOptions.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.title}
-                    </option>
-                  ))}
-                </select>
-                <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                  <i className="fas fa-chevron-down text-gray-400"></i>
-                </div>
-              </div>
-              
-              <div className="relative w-full sm:w-32">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <i className="fas fa-calendar-alt text-gray-400"></i>
-                </div>
-                <select
-                  value={yearFilter}
-                  onChange={(e) => setYearFilter(e.target.value)}
-                  className="pl-10 pr-10 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none outline-none"
-                >
-                  <option value="all">All Years</option>
-                  {yearOptions.map((y) => (
-                    <option key={y.id} value={y.id}>
-                      {y.name}
-                    </option>
-                  ))}
-                </select>
-                <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                  <i className="fas fa-chevron-down text-gray-400"></i>
-                </div>
-              </div>
-              
-              <div className="relative w-full sm:w-40">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <i className="fas fa-user-check text-gray-400"></i>
-                </div>
-                <select
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                  className="pl-10 pr-10 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none outline-none"
-                >
-                  <option value="all">All Status</option>
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
-                </select>
-                <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                  <i className="fas fa-chevron-down text-gray-400"></i>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <button
-            onClick={() => navigate("/piu/admin/add-curriculum")}
-            className="flex items-center justify-center bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors whitespace-nowrap w-full lg:w-auto"
-          >
-            <i className="fas fa-plus-circle mr-2"></i>
-            New Curriculum
-          </button>
-        </div>
+        <ManagementFilters
+          searchValue={searchTerm}
+          onSearchChange={setSearchTerm}
+          searchPlaceholder="Search curricula..."
+          filters={[
+            {
+              key: "course",
+              value: courseFilter,
+              onChange: setCourseFilter,
+              options: [
+                { value: "all", label: "All Courses" },
+                ...courseOptions.map((c) => ({ value: c.id, label: c.title })),
+              ],
+            },
+            {
+              key: "year",
+              value: yearFilter,
+              onChange: setYearFilter,
+              options: [
+                { value: "all", label: "All Years" },
+                ...yearOptions.map((y) => ({ value: y.id, label: y.name })),
+              ],
+            },
+          ]}
+          showStatus
+          statusValue={statusFilter}
+          onStatusChange={setStatusFilter}
+          onReset={resetFilters}
+          actions={
+            <button
+              onClick={() => navigate("/piu/admin/add-curriculum")}
+              className="flex items-center justify-center bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors whitespace-nowrap w-full lg:w-auto"
+            >
+              <i className="fas fa-plus-circle mr-2"></i>
+              New Curriculum
+            </button>
+          }
+        />
 
         {/* Curriculum Table */}
         <div className="overflow-x-auto rounded-lg border border-gray-200">

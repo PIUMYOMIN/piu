@@ -5,6 +5,7 @@ import { toStorageUrl } from "../../utils/api";
 import { ADMIN_TABS, buildDashboardPath } from "../../utils/dashboardTabs";
 import { useFloatingToast } from "../../hooks/useFloatingToast";
 import { getApiErrorMessage } from "../../utils/apiErrors";
+import ManagementFilters from "../../components/admin/ManagementFilters";
 
 function normalizeTeamActive(team) {
   if (typeof team?.is_active === "boolean") return team.is_active;
@@ -115,6 +116,12 @@ const TeamList = () => {
       .sort((a, b) => a.name.localeCompare(b.name));
   }, [departments]);
 
+  const resetFilters = () => {
+    setSearchTerm("");
+    setDepartmentFilter("all");
+    setStatusFilter("all");
+  };
+
   return (
     <div className="max-w-8xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
       <Toast />
@@ -131,72 +138,35 @@ const TeamList = () => {
           </div>
         )}
 
-        {/* Search and Filters */}
-        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 gap-4">
-          <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">
-            <div className="relative w-full sm:w-64">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <i className="fas fa-search text-gray-400"></i>
-              </div>
-              <input
-                type="text"
-                placeholder="Search team members..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-              />
-            </div>
-            
-            <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-              <div className="relative w-full sm:w-40">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <i className="fas fa-building text-gray-400"></i>
-                </div>
-                <select
-                  value={departmentFilter}
-                  onChange={(e) => setDepartmentFilter(e.target.value)}
-                  className="pl-10 pr-10 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none outline-none"
-                >
-                  <option value="all">All Departments</option>
-                  {departmentOptions.map((dept) => (
-                    <option key={dept.id} value={dept.id}>
-                      {dept.name}
-                    </option>
-                  ))}
-                </select>
-                <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                  <i className="fas fa-chevron-down text-gray-400"></i>
-                </div>
-              </div>
-              
-              <div className="relative w-full sm:w-40">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <i className="fas fa-user-check text-gray-400"></i>
-                </div>
-                <select
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                  className="pl-10 pr-10 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none outline-none"
-                >
-                  <option value="all">All Status</option>
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
-                </select>
-                <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                  <i className="fas fa-chevron-down text-gray-400"></i>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <Link
-            to={buildDashboardPath("/piu/admin/add-team", ADMIN_TABS.ADD_TEAM)}
-            className="flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors whitespace-nowrap w-full lg:w-auto"
-          >
-            <i className="fas fa-user-plus mr-2"></i>
-            Add Team Member
-          </Link>
-        </div>
+        <ManagementFilters
+          searchValue={searchTerm}
+          onSearchChange={setSearchTerm}
+          searchPlaceholder="Search team members..."
+          filters={[
+            {
+              key: "department",
+              value: departmentFilter,
+              onChange: setDepartmentFilter,
+              options: [
+                { value: "all", label: "All Departments" },
+                ...departmentOptions.map((dept) => ({ value: dept.id, label: dept.name })),
+              ],
+            },
+          ]}
+          showStatus
+          statusValue={statusFilter}
+          onStatusChange={setStatusFilter}
+          onReset={resetFilters}
+          actions={
+            <Link
+              to={buildDashboardPath("/piu/admin/add-team", ADMIN_TABS.ADD_TEAM)}
+              className="flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors whitespace-nowrap w-full lg:w-auto"
+            >
+              <i className="fas fa-user-plus mr-2"></i>
+              Add Team Member
+            </Link>
+          }
+        />
 
         {/* Team Table */}
         <div className="overflow-x-auto rounded-lg border border-gray-200">

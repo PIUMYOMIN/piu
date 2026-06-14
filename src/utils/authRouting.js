@@ -60,7 +60,7 @@ export function getAuthenticatedHomePath(user) {
   const path = getDashboardPathForRole(role);
 
   if (role === 'student') {
-    return `${path}?tab=profile`;
+    return `${path}?tab=dashboard`;
   }
   if (role === 'teacher') {
     return `${path}?tab=dashboard`;

@@ -7,6 +7,7 @@ import { adminApi } from "../../api/admin";
 import CategoryModal from "./CategoryModal";
 import { useFloatingToast } from "../../hooks/useFloatingToast";
 import { getApiErrorMessage } from "../../utils/apiErrors";
+import ManagementFilters from "../../components/admin/ManagementFilters";
 
 const CourseCategories = () => {
   const { showSuccess, showError, Toast } = useFloatingToast();
@@ -104,6 +105,8 @@ const CourseCategories = () => {
       return 0;
     });
 
+  const resetFilters = () => setSearchTerm("");
+
   return (
     <div className="max-w-7xl mx-auto">
       <Toast />
@@ -124,21 +127,13 @@ const CourseCategories = () => {
         </div>
       </div>
 
-      <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div className="relative w-full sm:max-w-sm">
-          <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(event) => setSearchTerm(event.target.value)}
-            placeholder="Search categories..."
-            className="w-full rounded-lg border border-gray-300 py-2 pl-10 pr-3 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-200"
-          />
-        </div>
-        <div className="text-sm text-gray-500">
-          Showing {filteredCategories.length} of {categories.length} categories
-        </div>
-      </div>
+      <ManagementFilters
+        searchValue={searchTerm}
+        onSearchChange={setSearchTerm}
+        searchPlaceholder="Search categories..."
+        onReset={resetFilters}
+        summary={`Showing ${filteredCategories.length} of ${categories.length} categories`}
+      />
 
       {error && (
         <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">

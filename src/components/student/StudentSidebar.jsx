@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import {
-  FaBookReader, FaUserCog, FaClock, FaEnvelope, FaChevronRight, FaTimes,
+  FaBookReader, FaUserCog, FaClock, FaEnvelope, FaChevronRight, FaTimes, FaSignOutAlt, FaThLarge,
 } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 import {
   buildDashboardPath,
   findMenuIndexByTab,
@@ -11,7 +13,8 @@ import {
 } from '../../utils/dashboardTabs';
 
 export const studentMenu = [
-  { title: 'Profile', icon: <FaUserCog />, path: '/piu/student', tab: STUDENT_TABS.PROFILE },
+  { title: 'Dashboard', icon: <FaThLarge />, path: '/piu/student', tab: STUDENT_TABS.DASHBOARD },
+  { title: 'Profile', icon: <FaUserCog />, path: '/piu/student/profile', tab: STUDENT_TABS.PROFILE },
   {
     title: 'My Courses',
     icon: <FaBookReader />,
@@ -40,9 +43,17 @@ export const studentMenu = [
 ];
 
 const StudentSidebar = ({ isSidebarOpen, toggleSidebar }) => {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
   const [openMenu, setOpenMenu] = useState(null);
   const location = useLocation();
   const [searchParams] = useSearchParams();
+
+  const handleLogout = async () => {
+    if (window.innerWidth < 1024) toggleSidebar();
+    await logout();
+    navigate('/login', { replace: true });
+  };
 
   useEffect(() => {
     const menuIndex = findMenuIndexByTab(studentMenu, searchParams, location.pathname);
@@ -93,7 +104,7 @@ const StudentSidebar = ({ isSidebarOpen, toggleSidebar }) => {
       )}
 
       <aside
-        className={`fixed top-[84px] left-0 bottom-0 w-80 bg-[#001933] text-white z-40 overflow-y-auto scrollbar-hide 
+        className={`fixed top-[84px] left-0 bottom-0 w-80 bg-[#001933] text-white z-40 flex flex-col overflow-hidden
                     transition-transform duration-300 ease-in-out 
                     lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
       >
@@ -104,7 +115,7 @@ const StudentSidebar = ({ isSidebarOpen, toggleSidebar }) => {
           <FaTimes size={16} />
         </button>
 
-        <ul className="p-3 space-y-0 mt-4 lg:mt-0">
+        <ul className="flex-1 overflow-y-auto scrollbar-hide p-3 space-y-0 mt-4 lg:mt-0">
           {studentMenu.map((item, index) => {
             const hasSub = !!item.sub;
             const isItemActive = itemIsActive(item);
@@ -168,6 +179,17 @@ const StudentSidebar = ({ isSidebarOpen, toggleSidebar }) => {
             );
           })}
         </ul>
+
+        <div className="border-t border-gray-700 p-4">
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="flex w-full items-center rounded-lg p-3 text-red-300 transition-colors hover:bg-red-900/20"
+          >
+            <FaSignOutAlt className="mr-3" />
+            <span className="text-sm">Logout</span>
+          </button>
+        </div>
       </aside>
     </>
   );

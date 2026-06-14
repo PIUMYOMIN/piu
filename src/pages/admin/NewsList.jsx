@@ -5,6 +5,7 @@ import { toStorageUrl } from "../../utils/api";
 import { useAuth } from "../../contexts/AuthContext";
 import { useFloatingToast } from "../../hooks/useFloatingToast";
 import { getApiErrorMessage } from "../../utils/apiErrors";
+import ManagementFilters from "../../components/admin/ManagementFilters";
 import StatusToggle, { parseIsActive } from "../../components/admin/StatusToggle";
 
 export default function NewsList() {
@@ -91,6 +92,11 @@ export default function NewsList() {
     }
   };
 
+  const resetFilters = () => {
+    setSearch("");
+    setStatusFilter("all");
+  };
+
   return (
     <div className="max-w-8xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
       <Toast />
@@ -106,32 +112,29 @@ export default function NewsList() {
           </div>
         )}
 
-        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 gap-4">
-          <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search news..."
-              className="px-4 py-2 w-full sm:w-72 border border-gray-300 rounded-lg"
-            />
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg"
+        <ManagementFilters
+          searchValue={search}
+          onSearchChange={setSearch}
+          searchPlaceholder="Search news..."
+          showStatus
+          statusValue={statusFilter}
+          onStatusChange={setStatusFilter}
+          statusOptions={[
+            { value: "all", label: "All Status" },
+            { value: "active", label: "Published" },
+            { value: "inactive", label: "Draft" },
+          ]}
+          onReset={resetFilters}
+          actions={
+            <button
+              type="button"
+              onClick={() => navigate("/piu/admin/add-news")}
+              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg"
             >
-              <option value="all">All Status</option>
-              <option value="active">Published</option>
-              <option value="inactive">Draft</option>
-            </select>
-          </div>
-          <button
-            type="button"
-            onClick={() => navigate("/piu/admin/add-news")}
-            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg"
-          >
-            Add News
-          </button>
-        </div>
+              Add News
+            </button>
+          }
+        />
 
         <div className="overflow-x-auto rounded-lg border border-gray-200">
           <table className="w-full">

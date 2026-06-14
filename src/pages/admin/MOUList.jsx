@@ -5,6 +5,7 @@ import { toStorageUrl } from "../../utils/api";
 import { useAuth } from "../../contexts/AuthContext";
 import { useFloatingToast } from "../../hooks/useFloatingToast";
 import { getApiErrorMessage } from "../../utils/apiErrors";
+import ManagementFilters from "../../components/admin/ManagementFilters";
 
 export default function MOUList() {
   const { showSuccess, showError, Toast } = useFloatingToast();
@@ -63,6 +64,8 @@ export default function MOUList() {
     }
   };
 
+  const resetFilters = () => setSearch("");
+
   return (
     <div className="max-w-7xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
       <Toast />
@@ -73,17 +76,17 @@ export default function MOUList() {
 
       <div className="p-6">
         {error && <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div>}
-        <div className="flex justify-between items-center mb-6 gap-4">
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search partner..."
-            className="px-4 py-2 w-full sm:w-72 border border-gray-300 rounded-lg"
-          />
-          <Link to="/piu/admin/mou/add" className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg">
-            Add MOU
-          </Link>
-        </div>
+        <ManagementFilters
+          searchValue={search}
+          onSearchChange={setSearch}
+          searchPlaceholder="Search partner..."
+          onReset={resetFilters}
+          actions={
+            <Link to="/piu/admin/mou/add" className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg">
+              Add MOU
+            </Link>
+          }
+        />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {loading && <div className="text-gray-500">Loading...</div>}
