@@ -5,7 +5,7 @@ export default {
     extend: {
       fontFamily: {
         roboto: ["Roboto", "sans-serif"],
-        nato: ["Nato-Sans", "sans-serif"],
+        nato: ["Noto Sans", "sans-serif"],
         montserrat: ["Montserrat", "sans-serif"],
         oswald: ["Oswald", "sans-serif"],
         merriweather: ["Merriweather", "sans-serif"],

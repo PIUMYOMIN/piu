@@ -1,7 +1,14 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 export default function ApplicationFormSubmitSuccessful() {
+  const location = useLocation();
+  const mail = location.state?.mail;
+  const mailFailed =
+    mail &&
+    mail.applicant_confirmed === false &&
+    Boolean(mail.error);
+
   return (
     <div className="max-w-7xl mx-auto px-3 py-10">
       <div className="max-w-2xl mx-auto rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
@@ -20,6 +27,13 @@ export default function ApplicationFormSubmitSuccessful() {
         </div>
 
         <div className="p-6">
+          {mailFailed && (
+            <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+              Your application was saved, but the confirmation email could not be sent right now.
+            Please keep a note of your submission and contact us if you do not hear back within a few days.
+            </div>
+          )}
+
           <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
             <div className="font-semibold text-gray-900">What happens next?</div>
             <ul className="mt-2 text-sm text-gray-700 space-y-1">

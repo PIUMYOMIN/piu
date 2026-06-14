@@ -79,7 +79,13 @@ export const v1 = {
   getTeam: () => apiClient.get('/team').then((r) => r.data),
   getTeamMember: (slug) => apiClient.get(`/team/${slug}`).then((r) => r.data),
   getCourses: () => apiClient.get('/courses').then((r) => r.data),
-  submitApplicationForm: (payload) => apiClient.post('/application-form/submit', payload).then((r) => r.data),
+  submitApplicationForm: (payload) =>
+    apiClient
+      .post('/admissions', payload, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        recaptcha: { enabled: true, action: 'admission_form_submit' },
+      })
+      .then((r) => r.data),
   submitContactForm: (formData) =>
     apiClient
       .post('/contact/form-submit', formData, {

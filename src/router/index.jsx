@@ -1,83 +1,83 @@
 // src/router/index.jsx
 import { createBrowserRouter, Navigate } from "react-router-dom";
-import Home from "../pages/user/Home";
-import Contact from "../pages/user/contact";
-import President from "../pages/user/President";
-import Courses from "../pages/user/Courses";
-import CourseCategories from "../pages/admin/CourseCategories";
-import Campus from "../pages/user/Campus";
-import Faculties from "../pages/user/Faculties";
-import FacultiesDetails from "../pages/user/FacultiesDetails";
-import About from "../pages/user/About";
-import Login from "../auth/Login";
-import Register from "../auth/Register";
-import ForgotPassword from "../auth/ForgotPassword";
-import ResetPassword from "../auth/ResetPassword";
-import AdminLayout from "../layouts/AdminLayout";
 import UserLayout from "../layouts/UserLayout";
-import StudentLayout from "../layouts/StudentLayout";
-import TeacherLayout from "../layouts/TeacherLayout";
-import UserDashboardLayout from "../layouts/UserDashboardLayout";
-import CourseDetails from "../pages/user/CourseDetails";
-import NewsDetails from "../pages/user/NewsDetails";
-import Gallery from "../components/user/Gallery";
-import NewsPage from "../pages/user/News";
-import SearchResults from "../pages/user/SearchResults";
-
-// Admin Dashboard
-import Dashboard from "../pages/admin/Dashboard";
-import UsersHub from "../pages/admin/UsersHub";
-import AdmissionPage from "../pages/admin/Admission";
-import AdmissionDetails from "../pages/admin/AdmissionDetails";
-import CourseList from "../pages/admin/CourseList";
-import NewCourse from "../pages/admin/AddCourse";
-import BlogsForm from "../pages/admin/AddBlogs";
-import BlogsList from "../pages/admin/BlogsList";
-import NewsList from "../pages/admin/NewsList";
-import NewsForm from "../pages/admin/AddNews";
-import CampusForm from "../pages/admin/AddCampus";
-import CampusList from "../pages/admin/CampusList";
-import AddTeam from "../pages/admin/AddTeam";
-import TeamList from "../pages/admin/TeamList";
-import AddEvent from "../pages/admin/AddEvent";
-import EventList from "../pages/admin/EventList";
-import AddCurriculum from "../pages/admin/AddCurriculum";
-import CurriculumList from "../pages/admin/CurriculumList";
-import SliderList from "../pages/admin/SliderList";
-import MOUList from "../pages/admin/MOUList";
-import AddMOU from "../pages/admin/AddMOU";
-import DepartmentList from "../pages/admin/DepartmentsList";
-import AddDepartment from "../pages/admin/AddDepartment";
-import PositionList from "../pages/admin/PositionList";
-import AddPosition from "../pages/admin/AddPosition";
-import SeminarList from "../pages/admin/SeminarList";
-import AddSeminar from "../pages/admin/AddSeminar";
-import GalleryList from "../pages/admin/GalleryList";
-import AddGallery from "../pages/admin/AddGallery";
-import AllStudents from "../pages/admin/AllStudents";
-import AddStudent from "../pages/admin/AddStudent";
-import StudentDetails from "../pages/admin/StudentDetails";
-import AddStudentGrading from "../pages/admin/AddStudentGrading";
-import GradeForm from "../pages/admin/GradeForm";
-import StudentGradingList from "../pages/admin/StudentGradingList";
-import StudentYearView from "../pages/admin/StudentYearView";
-import StudentSemesterView from "../pages/admin/StudentSemesterView";
-import StudentGradeView from "../pages/admin/StudentGradeView";
-import AssignmentsList from "../pages/admin/AssignmentList";
-import AddAssignment from "../pages/admin/AddAssignment";
-import ModulesList from "../pages/admin/ModulesList";
-import ModuleForm from "../pages/admin/ModuleForm";
-import ProfileSetting from "../pages/admin/ProfileSetting";
-import ChangePassword from "../pages/admin/ChangePassword";
-import Admission2 from "../pages/user/Admission2";
-import TeamProfile from "../pages/user/TeamProfile";
-import StudentProfile from "../pages/student/StudentProfile";
-import UserDashboard from "../pages/user/UserDashboard";
-import TeacherDashboard from "../pages/teacher/TeacherDashboard";
-import TeacherProfile from "../pages/teacher/TeacherProfile";
-import Admission from "../pages/user/Admission";
-import ApplicationFormSubmitSuccessful from "../pages/user/ApplicationFormSubmitSuccessful";
-import ContactFormSubmittedSuccessful from "../pages/user/ContactFormSubmittedSuccessful";
+import {
+  About,
+  AddAssignment,
+  AddCurriculum,
+  AddDepartment,
+  AddEvent,
+  AddGallery,
+  AddMOU,
+  AddPosition,
+  AddSeminar,
+  AddStudent,
+  AddStudentGrading,
+  AddTeam,
+  AdminLayout,
+  Admission,
+  Admission2,
+  AdmissionDetails,
+  AdmissionPage,
+  AllStudents,
+  ApplicationFormSubmitSuccessful,
+  AssignmentsList,
+  BlogsForm,
+  BlogsList,
+  Campus,
+  CampusForm,
+  CampusList,
+  ChangePassword,
+  Contact,
+  ContactFormSubmittedSuccessful,
+  CourseCategories,
+  CourseDetails,
+  CourseList,
+  Courses,
+  CurriculumList,
+  Dashboard,
+  DepartmentList,
+  EventList,
+  Faculties,
+  FacultiesDetails,
+  ForgotPassword,
+  Gallery,
+  GalleryList,
+  GradeForm,
+  Home,
+  Login,
+  MOUList,
+  ModuleForm,
+  ModulesList,
+  NewCourse,
+  NewsDetails,
+  NewsForm,
+  NewsList,
+  NewsPage,
+  PositionList,
+  President,
+  ProfileSetting,
+  Register,
+  ResetPassword,
+  SearchResults,
+  SeminarList,
+  SliderList,
+  StudentDetails,
+  StudentGradeView,
+  StudentGradingList,
+  StudentLayout,
+  StudentProfile,
+  StudentSemesterView,
+  StudentYearView,
+  TeacherDashboard,
+  TeacherLayout,
+  TeacherProfile,
+  TeamList,
+  TeamProfile,
+  UserDashboard,
+  UserDashboardLayout,
+  UsersHub,
+} from "./lazyPages";
 
 // Auth Components
 import PrivateRoute from "../components/PrivateRoute";

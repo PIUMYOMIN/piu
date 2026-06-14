@@ -129,7 +129,9 @@ export default function Admission() {
       const responseData = await v2.submitAdmission(formData);
 
       if (responseData?.success) {
-        navigate("/admissions/application-form/successfully-submitted");
+        navigate("/admissions/application-form/successfully-submitted", {
+          state: { mail: responseData?.mail || null },
+        });
         return;
       }
 

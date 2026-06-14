@@ -1,0 +1,134 @@
+[
+  {
+    "url": "http://localhost:4173/",
+    "isRepresentativeRun": true,
+    "htmlPath": "D:\\React Projects\\PIU-Web-Project\\.lhci\\frontend\\localhost--2026_06_14_11_56_51.report.html",
+    "jsonPath": "D:\\React Projects\\PIU-Web-Project\\.lhci\\frontend\\localhost--2026_06_14_11_56_51.report.json",
+    "summary": {
+      "performance": 0.91,
+      "accessibility": 0.91,
+      "best-practices": 0.96,
+      "seo": 1
+    }
+  },
+  {
+    "url": "http://localhost:4173/about-us",
+    "isRepresentativeRun": true,
+    "htmlPath": "D:\\React Projects\\PIU-Web-Project\\.lhci\\frontend\\localhost-about_us-2026_06_14_11_57_15.report.html",
+    "jsonPath": "D:\\React Projects\\PIU-Web-Project\\.lhci\\frontend\\localhost-about_us-2026_06_14_11_57_15.report.json",
+    "summary": {
+      "performance": 0.99,
+      "accessibility": 0.91,
+      "best-practices": 1,
+      "seo": 1
+    }
+  },
+  {
+    "url": "http://localhost:4173/campus",
+    "isRepresentativeRun": true,
+    "htmlPath": "D:\\React Projects\\PIU-Web-Project\\.lhci\\frontend\\localhost-campus-2026_06_14_11_57_34.report.html",
+    "jsonPath": "D:\\React Projects\\PIU-Web-Project\\.lhci\\frontend\\localhost-campus-2026_06_14_11_57_34.report.json",
+    "summary": {
+      "performance": 1,
+      "accessibility": 0.91,
+      "best-practices": 1,
+      "seo": 1
+    }
+  },
+  {
+    "url": "http://localhost:4173/president-of-piu",
+    "isRepresentativeRun": true,
+    "htmlPath": "D:\\React Projects\\PIU-Web-Project\\.lhci\\frontend\\localhost-president_of_piu-2026_06_14_11_57_52.report.html",
+    "jsonPath": "D:\\React Projects\\PIU-Web-Project\\.lhci\\frontend\\localhost-president_of_piu-2026_06_14_11_57_52.report.json",
+    "summary": {
+      "performance": 0.97,
+      "accessibility": 0.91,
+      "best-practices": 1,
+      "seo": 1
+    }
+  },
+  {
+    "url": "http://localhost:4173/faculties",
+    "isRepresentativeRun": true,
+    "htmlPath": "D:\\React Projects\\PIU-Web-Project\\.lhci\\frontend\\localhost-faculties-2026_06_14_11_58_09.report.html",
+    "jsonPath": "D:\\React Projects\\PIU-Web-Project\\.lhci\\frontend\\localhost-faculties-2026_06_14_11_58_09.report.json",
+    "summary": {
+      "performance": 0.98,
+      "accessibility": 0.91,
+      "best-practices": 0.96,
+      "seo": 1
+    }
+  },
+  {
+    "url": "http://localhost:4173/courses",
+    "isRepresentativeRun": true,
+    "htmlPath": "D:\\React Projects\\PIU-Web-Project\\.lhci\\frontend\\localhost-courses-2026_06_14_11_58_27.report.html",
+    "jsonPath": "D:\\React Projects\\PIU-Web-Project\\.lhci\\frontend\\localhost-courses-2026_06_14_11_58_27.report.json",
+    "summary": {
+      "performance": 0.81,
+      "accessibility": 0.91,
+      "best-practices": 0.96,
+      "seo": 1
+    }
+  },
+  {
+    "url": "http://localhost:4173/news",
+    "isRepresentativeRun": true,
+    "htmlPath": "D:\\React Projects\\PIU-Web-Project\\.lhci\\frontend\\localhost-news-2026_06_14_11_58_46.report.html",
+    "jsonPath": "D:\\React Projects\\PIU-Web-Project\\.lhci\\frontend\\localhost-news-2026_06_14_11_58_46.report.json",
+    "summary": {
+      "performance": 0.84,
+      "accessibility": 0.91,
+      "best-practices": 0.96,
+      "seo": 1
+    }
+  },
+  {
+    "url": "http://localhost:4173/admission",
+    "isRepresentativeRun": true,
+    "htmlPath": "D:\\React Projects\\PIU-Web-Project\\.lhci\\frontend\\localhost-admission-2026_06_14_11_59_05.report.html",
+    "jsonPath": "D:\\React Projects\\PIU-Web-Project\\.lhci\\frontend\\localhost-admission-2026_06_14_11_59_05.report.json",
+    "summary": {
+      "performance": 0.99,
+      "accessibility": 0.91,
+      "best-practices": 1,
+      "seo": 1
+    }
+  },
+  {
+    "url": "http://localhost:4173/admissions/application-form",
+    "isRepresentativeRun": true,
+    "htmlPath": "D:\\React Projects\\PIU-Web-Project\\.lhci\\frontend\\localhost-admissions_application_form-2026_06_14_11_59_22.report.html",
+    "jsonPath": "D:\\React Projects\\PIU-Web-Project\\.lhci\\frontend\\localhost-admissions_application_form-2026_06_14_11_59_22.report.json",
+    "summary": {
+      "performance": 0.99,
+      "accessibility": 0.92,
+      "best-practices": 0.96,
+      "seo": 1
+    }
+  },
+  {
+    "url": "http://localhost:4173/gallery",
+    "isRepresentativeRun": true,
+    "htmlPath": "D:\\React Projects\\PIU-Web-Project\\.lhci\\frontend\\localhost-gallery-2026_06_14_11_59_42.report.html",
+    "jsonPath": "D:\\React Projects\\PIU-Web-Project\\.lhci\\frontend\\localhost-gallery-2026_06_14_11_59_42.report.json",
+    "summary": {
+      "performance": 0.77,
+      "accessibility": 0.91,
+      "best-practices": 0.96,
+      "seo": 1
+    }
+  },
+  {
+    "url": "http://localhost:4173/contact-us",
+    "isRepresentativeRun": true,
+    "htmlPath": "D:\\React Projects\\PIU-Web-Project\\.lhci\\frontend\\localhost-contact_us-2026_06_14_12_00_01.report.html",
+    "jsonPath": "D:\\React Projects\\PIU-Web-Project\\.lhci\\frontend\\localhost-contact_us-2026_06_14_12_00_01.report.json",
+    "summary": {
+      "performance": 1,
+      "accessibility": 0.87,
+      "best-practices": 1,
+      "seo": 1
+    }
+  }
+]

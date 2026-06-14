@@ -31,13 +31,7 @@ export default function Contact() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const getCsrfToken = () => {
-    return document
-      .querySelector('meta[name="csrf-token"]')
-      .getAttribute("content");
-  };
-
-  const submitContactForm = async e => {
+  const submitContactForm = async (e) => {
     e.preventDefault();
 
     if (!validateForm()) {

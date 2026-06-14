@@ -148,8 +148,8 @@ export default function Navbar() {
                   )}
                 </div>
               ) : (
-                <Link to="/login">
-                  <FaUserCircle />
+                <Link to="/login" aria-label="Login">
+                  <FaUserCircle aria-hidden="true" />
                 </Link>
               )}
             </li>
