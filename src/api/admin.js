@@ -125,6 +125,22 @@ export const adminApi = {
     toggleActive: (id) => client.post(`/gallery/${id}/toggle-active`).then((r) => r.data),
   },
 
+  // News
+  news: {
+    list: () => client.get('/news').then((r) => unwrap(r.data)),
+    get: (id) => client.get(`/news/${id}`).then((r) => unwrap(r.data)),
+    create: (formData) =>
+      client
+        .post('/news', formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+        .then((r) => unwrap(r.data)),
+    update: (id, formData) =>
+      client
+        .post(`/news/${id}?_method=PUT`, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+        .then((r) => unwrap(r.data)),
+    remove: (id) => client.delete(`/news/${id}`).then((r) => r.data),
+    toggleActive: (id) => client.post(`/news/${id}/toggle-active`).then((r) => r.data),
+  },
+
   // Slides
   slides: {
     list: () => client.get('/slides').then((r) => unwrap(r.data)),
@@ -180,6 +196,7 @@ export const adminApi = {
         .post(`/students/${id}?_method=PUT`, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
         .then((r) => unwrap(r.data)),
     remove: (id) => client.delete(`/students/${id}`).then((r) => r.data),
+    toggleActive: (id) => client.post(`/students/${id}/toggle-active`).then((r) => r.data),
   },
 
   meta: {

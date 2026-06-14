@@ -5,8 +5,11 @@ import {
 } from "react-icons/fa";
 import { adminApi } from "../../api/admin";
 import CategoryModal from "./CategoryModal";
+import { useFloatingToast } from "../../hooks/useFloatingToast";
+import { getApiErrorMessage } from "../../utils/apiErrors";
 
 const CourseCategories = () => {
+  const { showSuccess, showError, Toast } = useFloatingToast();
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -29,6 +32,7 @@ const CourseCategories = () => {
     } catch (error) {
       console.error("Error fetching categories:", error);
       setError("Failed to load course categories.");
+      showError(getApiErrorMessage(error, "Failed to load course categories."));
     } finally {
       setLoading(false);
     }
@@ -71,9 +75,10 @@ const CourseCategories = () => {
     try {
       await adminApi.categories.remove(id);
       setCategories(categories.filter(category => category.id !== id));
+      showSuccess("Category deleted successfully!");
     } catch (error) {
       console.error("Error deleting category:", error);
-      alert(error.response?.data?.message || "Failed to delete category. It might be in use.");
+      showError(getApiErrorMessage(error, "Failed to delete category. It might be in use."));
     }
   };
 
@@ -101,6 +106,7 @@ const CourseCategories = () => {
 
   return (
     <div className="max-w-7xl mx-auto">
+      <Toast />
       {/* Header and Controls */}
       <div className="mb-6">
         <div className="flex justify-between items-center">

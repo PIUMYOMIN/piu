@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { adminApi } from "../../api/admin";
+import { useFloatingToast } from "../../hooks/useFloatingToast";
+import { getApiErrorMessage } from "../../utils/apiErrors";
 
 export default function ModuleForm() {
   const navigate = useNavigate();
   const { id } = useParams();
   const isEdit = Boolean(id);
+  const { showSuccess, showError, Toast } = useFloatingToast();
 
   const [formData, setFormData] = useState({
     name: "",
@@ -35,6 +38,7 @@ export default function ModuleForm() {
       } catch (e) {
         if (!mounted) return;
         setError(e?.response?.data?.message || e?.message || "Failed to load module");
+        showError(getApiErrorMessage(e, "Failed to load module"));
       } finally {
         if (mounted) setLoading(false);
       }
@@ -83,12 +87,17 @@ export default function ModuleForm() {
       };
       if (isEdit) {
         await adminApi.modules.update(id, payload);
+        showSuccess("Module updated successfully!");
       } else {
         await adminApi.modules.create(payload);
+        showSuccess("Module added successfully!");
       }
-      navigate("/piu/admin/modules");
+      setTimeout(() => {
+        navigate("/piu/admin/modules");
+      }, 1200);
     } catch (e) {
       setError(e?.response?.data?.message || e?.message || "Failed to save module");
+      showError(getApiErrorMessage(e, "Failed to save module"));
       setFieldErrors(e?.response?.data?.errors || {});
     } finally {
       setSaving(false);
@@ -96,11 +105,17 @@ export default function ModuleForm() {
   };
 
   if (loading) {
-    return <div className="p-6">Loading module...</div>;
+    return (
+      <div className="p-6">
+        <Toast />
+        Loading module...
+      </div>
+    );
   }
 
   return (
     <div className="max-w-4xl mx-auto bg-white p-8 rounded-xl shadow-md">
+      <Toast />
       <h2 className="text-2xl font-bold mb-6 text-[#002147]">{isEdit ? "Edit Module" : "Add Module"}</h2>
 
       {error && <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div>}

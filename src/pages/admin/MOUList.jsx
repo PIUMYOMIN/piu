@@ -3,8 +3,11 @@ import { Link, useNavigate } from "react-router-dom";
 import adminApi from "../../api/admin";
 import { toStorageUrl } from "../../utils/api";
 import { useAuth } from "../../contexts/AuthContext";
+import { useFloatingToast } from "../../hooks/useFloatingToast";
+import { getApiErrorMessage } from "../../utils/apiErrors";
 
 export default function MOUList() {
+  const { showSuccess, showError, Toast } = useFloatingToast();
   const { user: authUser } = useAuth();
   const currentRole = String(
     authUser?.role?.name ??
@@ -25,7 +28,8 @@ export default function MOUList() {
       const data = await adminApi.partners.list();
       setItems(Array.isArray(data) ? data : []);
     } catch (e) {
-      setError(e?.response?.data?.message || e?.message || "Failed to load MOU partners");
+      showError(getApiErrorMessage(e, "Failed to load MOU partners"));
+      setError(getApiErrorMessage(e, "Failed to load MOU partners"));
       setItems([]);
     } finally {
       setLoading(false);
@@ -52,13 +56,16 @@ export default function MOUList() {
     try {
       await adminApi.partners.remove(item.id);
       await load();
+      showSuccess(`"${item?.name}" deleted successfully!`);
     } catch (e) {
-      setError(e?.response?.data?.message || e?.message || "Failed to delete partner");
+      showError(getApiErrorMessage(e, "Failed to delete partner"));
+      setError(getApiErrorMessage(e, "Failed to delete partner"));
     }
   };
 
   return (
     <div className="max-w-7xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
+      <Toast />
       <div className="bg-[#002147] p-6 text-white">
         <h2 className="text-2xl font-bold">MOU Management</h2>
         <p className="text-blue-100 mt-1">Manage partner institutions</p>

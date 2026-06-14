@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { adminApi } from "../../api/admin";
+import { useFloatingToast } from "../../hooks/useFloatingToast";
+import { getApiErrorMessage } from "../../utils/apiErrors";
 
 const AddAssignment = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { showSuccess, showError, Toast } = useFloatingToast();
 
   const [formData, setFormData] = useState({
     name: "",
@@ -16,12 +19,14 @@ const AddAssignment = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    if (id) {
-      adminApi.assignments
-        .get(id)
-        .then((data) => setFormData(data))
-        .catch((err) => console.error("Error fetching assignment:", err));
-    }
+    if (!id) return;
+    adminApi.assignments
+      .get(id)
+      .then((data) => setFormData(data))
+      .catch((err) => {
+        console.error("Error fetching assignment:", err);
+        showError(getApiErrorMessage(err, "Failed to load assignment"));
+      });
   }, [id]);
 
   const handleChange = (e) => {
@@ -32,31 +37,31 @@ const AddAssignment = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    if (id) {
-      adminApi.assignments
-        .update(id, formData)
-        .then(() => {
-          alert("Assignment updated successfully!");
-          navigate("/piu/admin/assignments");
-        })
-        .finally(() => setIsSubmitting(false));
-    } else {
-      adminApi.assignments
-        .create(formData)
-        .then(() => {
-          alert("Assignment added successfully!");
-          navigate("/piu/admin/assignments");
-        })
-        .finally(() => setIsSubmitting(false));
+    try {
+      if (id) {
+        await adminApi.assignments.update(id, formData);
+        showSuccess("Assignment updated successfully!");
+      } else {
+        await adminApi.assignments.create(formData);
+        showSuccess("Assignment added successfully!");
+      }
+      setTimeout(() => {
+        navigate("/piu/admin/assignments");
+      }, 1200);
+    } catch (err) {
+      showError(getApiErrorMessage(err, "Failed to save assignment"));
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
     <div className="max-w-7xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
+      <Toast />
       {/* Header */}
       <div className="bg-[#002147] p-6 text-white">
         <h2 className="text-2xl font-bold">

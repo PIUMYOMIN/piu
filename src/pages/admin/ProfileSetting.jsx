@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { FaUser, FaEnvelope, FaPhone, FaMapMarkerAlt, FaCity, FaGlobe, FaEdit, FaCamera, FaSave, FaSpinner } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 import { v2 } from "../../utils/api";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { ADMIN_TABS, buildDashboardPath } from "../../utils/dashboardTabs";
+import { useFloatingToast } from "../../hooks/useFloatingToast";
+import { getApiErrorMessage } from "../../utils/apiErrors";
 
 function ProfileSetting() {
+  const navigate = useNavigate();
+  const { showSuccess, showError, Toast } = useFloatingToast();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -48,7 +52,7 @@ function ProfileSetting() {
       }
     } catch (error) {
       console.error("Error fetching profile:", error);
-      toast.error("Failed to load profile data");
+      showError(getApiErrorMessage(error, "Failed to load profile data"));
     } finally {
       setLoading(false);
     }
@@ -103,14 +107,15 @@ function ProfileSetting() {
       // Update local user data
       setCurrentUser(response?.user || response?.data?.user || null);
       
-      toast.success("Profile updated successfully!");
+      showSuccess("Profile updated successfully!");
+      navigate(buildDashboardPath('/piu/admin/profile', ADMIN_TABS.PROFILE), { replace: true });
       
       // Clear file input
       setFormData(prev => ({ ...prev, profile_image: null }));
       
     } catch (error) {
       console.error("Error updating profile:", error);
-      toast.error(error.response?.data?.message || "Failed to update profile");
+      showError(getApiErrorMessage(error, "Failed to update profile"));
     } finally {
       setUpdating(false);
     }
@@ -119,6 +124,7 @@ function ProfileSetting() {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
+        <Toast />
         <FaSpinner className="animate-spin text-3xl text-blue-500" />
       </div>
     );
@@ -126,7 +132,7 @@ function ProfileSetting() {
 
   return (
     <div className="bg-white rounded-lg shadow-md w-full">
-      <ToastContainer position="top-right" autoClose={3000} />
+      <Toast />
       
       {/* Header */}
       <div className="bg-gradient-to-r from-[#002147] to-[#003366] text-white p-6 rounded-t-lg">

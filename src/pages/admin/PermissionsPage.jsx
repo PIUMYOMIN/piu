@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { FaEdit, FaTrash, FaPlus, FaSpinner } from "react-icons/fa";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import { adminApi } from "../../api/admin";
 import { useAuth } from "../../contexts/AuthContext";
+import { useFloatingToast } from "../../hooks/useFloatingToast";
+import { getApiErrorMessage } from "../../utils/apiErrors";
 
 function PermissionsPage() {
   const { user: authUser } = useAuth();
+  const { showSuccess, showError, Toast } = useFloatingToast();
   const currentRole = String(
     authUser?.role?.name ??
       authUser?.role ??
@@ -42,7 +43,7 @@ function PermissionsPage() {
       setRoles(Array.isArray(rolesData) ? rolesData : []);
     } catch (error) {
       console.error("Error fetching data:", error);
-      toast.error("Failed to fetch data");
+      showError(getApiErrorMessage(error, "Failed to fetch data"));
     } finally {
       setLoading(false);
     }
@@ -75,7 +76,7 @@ function PermissionsPage() {
 
   const saveChanges = async () => {
     if (!editingPerm || !permissionName.trim()) {
-      toast.error("Permission name is required");
+      showError("Permission name is required");
       return;
     }
 
@@ -112,16 +113,16 @@ function PermissionsPage() {
       // Refresh data
       await fetchData();
       closeModal();
-      toast.success("Permission updated successfully");
+      showSuccess("Permission updated successfully");
     } catch (error) {
       console.error("Error updating permission:", error);
-      toast.error(error.response?.data?.message || "Failed to update permission");
+      showError(getApiErrorMessage(error, "Failed to update permission"));
     }
   };
 
   const handleAddPermission = async () => {
     if (!newPermissionName.trim()) {
-      toast.error("Permission name is required");
+      showError("Permission name is required");
       return;
     }
 
@@ -133,10 +134,10 @@ function PermissionsPage() {
       await fetchData();
       setNewPermissionName("");
       setIsAddModalOpen(false);
-      toast.success("Permission added successfully");
+      showSuccess("Permission added successfully");
     } catch (error) {
       console.error("Error adding permission:", error);
-      toast.error(error.response?.data?.message || "Failed to add permission");
+      showError(getApiErrorMessage(error, "Failed to add permission"));
     }
   };
 
@@ -149,10 +150,10 @@ function PermissionsPage() {
     try {
       await adminApi.permissions.remove(permissionId);
       setPermissions(permissions.filter(p => p.id !== permissionId));
-      toast.success("Permission deleted successfully");
+      showSuccess("Permission deleted successfully");
     } catch (error) {
       console.error("Error deleting permission:", error);
-      toast.error(error.response?.data?.message || "Failed to delete permission");
+      showError(getApiErrorMessage(error, "Failed to delete permission"));
     }
   };
 
@@ -165,6 +166,7 @@ function PermissionsPage() {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
+        <Toast />
         <FaSpinner className="animate-spin text-2xl text-blue-500" />
       </div>
     );
@@ -172,7 +174,7 @@ function PermissionsPage() {
 
   return (
     <div className="bg-white p-6 rounded shadow w-full">
-      <ToastContainer position="top-right" autoClose={3000} />
+      <Toast />
       
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-bold text-gray-800">All Permissions</h2>

@@ -1,13 +1,14 @@
 import { useState, useEffect } from "react";
 import EditRoleModal from "./EditRoleModal";
 import { FaEdit, FaTrash, FaPlus, FaSpinner } from "react-icons/fa";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import { adminApi } from "../../api/admin";
 import { useAuth } from "../../contexts/AuthContext";
+import { useFloatingToast } from "../../hooks/useFloatingToast";
+import { getApiErrorMessage } from "../../utils/apiErrors";
 
 function RolesPage() {
   const { user: authUser } = useAuth();
+  const { showSuccess, showError, Toast } = useFloatingToast();
   const currentRole = String(
     authUser?.role?.name ??
       authUser?.role ??
@@ -42,7 +43,7 @@ function RolesPage() {
       setPermissions(Array.isArray(permissionsData) ? permissionsData : []);
     } catch (error) {
       console.error("Error fetching data:", error);
-      toast.error("Failed to fetch data");
+      showError(getApiErrorMessage(error, "Failed to fetch data"));
     } finally {
       setLoading(false);
     }
@@ -50,7 +51,7 @@ function RolesPage() {
 
   const handleAddRole = async () => {
     if (!newRoleName.trim()) {
-      toast.error("Role name is required");
+      showError("Role name is required");
       return;
     }
 
@@ -64,10 +65,10 @@ function RolesPage() {
       setNewRoleName("");
       setSelectedPermissions([]);
       setIsAddModalOpen(false);
-      toast.success("Role added successfully");
+      showSuccess("Role added successfully");
     } catch (error) {
       console.error("Error adding role:", error);
-      toast.error(error.response?.data?.message || "Failed to add role");
+      showError(getApiErrorMessage(error, "Failed to add role"));
     }
   };
 
@@ -79,10 +80,10 @@ function RolesPage() {
         role.id === roleId ? response : role
       ));
       setEditingRole(null);
-      toast.success("Role updated successfully");
+      showSuccess("Role updated successfully");
     } catch (error) {
       console.error("Error updating role:", error);
-      toast.error(error.response?.data?.message || "Failed to update role");
+      showError(getApiErrorMessage(error, "Failed to update role"));
     }
   };
 
@@ -95,10 +96,10 @@ function RolesPage() {
     try {
       await adminApi.roles.remove(roleId);
       setRoles(roles.filter(role => role.id !== roleId));
-      toast.success("Role deleted successfully");
+      showSuccess("Role deleted successfully");
     } catch (error) {
       console.error("Error deleting role:", error);
-      toast.error(error.response?.data?.message || "Failed to delete role");
+      showError(getApiErrorMessage(error, "Failed to delete role"));
     }
   };
 
@@ -125,6 +126,7 @@ function RolesPage() {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
+        <Toast />
         <FaSpinner className="animate-spin text-2xl text-blue-500" />
       </div>
     );
@@ -132,7 +134,7 @@ function RolesPage() {
 
   return (
     <div className="bg-white rounded shadow p-4">
-      <ToastContainer position="top-right" autoClose={3000} />
+      <Toast />
       
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-bold text-gray-800">User Roles</h2>

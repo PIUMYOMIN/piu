@@ -26,9 +26,7 @@ import SearchResults from "../pages/user/SearchResults";
 
 // Admin Dashboard
 import Dashboard from "../pages/admin/Dashboard";
-import AdminUsers from "../pages/admin/Users";
-import UserRoles from "../pages/admin/UserRoles";
-import UserPermissions from "../pages/admin/PermissionsPage";
+import UsersHub from "../pages/admin/UsersHub";
 import AdmissionPage from "../pages/admin/Admission";
 import AdmissionDetails from "../pages/admin/AdmissionDetails";
 import CourseList from "../pages/admin/CourseList";
@@ -312,28 +310,18 @@ const router = createBrowserRouter([
         path: "users",
         element: withSeo(
           <RoleRoute allowedRoles={["admin"]}>
-            <AdminUsers />
+            <UsersHub />
           </RoleRoute>,
           privateSeo("Users")
         ),
       },
       {
         path: "users-role",
-        element: withSeo(
-          <RoleRoute allowedRoles={["admin"]}>
-            <UserRoles />
-          </RoleRoute>,
-          privateSeo("User Roles")
-        ),
+        element: <Navigate to="/piu/admin/users?tab=roles" replace />,
       },
       {
         path: "user-permission",
-        element: withSeo(
-          <RoleRoute allowedRoles={["admin"]}>
-            <UserPermissions />
-          </RoleRoute>,
-          privateSeo("User Permissions")
-        ),
+        element: <Navigate to="/piu/admin/users?tab=permissions" replace />,
       },
       {
         path: "admission",
@@ -379,7 +367,7 @@ const router = createBrowserRouter([
       { path: "add-blog/edit/:id", element: withSeo(<BlogsForm />, privateSeo("Edit Blog")) },
       { path: "news", element: withSeo(<NewsList />, privateSeo("News List")) },
       { path: "add-news", element: withSeo(<NewsForm />, privateSeo("Add News")) },
-      { path: "edit/:id", element: withSeo(<NewsForm />, privateSeo("Edit News")) },
+      { path: "add-news/edit/:id", element: withSeo(<NewsForm />, privateSeo("Edit News")) },
       { path: "campus-list", element: withSeo(<CampusList />, privateSeo("Campus List")) },
       { path: "new-campus", element: withSeo(<CampusForm />, privateSeo("Add Campus")) },
       { path: "campus/:id/edit", element: withSeo(<CampusForm />, privateSeo("Edit Campus")) },

@@ -3,6 +3,9 @@ import { Link, useNavigate } from "react-router-dom";
 import { adminApi } from "../../api/admin";
 import { toStorageUrl } from "../../utils/api";
 import { useAuth } from "../../contexts/AuthContext";
+import { useFloatingToast } from "../../hooks/useFloatingToast";
+import { getApiErrorMessage } from "../../utils/apiErrors";
+import StatusToggle, { parseIsActive } from "../../components/admin/StatusToggle";
 
 function getInitials(name) {
   const parts = String(name || "")
@@ -16,6 +19,7 @@ function getInitials(name) {
 
 const AllStudents = () => {
   const { user: authUser } = useAuth();
+  const { showSuccess, showError, Toast } = useFloatingToast();
   const currentRole = String(
     authUser?.role?.name ??
       authUser?.role ??
@@ -33,6 +37,7 @@ const AllStudents = () => {
   const [statusFilter, setStatusFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [togglingId, setTogglingId] = useState(null);
   const pageSize = 10;
 
   const load = async () => {
@@ -47,6 +52,7 @@ const AllStudents = () => {
       setCourses(Array.isArray(coursesData) ? coursesData : []);
     } catch (e) {
       setError(e?.response?.data?.message || e?.message || "Failed to load students");
+      showError(getApiErrorMessage(e, "Failed to load students"));
       setStudents([]);
       setCourses([]);
     } finally {
@@ -68,7 +74,7 @@ const AllStudents = () => {
       const programName = course?.title || "";
 
       const matchesProgram = filter ? String(programId) === String(filter) : true;
-      const isActive = typeof student.is_active === "boolean" ? student.is_active : String(student.status || "").toLowerCase() === "active";
+      const isActive = parseIsActive(student.is_active ?? student.status);
       const matchesStatus =
         statusFilter === "all" ||
         (statusFilter === "Active" && isActive) ||
@@ -95,8 +101,28 @@ const AllStudents = () => {
     setCurrentPage(1);
   }, [filter, statusFilter, searchTerm, students.length]);
 
+  const toggleStatus = async (student) => {
+    if (togglingId === student.id) return;
+    setTogglingId(student.id);
+    const wasActive = parseIsActive(student.is_active ?? student.status);
+    const fullName = `${student.fname || ""} ${student.lname || ""}`.trim();
+    try {
+      const response = await adminApi.students.toggleActive(student.id);
+      const nextActive = parseIsActive(response?.data?.is_active ?? !wasActive);
+      setStudents((prev) =>
+        prev.map((row) => (row.id === student.id ? { ...row, is_active: nextActive } : row))
+      );
+      showSuccess(`${fullName || "Student"} ${nextActive ? "activated" : "deactivated"} successfully!`);
+    } catch (e) {
+      showError(getApiErrorMessage(e, "Failed to update student status"));
+    } finally {
+      setTogglingId(null);
+    }
+  };
+
   return (
     <div className="max-w-8xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
+      <Toast />
       {/* Header */}
       <div className="bg-[#002147] p-6 text-white">
         <h2 className="text-2xl font-bold">Student Management</h2>
@@ -213,7 +239,7 @@ const AllStudents = () => {
                   const fullName = `${student.fname || ""} ${student.lname || ""}`.trim();
                   const programId = student.course_id ?? student.course?.id;
                   const course = coursesById.get(String(programId));
-                  const isActive = typeof student.is_active === "boolean" ? student.is_active : String(student.status || "").toLowerCase() === "active";
+                  const isActive = parseIsActive(student.is_active ?? student.status);
                   const avatar = toStorageUrl(student.profile) || student.profile || "";
                   return (
                   <tr key={student.id} className="hover:bg-gray-50 transition-colors">
@@ -252,15 +278,11 @@ const AllStudents = () => {
                       {course?.title || "—"}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span
-                        className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                          isActive
-                            ? "bg-green-100 text-green-800"
-                            : "bg-gray-100 text-gray-800"
-                        }`}
-                      >
-                        {isActive ? "Active" : "Inactive"}
-                      </span>
+                      <StatusToggle
+                        checked={isActive}
+                        loading={togglingId === student.id}
+                        onChange={() => toggleStatus(student)}
+                      />
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex gap-2">
@@ -278,9 +300,11 @@ const AllStudents = () => {
                               if (!window.confirm("Delete this student?")) return;
                               try {
                                 await adminApi.students.remove(student.id);
+                                showSuccess("Student deleted successfully!");
                                 await load();
                               } catch (e) {
                                 setError(e?.response?.data?.message || e?.message || "Failed to delete student");
+                                showError(getApiErrorMessage(e, "Failed to delete student"));
                               }
                             }}
                             className="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 px-4 py-2 rounded-md transition-colors"

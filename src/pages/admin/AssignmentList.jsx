@@ -1,8 +1,11 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { adminApi } from "../../api/admin";
+import { useFloatingToast } from "../../hooks/useFloatingToast";
+import { getApiErrorMessage } from "../../utils/apiErrors";
 
 const AssignmentsList = () => {
+  const { showSuccess, showError, Toast } = useFloatingToast();
   const [assignments, setAssignments] = useState([]);
   const [courses, setCourses] = useState([]);
   const [modules, setModules] = useState([]);
@@ -23,9 +26,9 @@ const AssignmentsList = () => {
         setCourses(Array.isArray(cData) ? cData : []);
         setModules(Array.isArray(mData) ? mData : []);
       } catch (e) {
-        console.error("Failed to load assignments:", e);
+        showError(getApiErrorMessage(e, "Failed to load assignments"));
         setAssignments([]);
-        setError(e?.response?.data?.message || e?.message || "Failed to load assignments");
+        setError(getApiErrorMessage(e, "Failed to load assignments"));
       } finally {
         setLoading(false);
       }
@@ -42,13 +45,16 @@ const AssignmentsList = () => {
       await adminApi.assignments.remove(id);
       const data = await adminApi.assignments.list();
       setAssignments(Array.isArray(data) ? data : []);
+      showSuccess("Assignment deleted successfully!");
     } catch (e) {
-      setError(e?.response?.data?.message || e?.message || "Failed to delete assignment");
+      showError(getApiErrorMessage(e, "Failed to delete assignment"));
+      setError(getApiErrorMessage(e, "Failed to delete assignment"));
     }
   };
 
   return (
     <div className="max-w-8xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
+      <Toast />
       {/* Header */}
       <div className="bg-[#002147] p-6 text-white flex justify-between items-center">
         <div>

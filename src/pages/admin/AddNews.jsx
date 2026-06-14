@@ -1,440 +1,157 @@
-import React, { useState, useEffect } from "react";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
+import adminApi from "../../api/admin";
+import { toStorageUrl } from "../../utils/api";
+import { useFloatingToast } from "../../hooks/useFloatingToast";
+import { getApiErrorMessage } from "../../utils/apiErrors";
 
-const NewsForm = () => {
-  const location = useLocation();
+export default function NewsForm() {
   const navigate = useNavigate();
   const { id } = useParams();
-
-  const [news, setNews] = useState([
-    {
-      id: 1,
-      title: "University Announces New Research Center",
-      description: "Groundbreaking research facility to open next semester",
-      content: "<p>Welcome to our new research center focused on AI and machine learning!</p>",
-      author: "Admin",
-      category: "Research",
-      date: "2025-01-10",
-      image: "https://images.unsplash.com/photo-1584697964358-3e14ca57658b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&q=80",
-      status: "published"
-    },
-    {
-      id: 2,
-      title: "Annual Science Fair Results",
-      description: "Students showcase innovative projects at science fair",
-      content: "<p>Congratulations to all participants in our annual science fair!</p>",
-      author: "Editor",
-      category: "Events",
-      date: "2025-02-05",
-      image: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&q=80",
-      status: "published"
-    }
-  ]);
-
-  const editingNew = location.state || news.find((n) => n.id === parseInt(id));
+  const isEdit = Boolean(id);
+  const { showSuccess, showError, Toast } = useFloatingToast();
 
   const [formData, setFormData] = useState({
     title: "",
-    description: "",
-    content: "",
-    author: "",
-    category: "",
-    date: "",
+    body: "",
+    is_active: true,
     image: null,
-    status: "draft"
   });
-
   const [preview, setPreview] = useState("");
-  const [errors, setErrors] = useState({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (editingNew) {
-      setFormData({
-        title: editingNew.title || "",
-        description: editingNew.description || "",
-        content: editingNew.content || "",
-        author: editingNew.author || "",
-        category: editingNew.category || "",
-        date: editingNew.date || "",
-        image: null,
-        status: editingNew.status || "draft"
-      });
-      if (editingNew.image) {
-        setPreview(editingNew.image);
+    if (!isEdit) return;
+    let mounted = true;
+    (async () => {
+      try {
+        const data = await adminApi.news.get(id);
+        if (!mounted) return;
+        setFormData({
+          title: data?.title || "",
+          body: data?.body || "",
+          is_active: Boolean(data?.is_active),
+          image: null,
+        });
+        setPreview(toStorageUrl(data?.image) || data?.image || "");
+      } catch (e) {
+        if (!mounted) return;
+        setError(getApiErrorMessage(e, "Failed to load news"));
+        showError(getApiErrorMessage(e, "Failed to load news"));
       }
-    }
-  }, [editingNew]);
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, [id, isEdit]);
 
-  const handleChange = (e) => {
-    const { name, value, files } = e.target;
-    
-    if (name === "image" && files && files[0]) {
-      const file = files[0];
-      setFormData((prev) => ({
-        ...prev,
-        [name]: file
-      }));
-      
-      // Create preview
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreview(reader.result);
-      };
-      reader.readAsDataURL(file);
-    } else {
-      setFormData((prev) => ({
-        ...prev,
-        [name]: value
-      }));
-    }
-    
-    // Clear error when user types
-    if (errors[name]) {
-      setErrors({
-        ...errors,
-        [name]: "",
-      });
-    }
-  };
-
-  const handleContentChange = (value) => {
-    setFormData((prev) => ({ ...prev, content: value }));
-    
-    if (errors.content) {
-      setErrors({
-        ...errors,
-        content: "",
-      });
-    }
-  };
-
-  const validateForm = () => {
-    const newErrors = {};
-    
-    if (!formData.title.trim()) {
-      newErrors.title = "News title is required";
-    }
-    
-    if (!formData.description.trim()) {
-      newErrors.description = "Description is required";
-    }
-    
-    if (!formData.content.trim() || formData.content === "<p><br></p>") {
-      newErrors.content = "Content is required";
-    }
-    
-    if (!formData.author.trim()) {
-      newErrors.author = "Author is required";
-    }
-    
-    if (!formData.category.trim()) {
-      newErrors.category = "Category is required";
-    }
-    
-    if (!formData.date) {
-      newErrors.date = "Date is required";
-    }
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (!validateForm()) return;
-    
-    setIsSubmitting(true);
-    
-    // Simulate API call
-    setTimeout(() => {
-      setIsSubmitting(false);
-      alert(editingNew ? "News updated successfully!" : "News created successfully!");
-      navigate("/piu/admin/news");
-    }, 1500);
-  };
+    setSaving(true);
+    setError("");
+    try {
+      const payload = new FormData();
+      payload.append("title", formData.title);
+      payload.append("body", formData.body);
+      payload.append("is_active", formData.is_active ? "1" : "0");
+      if (formData.image instanceof File) payload.append("image", formData.image);
 
-  const handleCancel = () => {
-    navigate("/piu/admin/news");
+      if (isEdit) {
+        await adminApi.news.update(id, payload);
+        showSuccess("News updated successfully!");
+      } else {
+        await adminApi.news.create(payload);
+        showSuccess("News created successfully!");
+      }
+      setTimeout(() => {
+        navigate("/piu/admin/news");
+      }, 1200);
+    } catch (e) {
+      setError(getApiErrorMessage(e, "Failed to save news"));
+      showError(getApiErrorMessage(e, "Failed to save news"));
+    } finally {
+      setSaving(false);
+    }
   };
-
-  const modules = {
-    toolbar: [
-      [{ 'header': [1, 2, 3, false] }],
-      ['bold', 'italic', 'underline'],
-      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-      ['link', 'image'],
-      ['clean']
-    ],
-  };
-
-  const categories = [
-    "News",
-    "Events",
-    "Research",
-    "Admissions",
-    "Academics",
-    "Campus Life",
-    "Sports",
-    "Alumni"
-  ];
 
   return (
-    <div className="max-w-7xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
-      {/* Header */}
+    <div className="max-w-5xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
+      <Toast />
       <div className="bg-[#002147] p-6 text-white">
-        <h2 className="text-2xl font-bold">
-          {editingNew ? "Edit News Article" : "Create New News Article"}
-        </h2>
+        <h2 className="text-2xl font-bold">{isEdit ? "Edit News Article" : "Create News Article"}</h2>
         <p className="text-blue-100 mt-1">
-          {editingNew 
-            ? "Update the news article details below" 
-            : "Write a new news article for your institution"
-          }
+          {isEdit ? "Update the news article details below" : "Write a new news article for your institution"}
         </p>
       </div>
-
       <div className="p-6">
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Title */}
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                News Title <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                name="title"
-                placeholder="Enter news title"
-                value={formData.title}
-                onChange={handleChange}
-                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:outline-none ${
-                  errors.title 
-                    ? "border-red-500 focus:ring-red-200" 
-                    : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                }`}
-                required
-              />
-              {errors.title && (
-                <p className="mt-1 text-sm text-red-600 flex items-center">
-                  <i className="fas fa-exclamation-circle mr-1"></i>
-                  {errors.title}
-                </p>
-              )}
-            </div>
-
-            {/* Description */}
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Description <span className="text-red-500">*</span>
-              </label>
-              <textarea
-                name="description"
-                placeholder="Enter brief description"
-                value={formData.description}
-                onChange={handleChange}
-                rows={3}
-                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:outline-none ${
-                  errors.description 
-                    ? "border-red-500 focus:ring-red-200" 
-                    : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                }`}
-                required
-              />
-              {errors.description && (
-                <p className="mt-1 text-sm text-red-600 flex items-center">
-                  <i className="fas fa-exclamation-circle mr-1"></i>
-                  {errors.description}
-                </p>
-              )}
-            </div>
-
-            {/* Author */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Author <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                name="author"
-                placeholder="Enter author name"
-                value={formData.author}
-                onChange={handleChange}
-                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:outline-none ${
-                  errors.author 
-                    ? "border-red-500 focus:ring-red-200" 
-                    : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                }`}
-                required
-              />
-              {errors.author && (
-                <p className="mt-1 text-sm text-red-600 flex items-center">
-                  <i className="fas fa-exclamation-circle mr-1"></i>
-                  {errors.author}
-                </p>
-              )}
-            </div>
-
-            {/* Category */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Category <span className="text-red-500">*</span>
-              </label>
-              <select
-                name="category"
-                value={formData.category}
-                onChange={handleChange}
-                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:outline-none ${
-                  errors.category 
-                    ? "border-red-500 focus:ring-red-200" 
-                    : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                }`}
-                required
-              >
-                <option value="">Select Category</option>
-                {categories.map((category) => (
-                  <option key={category} value={category}>{category}</option>
-                ))}
-              </select>
-              {errors.category && (
-                <p className="mt-1 text-sm text-red-600 flex items-center">
-                  <i className="fas fa-exclamation-circle mr-1"></i>
-                  {errors.category}
-                </p>
-              )}
-            </div>
-
-            {/* Date */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Date <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="date"
-                name="date"
-                value={formData.date}
-                onChange={handleChange}
-                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:outline-none ${
-                  errors.date 
-                    ? "border-red-500 focus:ring-red-200" 
-                    : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                }`}
-                required
-              />
-              {errors.date && (
-                <p className="mt-1 text-sm text-red-600 flex items-center">
-                  <i className="fas fa-exclamation-circle mr-1"></i>
-                  {errors.date}
-                </p>
-              )}
-            </div>
-
-            {/* Status */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Status
-              </label>
-              <select
-                name="status"
-                value={formData.status}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-              >
-                <option value="draft">Draft</option>
-                <option value="published">Published</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Content */}
+        {error && (
+          <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div>
+        )}
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Content <span className="text-red-500">*</span>
-            </label>
-            <ReactQuill
-              theme="snow"
-              value={formData.content}
-              onChange={handleContentChange}
-              modules={modules}
-              className="h-64 mb-20"
-              placeholder="Write your news content here..."
+            <label className="block text-sm font-medium mb-1">Title</label>
+            <input
+              value={formData.title}
+              onChange={(e) => setFormData((p) => ({ ...p, title: e.target.value }))}
+              className="w-full border border-gray-300 rounded-lg px-4 py-2"
+              required
             />
-            {errors.content && (
-              <p className="mt-1 text-sm text-red-600 flex items-center">
-                <i className="fas fa-exclamation-circle mr-1"></i>
-                {errors.content}
-              </p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Content</label>
+            <ReactQuill
+              value={formData.body}
+              onChange={(v) => setFormData((p) => ({ ...p, body: v }))}
+              className="h-48 mb-12"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Featured Image</label>
+            <input
+              type="file"
+              accept="image/png,image/jpeg,image/jpg,image/gif"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                setFormData((p) => ({ ...p, image: file }));
+                setPreview(URL.createObjectURL(file));
+              }}
+            />
+            {preview && (
+              <img src={preview} alt="preview" className="mt-3 h-28 w-44 object-cover rounded border" />
             )}
           </div>
-
-          {/* Image Upload */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Featured Image
+            <label className="inline-flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={formData.is_active}
+                onChange={(e) => setFormData((p) => ({ ...p, is_active: e.target.checked }))}
+              />
+              Published
             </label>
-            <div className="flex items-center space-x-6">
-              {preview && (
-                <div className="flex-shrink-0">
-                  <img
-                    src={preview}
-                    alt="News preview"
-                    className="h-32 w-48 object-cover rounded-lg border-2 border-gray-300 shadow-sm"
-                  />
-                </div>
-              )}
-              <div className="flex-1">
-                <input
-                  type="file"
-                  name="image"
-                  accept="image/png, image/jpeg, image/jpg"
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  PNG, JPG up to 5MB. Recommended: 16:9 aspect ratio
-                </p>
-              </div>
-            </div>
           </div>
-
-          {/* Action Buttons */}
-          <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4 border-t border-gray-200">
+          <div className="flex justify-end gap-3 pt-4 border-t">
             <button
               type="button"
-              onClick={handleCancel}
-              className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-200 transition-colors"
+              onClick={() => navigate("/piu/admin/news")}
+              className="px-4 py-2 border border-gray-300 rounded-lg"
             >
               Cancel
             </button>
             <button
               type="submit"
-              disabled={isSubmitting}
-              className={`px-4 py-2 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors ${
-                isSubmitting
-                  ? "bg-blue-400 cursor-not-allowed"
-                  : "bg-blue-600 hover:bg-blue-700 focus:ring-blue-500"
-              }`}
+              disabled={saving}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg disabled:opacity-60"
             >
-              {isSubmitting ? (
-                <>
-                  <i className="fas fa-spinner fa-spin mr-2"></i>
-                  {editingNew ? "Updating..." : "Creating..."}
-                </>
-              ) : (
-                <>
-                  <i className={`fas ${editingNew ? "fa-save" : "fa-plus-circle"} mr-2`}></i>
-                  {editingNew ? "Update News" : "Create News"}
-                </>
-              )}
+              {saving ? "Saving..." : isEdit ? "Update News" : "Create News"}
             </button>
           </div>
         </form>
       </div>
     </div>
   );
-};
-
-export default NewsForm;
+}

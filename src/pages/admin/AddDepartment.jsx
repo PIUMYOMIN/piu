@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import adminApi from "../../api/admin";
+import { useFloatingToast } from "../../hooks/useFloatingToast";
+import { getApiErrorMessage } from "../../utils/apiErrors";
 
 export default function AddDepartment() {
   const navigate = useNavigate();
   const location = useLocation();
   const { id } = useParams();
+  const { showSuccess, showError, Toast } = useFloatingToast();
   const editingDepartment = location.state || null;
   const isEdit = Boolean(editingDepartment || id);
 
@@ -37,6 +40,7 @@ export default function AddDepartment() {
       } catch (e) {
         if (!mounted) return;
         setError(e?.response?.data?.message || e?.message || "Failed to load department");
+        showError(getApiErrorMessage(e, "Failed to load department"));
       }
     })();
     return () => {
@@ -51,12 +55,17 @@ export default function AddDepartment() {
     try {
       if (isEdit) {
         await adminApi.departments.update(editingDepartment?.id || id, formData);
+        showSuccess("Department updated successfully!");
       } else {
         await adminApi.departments.create(formData);
+        showSuccess("Department added successfully!");
       }
-      navigate("/piu/admin/departments");
+      setTimeout(() => {
+        navigate("/piu/admin/departments");
+      }, 1200);
     } catch (e) {
       setError(e?.response?.data?.message || e?.message || "Failed to save department");
+      showError(getApiErrorMessage(e, "Failed to save department"));
     } finally {
       setSubmitting(false);
     }
@@ -64,6 +73,7 @@ export default function AddDepartment() {
 
   return (
     <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
+      <Toast />
       <div className="bg-[#002147] p-6 text-white">
         <h2 className="text-2xl font-bold">{isEdit ? "Edit Department" : "Add New Department"}</h2>
       </div>

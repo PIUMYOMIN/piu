@@ -1,7 +1,7 @@
 // src/components/PublicRoute.jsx
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
-import { getDashboardPathForUser } from "../utils/authRouting";
+import { getAuthenticatedHomePath } from "../utils/authRouting";
 
 const PublicRoute = ({ children }) => {
   const { isAuthenticated, user, loading } = useAuth();
@@ -16,7 +16,7 @@ const PublicRoute = ({ children }) => {
 
   // If user is authenticated, redirect to appropriate dashboard
   if (isAuthenticated) {
-    return <Navigate to={getDashboardPathForUser(user)} replace />;
+    return <Navigate to={getAuthenticatedHomePath(user)} replace />;
   }
 
   return children;

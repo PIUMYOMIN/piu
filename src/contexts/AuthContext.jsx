@@ -1,5 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { v2 } from '../utils/api';
+import { ACCOUNT_TYPES, resolveAccountType } from '../utils/authRouting';
 
 const AuthContext = createContext();
 
@@ -11,18 +12,28 @@ export const useAuth = () => {
   return context;
 };
 
+const persistSession = ({ token, user, accountType }) => {
+  if (token) localStorage.setItem('token', token);
+  else localStorage.removeItem('token');
+
+  localStorage.setItem('user', JSON.stringify(user || {}));
+  localStorage.setItem('account_type', accountType);
+};
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [accountType, setAccountType] = useState(null);
   const [loading, setLoading] = useState(true);
   const [initialized, setInitialized] = useState(false);
 
-  // Load user on initial mount
   useEffect(() => {
     const loadUser = async () => {
       const token = localStorage.getItem('token');
       const hasUsableToken = token && token !== 'undefined' && token !== 'null';
       if (!hasUsableToken) {
         localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        localStorage.removeItem('account_type');
         setLoading(false);
         setInitialized(true);
         return;
@@ -30,10 +41,18 @@ export const AuthProvider = ({ children }) => {
 
       try {
         const data = await v2.getProfile();
-        setUser(data.user);
+        const nextUser = data.user;
+        const nextAccountType = resolveAccountType(nextUser, data.account_type || ACCOUNT_TYPES.STAFF);
+        setUser(nextUser);
+        setAccountType(nextAccountType);
+        localStorage.setItem('user', JSON.stringify(nextUser || {}));
+        localStorage.setItem('account_type', nextAccountType);
       } catch (error) {
         localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        localStorage.removeItem('account_type');
         setUser(null);
+        setAccountType(null);
       } finally {
         setLoading(false);
         setInitialized(true);
@@ -43,65 +62,60 @@ export const AuthProvider = ({ children }) => {
     loadUser();
   }, []);
 
-  // Register user
   const register = async (userData) => {
     setLoading(true);
     try {
       const responseData = await v2.register(userData);
-      const { token, user } = responseData;
-      if (token) localStorage.setItem('token', token);
-      else localStorage.removeItem('token');
-      localStorage.setItem('user', JSON.stringify(user || {}));
-      setUser(user);
+      const { token, user: nextUser } = responseData;
+      const nextAccountType = resolveAccountType(nextUser, responseData.account_type || ACCOUNT_TYPES.STAFF);
+      persistSession({ token, user: nextUser, accountType: nextAccountType });
+      setUser(nextUser);
+      setAccountType(nextAccountType);
       return responseData;
     } finally {
       setLoading(false);
     }
   };
 
-  // Login user
   const login = async (email, password) => {
     setLoading(true);
     try {
       const responseData = await v2.login({ email, password });
-      const { token, user } = responseData;
-      if (token) localStorage.setItem('token', token);
-      else localStorage.removeItem('token');
-      localStorage.setItem('user', JSON.stringify(user || {}));
-      setUser(user);
+      const { token, user: nextUser } = responseData;
+      const nextAccountType = resolveAccountType(nextUser, responseData.account_type || ACCOUNT_TYPES.STAFF);
+      persistSession({ token, user: nextUser, accountType: nextAccountType });
+      setUser(nextUser);
+      setAccountType(nextAccountType);
       return responseData;
     } finally {
       setLoading(false);
     }
   };
 
-  // Student portal login (student table auth flow)
-  const studentPortalLogin = async (identifier, password) => {
+  const studentPortalLogin = async (studentId, password) => {
     setLoading(true);
     try {
       const responseData = await v2.studentPortalLogin({
-        email_or_student_id: identifier,
-        // Keep both keys for backend compatibility.
-        email: identifier,
-        student_id: identifier,
+        student_id: studentId,
         password,
       });
-      const { token, user } = responseData;
-      if (token) localStorage.setItem('token', token);
-      else localStorage.removeItem('token');
-      localStorage.setItem('user', JSON.stringify(user || {}));
-      setUser(user);
+      const { token, user: nextUser } = responseData;
+      const nextAccountType = resolveAccountType(nextUser, responseData.account_type || ACCOUNT_TYPES.STUDENT);
+      persistSession({ token, user: nextUser, accountType: nextAccountType });
+      setUser(nextUser);
+      setAccountType(nextAccountType);
       return responseData;
     } finally {
       setLoading(false);
     }
   };
 
-  // Logout user
   const logoutLocal = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    localStorage.removeItem('account_type');
     setUser(null);
+    setAccountType(null);
   };
 
   const logout = async () => {
@@ -118,6 +132,7 @@ export const AuthProvider = ({ children }) => {
 
   const value = {
     user,
+    accountType,
     loading,
     initialized,
     register,
@@ -126,6 +141,7 @@ export const AuthProvider = ({ children }) => {
     logout,
     logoutLocal,
     isAuthenticated: !!user,
+    isStudent: accountType === ACCOUNT_TYPES.STUDENT,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

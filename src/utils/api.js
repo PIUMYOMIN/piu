@@ -60,6 +60,7 @@ function createApiClient(baseURL) {
       if (error.response?.status === 401) {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
+        localStorage.removeItem('account_type');
         if (!window.location.pathname.startsWith('/login')) {
           window.location.assign('/login');
         }

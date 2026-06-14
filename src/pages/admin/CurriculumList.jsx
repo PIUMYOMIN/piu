@@ -1,9 +1,12 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { adminApi } from "../../api/admin";
+import { useFloatingToast } from "../../hooks/useFloatingToast";
+import { getApiErrorMessage } from "../../utils/apiErrors";
 
 const CurriculumList = () => {
   const navigate = useNavigate();
+  const { showSuccess, showError, Toast } = useFloatingToast();
 
   const [curriculums, setCurriculums] = useState([]);
   const [courses, setCourses] = useState([]);
@@ -32,7 +35,8 @@ const CurriculumList = () => {
       setYears(Array.isArray(yearsData) ? yearsData : []);
       setModules(Array.isArray(modulesData) ? modulesData : []);
     } catch (e) {
-      setError(e?.response?.data?.message || e?.message || "Failed to load curriculums");
+      showError(getApiErrorMessage(e, "Failed to load curriculums"));
+      setError(getApiErrorMessage(e, "Failed to load curriculums"));
       setCurriculums([]);
     } finally {
       setLoading(false);
@@ -52,8 +56,10 @@ const CurriculumList = () => {
     try {
       await adminApi.curriculums.remove(id);
       await load();
+      showSuccess("Curriculum deleted successfully!");
     } catch (e) {
-      setError(e?.response?.data?.message || e?.message || "Failed to delete curriculum");
+      showError(getApiErrorMessage(e, "Failed to delete curriculum"));
+      setError(getApiErrorMessage(e, "Failed to delete curriculum"));
     }
   };
 
@@ -97,6 +103,7 @@ const CurriculumList = () => {
 
   return (
     <div className="max-w-8xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
+      <Toast />
       {/* Header */}
       <div className="bg-[#002147] p-6 text-white">
         <h2 className="text-2xl font-bold">Curriculum Management</h2>

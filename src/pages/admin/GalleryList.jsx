@@ -2,9 +2,12 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { adminApi } from "../../api/admin";
 import { toStorageUrl } from "../../utils/api";
+import { useFloatingToast } from "../../hooks/useFloatingToast";
+import { getApiErrorMessage } from "../../utils/apiErrors";
 
 const GalleryList = () => {
   const navigate = useNavigate();
+  const { showSuccess, showError, Toast } = useFloatingToast();
   const parseIsActive = (value) => {
     if (typeof value === "boolean") return value;
     if (typeof value === "number") return value === 1;
@@ -27,6 +30,7 @@ const GalleryList = () => {
       setGallery(Array.isArray(data) ? data : []);
     } catch (e) {
       setError(e?.response?.data?.message || e?.message || "Failed to load gallery");
+      showError(getApiErrorMessage(e, "Failed to load gallery"));
       setGallery([]);
     } finally {
       setLoading(false);
@@ -46,9 +50,11 @@ const GalleryList = () => {
     setError("");
     try {
       await adminApi.gallery.remove(id);
+      showSuccess("Gallery image deleted successfully!");
       await load();
     } catch (e) {
       setError(e?.response?.data?.message || e?.message || "Failed to delete image");
+      showError(getApiErrorMessage(e, "Failed to delete image"));
     }
   };
 
@@ -56,9 +62,11 @@ const GalleryList = () => {
     setError("");
     try {
       await adminApi.gallery.toggleActive(id);
+      showSuccess("Gallery image status updated successfully!");
       await load();
     } catch (e) {
       setError(e?.response?.data?.message || e?.message || "Failed to update status");
+      showError(getApiErrorMessage(e, "Failed to update status"));
     }
   };
 
@@ -82,6 +90,7 @@ const GalleryList = () => {
 
   return (
     <div className="max-w-8xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
+      <Toast />
       {/* Header */}
       <div className="bg-[#002147] p-6 text-white">
         <h2 className="text-2xl font-bold">Gallery Management</h2>

@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaSearch, FaTag, FaUserCheck, FaPlusCircle, FaEdit, FaTrash, FaToggleOn, FaToggleOff, FaCalendarAlt, FaUserTie, FaDollarSign, FaGraduationCap, FaBook, FaUsers, FaSpinner, FaCheckCircle, FaTimesCircle, FaInfoCircle } from "react-icons/fa";
+import { FaSearch, FaTag, FaUserCheck, FaPlusCircle, FaEdit, FaTrash, FaToggleOn, FaToggleOff, FaCalendarAlt, FaUserTie, FaDollarSign, FaGraduationCap, FaBook, FaUsers, FaSpinner } from "react-icons/fa";
 import { adminApi } from "../../api/admin";
+import { useFloatingToast } from "../../hooks/useFloatingToast";
+import { getApiErrorMessage } from "../../utils/apiErrors";
 
 const CourseList = () => {
   const navigate = useNavigate();
+  const { showSuccess, showError, Toast } = useFloatingToast();
 
   const [courses, setCourses] = useState([]);
   const [categories, setCategories] = useState([]); // Store fetched categories
@@ -15,7 +18,6 @@ const CourseList = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [toast, setToast] = useState(null);
 
   // Fetch courses and categories from API
   useEffect(() => {
@@ -27,20 +29,6 @@ const CourseList = () => {
     filterCourses();
   }, [courses, searchTerm, categoryFilter, statusFilter]);
 
-  // Auto-dismiss toast after 3 seconds
-  useEffect(() => {
-    if (toast) {
-      const timer = setTimeout(() => {
-        setToast(null);
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [toast]);
-
-  const showToast = (message, type = "success") => {
-    setToast({ message, type });
-  };
-
   const fetchCategories = async () => {
     try {
       setLoadingCategories(true);
@@ -48,7 +36,7 @@ const CourseList = () => {
       setCategories(data);
     } catch (error) {
       console.error("❌ Error fetching categories:", error);
-      showToast("Failed to load categories. Using default categories.", "error");
+      showError("Failed to load categories. Using default categories.");
       // Fallback to default categories
       setCategories([
         { id: 1, name: "Certificate" },
@@ -112,7 +100,7 @@ const CourseList = () => {
     } catch (error) {
       console.error("Error fetching course data:", error);
       setError("Failed to load courses. Please try again.");
-      showToast("Failed to load courses. Please try again.", "error");
+      showError("Failed to load courses. Please try again.");
     } finally {
       setLoading(false);
       setLoadingCategories(false);
@@ -130,7 +118,7 @@ const CourseList = () => {
     } catch (error) {
       console.error("❌ Error fetching courses:", error);
       setError("Failed to load courses. Please try again.");
-      showToast("Failed to load courses. Please try again.", "error");
+      showError("Failed to load courses. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -166,10 +154,10 @@ const CourseList = () => {
       // Remove from local state
       setCourses(courses.filter((course) => course.id !== id));
 
-      showToast(`Course "${courseTitle}" deleted successfully!`, "success");
+      showSuccess(`Course "${courseTitle}" deleted successfully!`);
     } catch (error) {
       console.error("❌ Error deleting course:", error);
-      showToast("Failed to delete course. Please try again.", "error");
+      showError(getApiErrorMessage(error, "Failed to delete course. Please try again."));
     }
   };
 
@@ -199,7 +187,7 @@ const CourseList = () => {
         ));
 
         const statusMessage = newValue ? "activated" : "deactivated";
-        showToast(`Course "${courseTitle}" ${statusMessage} successfully!`, "success");
+        showSuccess(`Course "${courseTitle}" ${statusMessage} successfully!`);
 
       } else if (field === 'applicantOpen') {
         // Toggle application status using application endpoint
@@ -217,11 +205,11 @@ const CourseList = () => {
         ));
 
         const statusMessage = newValue ? "opened for applications" : "closed for applications";
-        showToast(`Course "${courseTitle}" ${statusMessage}!`, "success");
+        showSuccess(`Course "${courseTitle}" ${statusMessage}!`);
       }
     } catch (error) {
       console.error(`❌ Error updating course ${field}:`, error);
-      showToast(`Failed to update course. Please try again.`, "error");
+      showError(getApiErrorMessage(error, "Failed to update course. Please try again."));
     }
   };
 
@@ -245,45 +233,10 @@ const CourseList = () => {
     return Math.round((parseInt(enrolled) / parseInt(seats)) * 100);
   };
 
-  // Toast component
-  const Toast = () => {
-    if (!toast) return null;
-
-    const bgColor = toast.type === "success" ? "bg-green-50 border-green-200" :
-      toast.type === "error" ? "bg-red-50 border-red-200" :
-        "bg-blue-50 border-blue-200";
-
-    const textColor = toast.type === "success" ? "text-green-800" :
-      toast.type === "error" ? "text-red-800" :
-        "text-blue-800";
-
-    const icon = toast.type === "success" ? <FaCheckCircle className="text-green-500" /> :
-      toast.type === "error" ? <FaTimesCircle className="text-red-500" /> :
-        <FaInfoCircle className="text-blue-500" />;
-
-    return (
-      <div className="fixed top-4 right-4 z-50 animate-slideIn">
-        <div className={`flex items-center p-4 mb-3 rounded-lg border ${bgColor} ${textColor} shadow-lg max-w-md`}>
-          <div className="text-lg mr-3">
-            {icon}
-          </div>
-          <div className="flex-1">
-            <p className="text-sm font-medium">{toast.message}</p>
-          </div>
-          <button
-            onClick={() => setToast(null)}
-            className="ml-3 text-gray-400 hover:text-gray-600"
-          >
-            <FaTimesCircle />
-          </button>
-        </div>
-      </div>
-    );
-  };
-
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
+        <Toast />
         <FaSpinner className="animate-spin text-3xl text-blue-500" />
         <span className="ml-3 text-gray-600">Loading courses...</span>
       </div>
@@ -292,7 +245,6 @@ const CourseList = () => {
 
   return (
     <div className="max-w-8xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
-      {/* Toast Notification */}
       <Toast />
 
       {/* Header */}
@@ -626,7 +578,7 @@ const CourseList = () => {
             <button
               onClick={() => {
                 fetchCategories();
-                showToast("Categories refreshed!", "success");
+                showSuccess("Categories refreshed!");
               }}
               className="inline-flex items-center text-purple-600 hover:text-purple-800"
             >
@@ -636,7 +588,7 @@ const CourseList = () => {
             <button
               onClick={() => {
                 fetchCourses();
-                showToast("Courses list refreshed!", "success");
+                showSuccess("Courses list refreshed!");
               }}
               className="inline-flex items-center text-blue-600 hover:text-blue-800"
             >

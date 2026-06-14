@@ -2,14 +2,26 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { adminApi } from "../../api/admin";
 import { toStorageUrl } from "../../utils/api";
+import { ADMIN_TABS, buildDashboardPath } from "../../utils/dashboardTabs";
+import { useFloatingToast } from "../../hooks/useFloatingToast";
+import { getApiErrorMessage } from "../../utils/apiErrors";
+
+function normalizeTeamActive(team) {
+  if (typeof team?.is_active === "boolean") return team.is_active;
+  if (team?.is_active === 1 || team?.is_active === "1") return true;
+  if (team?.is_active === 0 || team?.is_active === "0") return false;
+  return Boolean(team?.status);
+}
 
 const TeamList = () => {
   const navigate = useNavigate();
+  const { showSuccess, showError, Toast } = useFloatingToast();
 
   const [teams, setTeams] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [togglingId, setTogglingId] = useState(null);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [departmentFilter, setDepartmentFilter] = useState("all");
@@ -27,6 +39,7 @@ const TeamList = () => {
       setDepartments(Array.isArray(deptData) ? deptData : []);
     } catch (e) {
       setError(e?.response?.data?.message || e?.message || "Failed to load team members");
+      showError(getApiErrorMessage(e, "Failed to load team members"));
       setTeams([]);
       setDepartments([]);
     } finally {
@@ -38,28 +51,45 @@ const TeamList = () => {
     load();
   }, []);
 
-  // Toggle status
-  const handleStatusChange = async (id) => {
+  const handleStatusChange = async (team) => {
+    if (togglingId === team.id) return;
+
+    setTogglingId(team.id);
+    const wasActive = normalizeTeamActive(team);
+
     try {
-      await adminApi.teams.toggleActive(id);
-      await load();
+      const response = await adminApi.teams.toggleActive(team.id);
+      const updatedTeam = response?.data ?? response;
+      const nextActive =
+        typeof updatedTeam?.is_active === "boolean"
+          ? updatedTeam.is_active
+          : !wasActive;
+
+      setTeams((prev) =>
+        prev.map((item) =>
+          item.id === team.id ? { ...item, ...updatedTeam, is_active: nextActive } : item
+        )
+      );
+
+      showSuccess(`${team.name} ${nextActive ? "activated" : "deactivated"} successfully!`);
     } catch (e) {
-      setError(e?.response?.data?.message || e?.message || "Failed to update status");
+      showError(getApiErrorMessage(e, "Failed to update team status."));
+    } finally {
+      setTogglingId(null);
     }
   };
 
-  // Delete team
-  const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this team member?")) return;
+  const handleDelete = async (team) => {
+    if (!window.confirm(`Are you sure you want to delete "${team.name}"?`)) return;
     try {
-      await adminApi.teams.remove(id);
-      await load();
+      await adminApi.teams.remove(team.id);
+      setTeams((prev) => prev.filter((item) => item.id !== team.id));
+      showSuccess(`"${team.name}" deleted successfully!`);
     } catch (e) {
-      setError(e?.response?.data?.message || e?.message || "Failed to delete team member");
+      showError(getApiErrorMessage(e, "Failed to delete team member."));
     }
   };
 
-  // Filter teams based on search and filters
   const filteredTeams = useMemo(() => {
     const q = searchTerm.trim().toLowerCase();
     return teams.filter((team) => {
@@ -71,7 +101,7 @@ const TeamList = () => {
       const depId = team.department_id ?? team.department?.id;
       const matchesDepartment = departmentFilter === "all" || String(depId) === String(departmentFilter);
 
-      const isActive = typeof team.is_active === "boolean" ? team.is_active : Boolean(team.status);
+      const isActive = normalizeTeamActive(team);
       const matchesStatus =
         statusFilter === "all" || (statusFilter === "active" && isActive) || (statusFilter === "inactive" && !isActive);
 
@@ -87,6 +117,7 @@ const TeamList = () => {
 
   return (
     <div className="max-w-8xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
+      <Toast />
       {/* Header */}
       <div className="bg-[#002147] p-6 text-white">
         <h2 className="text-2xl font-bold">Team Management</h2>
@@ -159,7 +190,7 @@ const TeamList = () => {
           </div>
           
           <Link
-            to="/piu/admin/add-team"
+            to={buildDashboardPath("/piu/admin/add-team", ADMIN_TABS.ADD_TEAM)}
             className="flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors whitespace-nowrap w-full lg:w-auto"
           >
             <i className="fas fa-user-plus mr-2"></i>
@@ -203,10 +234,10 @@ const TeamList = () => {
 
               {!loading &&
                 filteredTeams.map((team) => {
-                  const isActive = typeof team.is_active === "boolean" ? team.is_active : Boolean(team.status);
+                  const isActive = normalizeTeamActive(team);
+                  const isToggling = togglingId === team.id;
                   return (
                 <tr key={team.id} className="hover:bg-gray-50 transition-colors">
-                  {/* Member Info */}
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className="flex-shrink-0 h-10 w-10">
@@ -230,7 +261,6 @@ const TeamList = () => {
                     </div>
                   </td>
                   
-                  {/* Contact Info */}
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-900">{team.phone}</div>
                     <div className="text-sm text-gray-500 truncate max-w-xs">
@@ -238,40 +268,45 @@ const TeamList = () => {
                     </div>
                   </td>
                   
-                  {/* Department */}
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                     {team.department?.name || `#${team.department_id ?? "—"}`}
                   </td>
                   
-                  {/* Position */}
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                     {team.position?.name || `#${team.position_id ?? "—"}`}
                   </td>
                   
-                  {/* Status */}
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <label className="flex items-center cursor-pointer">
+                    <label className={`flex items-center ${isToggling ? "opacity-60 cursor-wait" : "cursor-pointer"}`}>
                       <div className="relative">
                         <input
                           type="checkbox"
                           className="sr-only"
                           checked={isActive}
-                          onChange={() => handleStatusChange(team.id)}
+                          disabled={isToggling}
+                          onChange={() => handleStatusChange(team)}
                         />
-                        <div className={`block w-14 h-7 rounded-full ${isActive ? 'bg-blue-600' : 'bg-gray-300'}`}></div>
-                        <div className={`absolute left-1 top-1 bg-white w-5 h-5 rounded-full transition-transform ${isActive ? 'transform translate-x-7' : ''}`}></div>
+                        <div className={`block w-14 h-7 rounded-full transition-colors ${isActive ? "bg-blue-600" : "bg-gray-300"}`}></div>
+                        <div
+                          className={`absolute left-1 top-1 bg-white w-5 h-5 rounded-full transition-transform ${
+                            isActive ? "transform translate-x-7" : ""
+                          }`}
+                        ></div>
                       </div>
                       <span className="ml-3 text-sm font-medium text-gray-700">
-                        {isActive ? "Active" : "Inactive"}
+                        {isToggling ? "Updating..." : isActive ? "Active" : "Inactive"}
                       </span>
                     </label>
                   </td>
                   
-                  {/* Actions */}
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex space-x-2">
                       <button
-                        onClick={() => navigate(`/piu/admin/add-team/edit/${team.id}`)}
+                        onClick={() =>
+                          navigate(
+                            buildDashboardPath(`/piu/admin/add-team/edit/${team.id}`, ADMIN_TABS.ADD_TEAM)
+                          )
+                        }
                         className="text-blue-600 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 px-3 py-1 rounded-md transition-colors"
                         title="Edit team member"
                       >
@@ -279,7 +314,7 @@ const TeamList = () => {
                         Edit
                       </button>
                       <button
-                        onClick={() => handleDelete(team.id)}
+                        onClick={() => handleDelete(team)}
                         className="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 px-3 py-1 rounded-md transition-colors"
                         title="Delete team member"
                       >
@@ -294,7 +329,6 @@ const TeamList = () => {
             </tbody>
           </table>
           
-          {/* Empty State */}
           {!loading && filteredTeams.length === 0 && (
             <div className="px-6 py-12 text-center">
               <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4">
@@ -311,7 +345,6 @@ const TeamList = () => {
           )}
         </div>
 
-        {/* Summary */}
         <div className="mt-6 text-sm text-gray-600">
           Showing {filteredTeams.length} of {teams.length} team members
         </div>

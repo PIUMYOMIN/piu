@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
 import { FaTimes, FaSpinner } from "react-icons/fa";
+import { useFloatingToast } from "../../hooks/useFloatingToast";
 
 function EditRoleModal({ role, permissions, onClose, onUpdate }) {
+  const { showError, Toast } = useFloatingToast();
   const [roleName, setRoleName] = useState(role.name || "");
   const [selectedPermissions, setSelectedPermissions] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -18,7 +20,7 @@ function EditRoleModal({ role, permissions, onClose, onUpdate }) {
     e.preventDefault();
     
     if (!roleName.trim()) {
-      alert("Role name is required");
+      showError("Role name is required");
       return;
     }
 
@@ -46,6 +48,7 @@ function EditRoleModal({ role, permissions, onClose, onUpdate }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+      <Toast />
       <div className="bg-white rounded-lg w-full max-w-lg p-6">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-semibold">Edit Role: {role.name}</h3>

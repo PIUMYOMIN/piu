@@ -2,6 +2,8 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import adminApi from "../../api/admin";
 import { toStorageUrl } from "../../utils/api";
+import { useFloatingToast } from "../../hooks/useFloatingToast";
+import { getApiErrorMessage } from "../../utils/apiErrors";
 
 function Row({ label, value }) {
   return (
@@ -13,6 +15,7 @@ function Row({ label, value }) {
 }
 
 export default function AdmissionDetails() {
+  const { showError, Toast } = useFloatingToast();
   const location = useLocation();
   const navigate = useNavigate();
   const params = useParams();
@@ -39,7 +42,8 @@ export default function AdmissionDetails() {
         setAdmission(admissionData || applicantFromState || null);
       } catch (e) {
         if (!mounted) return;
-        setError(e?.response?.data?.message || e?.message || "Failed to load admission details");
+        showError(getApiErrorMessage(e, "Failed to load admission details"));
+        setError(getApiErrorMessage(e, "Failed to load admission details"));
       } finally {
         if (mounted) setLoading(false);
       }
@@ -57,12 +61,19 @@ export default function AdmissionDetails() {
   }, [courses]);
 
   if (loading) {
-    return <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-md p-6 text-gray-600">Loading applicant details...</div>;
+    return (
+      <>
+        <Toast />
+        <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-md p-6 text-gray-600">Loading applicant details...</div>
+      </>
+    );
   }
 
   if (!admission) {
     return (
-      <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
+      <>
+        <Toast />
+        <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
         <div className="bg-[#002147] p-6 text-white flex justify-between">
           <h2 className="text-2xl font-bold">Admission Details</h2>
           <button onClick={() => navigate("/piu/admin/admission")} className="text-sm hover:text-blue-200">
@@ -71,6 +82,7 @@ export default function AdmissionDetails() {
         </div>
         <div className="p-6 text-gray-600">No admission selected.</div>
       </div>
+      </>
     );
   }
 
@@ -83,6 +95,7 @@ export default function AdmissionDetails() {
 
   return (
     <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
+      <Toast />
       <div className="bg-[#002147] p-6 text-white flex justify-between items-start">
         <div>
           <h2 className="text-2xl font-bold">Admission Details</h2>

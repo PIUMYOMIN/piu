@@ -2,10 +2,13 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { adminApi } from "../../api/admin";
 import { toStorageUrl } from "../../utils/api";
+import { useFloatingToast } from "../../hooks/useFloatingToast";
+import { getApiErrorMessage } from "../../utils/apiErrors";
 
 const AddGallery = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { showSuccess, showError, Toast } = useFloatingToast();
   const parseIsActive = (value) => {
     if (typeof value === "boolean") return value;
     if (typeof value === "number") return value === 1;
@@ -47,6 +50,7 @@ const AddGallery = () => {
       } catch (e) {
         if (!mounted) return;
         setError(e?.response?.data?.message || e?.message || "Failed to load gallery item");
+        showError(getApiErrorMessage(e, "Failed to load gallery item"));
       } finally {
         if (mounted) setLoading(false);
       }
@@ -84,14 +88,19 @@ const AddGallery = () => {
       if (id) await adminApi.gallery.update(id, fd);
       else await adminApi.gallery.create(fd);
 
-      navigate("/piu/admin/gallery");
+      showSuccess(id ? "Gallery item updated successfully!" : "Gallery item added successfully!");
+      setTimeout(() => {
+        navigate("/piu/admin/gallery");
+      }, 1200);
     } catch (e2) {
       setError(e2?.response?.data?.message || e2?.message || "Failed to save gallery item");
+      showError(getApiErrorMessage(e2, "Failed to save gallery item"));
     }
   };
 
   return (
     <div className="max-w-7xl mx-auto p-4 md:p-6">
+      <Toast />
       {/* Header */}
       <div className="bg-[#002147] text-white px-5 py-3 rounded-t-lg shadow-md">
         <h2 className="text-xl font-semibold flex items-center">

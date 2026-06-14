@@ -1,10 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { adminApi } from "../../api/admin";
+import { ADMIN_TABS, buildDashboardPath } from "../../utils/dashboardTabs";
+import { useFloatingToast } from "../../hooks/useFloatingToast";
+import { getApiErrorMessage } from "../../utils/apiErrors";
 
 const AddStudent = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { showSuccess, showError, Toast } = useFloatingToast();
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -76,6 +80,7 @@ const AddStudent = () => {
       } catch (e) {
         if (!mounted) return;
         setError(e?.response?.data?.message || e?.message || "Failed to load student form");
+        showError(getApiErrorMessage(e, "Failed to load student form"));
       } finally {
         if (mounted) setLoading(false);
       }
@@ -126,14 +131,19 @@ const AddStudent = () => {
       } else {
         await adminApi.students.create(fd);
       }
-      navigate("/piu/admin/students");
+      showSuccess(id ? "Student updated successfully!" : "Student added successfully!");
+      setTimeout(() => {
+        navigate(buildDashboardPath('/piu/admin/students', ADMIN_TABS.STUDENTS));
+      }, 1200);
     } catch (e2) {
       setError(e2?.response?.data?.message || e2?.message || "Failed to save student");
+      showError(getApiErrorMessage(e2, "Failed to save student"));
     }
   };
 
   return (
     <div className="max-w-7xl mx-auto p-4 md:p-6">
+      <Toast />
       {/* Header */}
       <div className="bg-[#002147] text-white px-5 py-3 rounded-t-lg shadow-md">
         <h2 className="text-xl font-semibold flex items-center">
@@ -501,7 +511,7 @@ const AddStudent = () => {
           <div className="flex justify-end space-x-4 pt-4">
             <button
               type="button"
-              onClick={() => navigate("/piu/admin/students")}
+              onClick={() => navigate(buildDashboardPath('/piu/admin/students', ADMIN_TABS.STUDENTS))}
               className="px-5 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors"
             >
               Cancel

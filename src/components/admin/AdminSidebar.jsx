@@ -1,201 +1,72 @@
-import React, { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import React, { useEffect, useMemo, useState } from 'react';
+import { Link, useLocation, useSearchParams } from 'react-router-dom';
+import { FaChevronRight, FaTimes, FaSignOutAlt } from 'react-icons/fa';
+import { useAuth } from '../../contexts/AuthContext';
+import { adminMenu } from '../../config/adminMenu';
 import {
-  FaTachometerAlt, FaUserCog, FaKey, FaUsers, FaGraduationCap, FaBookOpen,
-  FaBlog, FaUniversity, FaNewspaper, FaListAlt, FaUsersCog, FaSlidersH,
-  FaHandshake, FaCalendarAlt, FaBuilding, FaBriefcase, FaChalkboardTeacher,
-  FaClock, FaImages, FaSuitcase, FaUserGraduate, FaEnvelope, FaTasks,
-  FaBook, FaBookReader, FaChevronRight, FaTimes, FaSignOutAlt
-} from "react-icons/fa";
-import { useAuth } from "../../contexts/AuthContext";
+  buildDashboardPath,
+  findMenuIndexByTab,
+  isDashboardTabActive,
+} from '../../utils/dashboardTabs';
 
 function resolveRole(user) {
   return String(
     user?.role?.name ??
       user?.role ??
-      (Array.isArray(user?.roles) ? user.roles[0]?.name || user.roles[0] : "")
+      (Array.isArray(user?.roles) ? user.roles[0]?.name || user.roles[0] : '')
   ).toLowerCase();
 }
-
-// ----------------- ADMIN MENU -----------------
-const adminMenu = [
-  { title: "Dashboard", icon: <FaTachometerAlt />, path: "/piu/admin", roles: ["admin", "teacher", "registrar"] },
-  { title: "Profile Setting", icon: <FaUserCog />, path: "/piu/admin/profile", roles: ["admin", "teacher", "registrar"] },
-  { title: "Change Password", icon: <FaKey />, path: "/piu/admin/change-password", roles: ["admin", "teacher", "registrar"] },
-
-  {
-    title: "Users", icon: <FaUsers />, roles: ["admin"],
-    sub: [
-      { name: "All Users", path: "/piu/admin/users" },
-      { name: "User Role", path: "/piu/admin/users-role" },
-      { name: "User Permission", path: "/piu/admin/user-permission" }
-    ]
-  },
-  {
-    title: "Admission", icon: <FaGraduationCap />, path: "/piu/admin/admission", roles: ["admin", "registrar"],
-  },
-  {
-    title: "All Courses", icon: <FaBookOpen />, roles: ["admin", "teacher", "registrar"],
-    sub: [
-      { name: "Course List", path: "/piu/admin/course-list" },
-      { name: "Add Course", path: "/piu/admin/new" },
-    ]
-  },
-  {
-    title: "Course Categories", icon: <FaListAlt />, roles: ["admin", "registrar"],
-    sub: [
-      { name: "Categories", path: "/piu/admin/course-categories" }
-    ]
-  },
-  {
-    title: "All Blogs", icon: <FaBlog />, roles: ["admin", "teacher", "registrar"],
-    sub: [
-      { name: "Blog List", path: "/piu/admin/blog-list" },
-      { name: "Add Blog", path: "/piu/admin/add-blog" },
-    ]
-  },
-  {
-    title: "All News", icon: <FaNewspaper />, roles: ["admin", "teacher", "registrar"],
-    sub: [
-      { name: "News List", path: "/piu/admin/news" },
-      { name: "Add News", path: "/piu/admin/add-news" },
-    ]
-  },
-  {
-    title: "Events", icon: <FaCalendarAlt />, roles: ["admin", "teacher", "registrar"],
-    sub: [
-      { name: "Event List", path: "/piu/admin/event-list" },
-      { name: "Add Event", path: "/piu/admin/add-event" },
-    ]
-  },
-  {
-    title: "All Campus", icon: <FaUniversity />, roles: ["admin", "registrar"],
-    sub: [
-      { name: "Campus List", path: "/piu/admin/campus-list" },
-      { name: "Add Campus", path: "/piu/admin/new-campus" },
-    ]
-  },
-  {
-    title: "Curriculums", icon: <FaListAlt />, roles: ["admin", "teacher", "registrar"],
-    sub: [
-      { name: "Curriculum List", path: "/piu/admin/curriculum-list" },
-      { name: "Add Curriculum", path: "/piu/admin/add-curriculum" },
-    ]
-  },
-  {
-    title: "Teams", icon: <FaUsersCog />, roles: ["admin"],
-    sub: [
-      { name: "Team List", path: "/piu/admin/team-list" },
-      { name: "Add Team", path: "/piu/admin/add-team" },
-    ]
-  },
-  {
-    title: "Slider", icon: <FaSlidersH />, path: "/piu/admin/slider", roles: ["admin"]
-  },
-  {
-    title: "MOU Partnership", icon: <FaHandshake />, roles: ["admin", "registrar"],
-    sub: [
-      { name: "All MOU", path: "/piu/admin/mou" },
-      { name: "Add MOU", path: "/piu/admin/mou/add" },
-    ]
-  },
-  {
-    title: "Departments", icon: <FaBuilding />, roles: ["admin", "registrar"],
-    sub: [
-      { name: "Department List", path: "/piu/admin/departments" },
-      { name: "Add Department", path: "/piu/admin/departments/new" },
-    ]
-  },
-  {
-    title: "Positions", icon: <FaBriefcase />, roles: ["admin", "registrar"],
-    sub: [
-      { name: "Position List", path: "/piu/admin/positions" },
-      { name: "Add Position", path: "/piu/admin/positions/new" },
-    ]
-  },
-  {
-    title: "Seminar", icon: <FaChalkboardTeacher />, roles: ["admin", "teacher", "registrar"],
-    sub: [
-      { name: "Seminar List", path: "/piu/admin/seminars" },
-      { name: "Add Seminar", path: "/piu/admin/seminars/add" },
-    ]
-  },
-  {
-    title: "Students", icon: <FaUserGraduate />, roles: ["admin", "teacher", "registrar"],
-    sub: [
-      { name: "All Students", path: "/piu/admin/students" },
-      { name: "Add Student", path: "/piu/admin/students/add" },
-      { name: "Add Student Grading", path: "/piu/admin/students/add-grading" },
-      { name: "Student Grading", path: "/piu/admin/students/grading" }
-    ]
-  },
-  {
-    title: "Gallery", icon: <FaImages />, roles: ["admin", "teacher", "registrar"],
-    sub: [
-      { name: "Gallery List", path: "/piu/admin/gallery" },
-      { name: "Add Gallery", path: "/piu/admin/gallery/add" },
-    ]
-  },
-  {
-    title: "Assignments", icon: <FaTasks />, roles: ["admin", "teacher"],
-    sub: [
-      { name: "Assignment List", path: "/piu/admin/assignments" },
-      { name: "Add Assignment", path: "/piu/admin/assignments/add" },
-    ]
-  },
-  {
-    title: "Course Modules", icon: <FaBook />, roles: ["admin", "teacher", "registrar"],
-    sub: [
-      { name: "Module List", path: "/piu/admin/modules" },
-      { name: "Add Module", path: "/piu/admin/modules/add" },
-    ]
-  },
-  {
-    title: "Exam Time Table", icon: <FaClock />, roles: ["admin", "registrar"],
-    sub: [
-      { name: "Time Table List", path: "/piu/admin/timetable-list" },
-      { name: "Add Time Table", path: "/piu/admin/add-timetable" },
-      { name: "Exam Sessions", path: "/piu/admin/exam-sessions" }
-    ]
-  },
-  {
-    title: "Job Vacants", icon: <FaSuitcase />, roles: ["admin"],
-    sub: [
-      { name: "Job List", path: "/piu/admin/job-list" },
-      { name: "Add Job", path: "/piu/admin/add-job" },
-      { name: "Job Categories", path: "/piu/admin/job-categories" }
-    ]
-  },
-  {
-    title: "Mail Box", icon: <FaEnvelope />, roles: ["admin", "teacher", "registrar"],
-    sub: [
-      { name: "Inbox", path: "/piu/admin/inbox" },
-      { name: "Sent Mails", path: "/piu/admin/sent-mails" },
-      { name: "Drafts", path: "/piu/admin/drafts" }
-    ]
-  },
-  {
-    title: "Subjects", icon: <FaBookReader />, roles: ["admin", "teacher", "registrar"],
-    sub: [
-      { name: "Subject List", path: "/piu/admin/subject-list" },
-      { name: "Add Subject", path: "/piu/admin/add-subject" },
-      { name: "Subject Categories", path: "/piu/admin/subject-categories" }
-    ]
-  }
-];
 
 const AdminSidebar = ({ isSidebarOpen, toggleSidebar }) => {
   const { user } = useAuth();
   const role = resolveRole(user);
-  const [openMenu, setOpenMenu] = useState(null);
   const location = useLocation();
+  const [searchParams] = useSearchParams();
+  const [openMenu, setOpenMenu] = useState(null);
+
+  const visibleMenu = useMemo(
+    () => adminMenu.filter((item) => !item.roles || item.roles.includes(role)),
+    [role]
+  );
+
+  useEffect(() => {
+    const menuIndex = findMenuIndexByTab(visibleMenu, searchParams, location.pathname);
+    if (menuIndex >= 0 && visibleMenu[menuIndex]?.sub) {
+      setOpenMenu(menuIndex);
+    }
+  }, [location.pathname, searchParams, visibleMenu]);
 
   const toggleMenu = (index) => {
     setOpenMenu(openMenu === index ? null : index);
   };
 
-  // Highlight active item
-  const isActive = (path) => location.pathname === path || location.pathname.startsWith(path + '/');
+  const itemIsActive = (item) => {
+    if (item.sub) {
+      return item.sub.some((subItem) =>
+        isDashboardTabActive({
+          tab: subItem.tab,
+          path: subItem.path,
+          pathname: location.pathname,
+          searchParams,
+        })
+      );
+    }
+
+    return isDashboardTabActive({
+      tab: item.tab,
+      path: item.path,
+      pathname: location.pathname,
+      searchParams,
+    });
+  };
+
+  const subItemIsActive = (subItem) =>
+    isDashboardTabActive({
+      tab: subItem.tab,
+      path: subItem.path,
+      pathname: location.pathname,
+      searchParams,
+    });
 
   return (
     <>
@@ -209,7 +80,7 @@ const AdminSidebar = ({ isSidebarOpen, toggleSidebar }) => {
       <aside
         className={`fixed top-16 md:top-18 left-0 bottom-0 w-80 bg-gradient-to-b from-[#001933] to-[#002147] text-white z-40 overflow-y-auto scrollbar-hide 
                     transition-transform duration-300 ease-in-out shadow-lg
-                    lg:translate-x-0 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
+                    lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
       >
         <div className="p-4 border-b border-gray-700 flex items-center justify-between lg:hidden">
           <div className="font-medium">Admin Menu</div>
@@ -222,14 +93,12 @@ const AdminSidebar = ({ isSidebarOpen, toggleSidebar }) => {
         </div>
 
         <ul className="p-4 space-y-1">
-          {adminMenu
-            .filter((item) => !item.roles || item.roles.includes(role))
-            .map((item, index) => {
+          {visibleMenu.map((item, index) => {
             const hasSub = !!item.sub;
-            const isItemActive = isActive(item.path) || (item.sub?.some(subItem => isActive(subItem.path)));
+            const isItemActive = itemIsActive(item);
 
             return (
-              <li key={index} className="mb-1">
+              <li key={item.title} className="mb-1">
                 {hasSub ? (
                   <>
                     <button
@@ -243,24 +112,26 @@ const AdminSidebar = ({ isSidebarOpen, toggleSidebar }) => {
                       </div>
                       <FaChevronRight
                         className={`transition-transform duration-200 ${
-                          openMenu === index ? "rotate-90" : ""
+                          openMenu === index ? 'rotate-90' : ''
                         } text-xs`}
                       />
                     </button>
-                    
+
                     {openMenu === index && (
                       <ul className="ml-10 mt-1 space-y-1 border-l border-gray-700 pl-4">
-                        {item.sub.map((subItem, subIndex) => (
-                          <Link 
-                            key={subIndex} 
-                            to={subItem.path}
+                        {item.sub.map((subItem) => (
+                          <Link
+                            key={subItem.tab}
+                            to={buildDashboardPath(subItem.path, subItem.tab)}
                             onClick={() => window.innerWidth < 1024 && toggleSidebar()}
                           >
                             <li
                               className={`p-2 rounded transition-colors
-                                        ${isActive(subItem.path) 
-                                          ? 'bg-[#003366] text-white' 
-                                          : 'hover:bg-[#002147] text-gray-300'}`}
+                                        ${
+                                          subItemIsActive(subItem)
+                                            ? 'bg-[#003366] text-white'
+                                            : 'hover:bg-[#002147] text-gray-300'
+                                        }`}
                             >
                               {subItem.name}
                             </li>
@@ -271,14 +142,12 @@ const AdminSidebar = ({ isSidebarOpen, toggleSidebar }) => {
                   </>
                 ) : (
                   <Link
-                    to={item.path}
+                    to={buildDashboardPath(item.path, item.tab)}
                     onClick={() => window.innerWidth < 1024 && toggleSidebar()}
                   >
                     <div
                       className={`flex items-center w-full p-3 rounded-lg transition-all
-                                ${isActive(item.path) 
-                                  ? 'bg-[#003366]' 
-                                  : 'hover:bg-[#002147]'}`}
+                                ${isItemActive ? 'bg-[#003366]' : 'hover:bg-[#002147]'}`}
                     >
                       <span className="mr-3 text-blue-300">{item.icon}</span>
                       <span className="text-sm">{item.title}</span>
@@ -287,15 +156,13 @@ const AdminSidebar = ({ isSidebarOpen, toggleSidebar }) => {
                 )}
               </li>
             );
-            })}
+          })}
         </ul>
 
-        {/* Footer with logout */}
         <div className="p-4 border-t border-gray-700 mt-auto">
           <button
             onClick={() => {
               if (window.innerWidth < 1024) toggleSidebar();
-              // Trigger logout
             }}
             className="flex items-center w-full p-3 rounded-lg hover:bg-red-900/20 text-red-300 transition-colors"
           >

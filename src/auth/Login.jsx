@@ -1,13 +1,18 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { getDashboardPathForRole, resolveUserRole } from '../utils/authRouting';
+import {
+  getDashboardPathForRole,
+  resolveUserRole,
+  STUDENT_DEFAULT_PASSWORD,
+} from '../utils/authRouting';
+import { ADMIN_TABS, buildDashboardPath, STUDENT_TABS, TEACHER_TABS } from '../utils/dashboardTabs';
 
 export default function Login() {
   const [portal, setPortal] = useState('user');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [studentCredential, setStudentCredential] = useState('');
+  const [studentId, setStudentId] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const { login, logoutLocal, studentPortalLogin, loading } = useAuth();
@@ -28,11 +33,11 @@ export default function Login() {
 
     try {
       if (portal === 'student') {
-        if (!studentCredential || !password) {
-          setError('Please enter email/student ID and password.');
+        if (!studentId || !password) {
+          setError('Please enter your student ID and password.');
           return;
         }
-        const studentData = await studentPortalLogin(studentCredential, password);
+        const studentData = await studentPortalLogin(studentId.trim(), password);
         const role = resolveUserRole(studentData?.user);
 
         if (role !== "student") {
@@ -41,7 +46,10 @@ export default function Login() {
           return;
         }
 
-        navigate(getDashboardPathForRole(role), { replace: true });
+        navigate(
+          buildDashboardPath(getDashboardPathForRole(role), STUDENT_TABS.PROFILE),
+          { replace: true }
+        );
         return;
       }
 
@@ -71,10 +79,19 @@ export default function Login() {
         return;
       }
 
-      navigate(getDashboardPathForRole(role), { replace: true });
+      let destination = getDashboardPathForRole(role);
+      if (role === 'admin' || role === 'registrar') {
+        destination = buildDashboardPath(destination, ADMIN_TABS.DASHBOARD);
+      } else if (role === 'teacher') {
+        destination = buildDashboardPath(destination, TEACHER_TABS.DASHBOARD);
+      }
+
+      navigate(destination, { replace: true });
     } catch (err) {
       const fallback =
-        portal === "user"
+        portal === "student"
+          ? "Invalid student ID or password."
+          : portal === "user"
           ? "No matching account in the user table. Please choose the correct portal."
           : "Invalid login credentials.";
       const message = getErrorMessage(err, fallback);
@@ -141,7 +158,7 @@ export default function Login() {
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="rounded-md border border-green-200 bg-green-50 px-3 py-2 text-sm font-medium text-green-800">
             {portal === "student"
-              ? "Student Portal: use email or student ID, and password."
+              ? `Student Portal: sign in with your Student ID and default password (${STUDENT_DEFAULT_PASSWORD}).`
               : portal === "admin"
               ? "Admin Portal: admin and registrar accounts."
               : portal === "teacher"
@@ -153,18 +170,18 @@ export default function Login() {
             {portal === 'student' ? (
               <>
                 <div>
-                  <label htmlFor="studentCredential" className="sr-only">
-                    Email or Student ID
+                  <label htmlFor="studentId" className="sr-only">
+                    Student ID
                   </label>
                   <input
-                    id="studentCredential"
-                    name="studentCredential"
+                    id="studentId"
+                    name="studentId"
                     type="text"
                     required
-                    value={studentCredential}
-                    onChange={(e) => setStudentCredential(e.target.value)}
+                    value={studentId}
+                    onChange={(e) => setStudentId(e.target.value)}
                     className="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 sm:text-sm"
-                    placeholder="Email or Student ID"
+                    placeholder="Student ID"
                   />
                 </div>
                 <div>

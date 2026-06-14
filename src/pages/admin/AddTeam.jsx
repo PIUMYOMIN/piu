@@ -4,10 +4,14 @@ import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { adminApi } from "../../api/admin";
 import { toStorageUrl } from "../../utils/api";
+import { ADMIN_TABS, buildDashboardPath } from "../../utils/dashboardTabs";
+import { useFloatingToast } from "../../hooks/useFloatingToast";
+import { getApiErrorMessage } from "../../utils/apiErrors";
 
 const AddTeam = () => {
-  const { id } = useParams(); // get id from route
+  const { id } = useParams();
   const navigate = useNavigate();
+  const { showSuccess, showError, Toast } = useFloatingToast();
 
   const [formData, setFormData] = useState({
     name: "",
@@ -71,6 +75,7 @@ const AddTeam = () => {
       } catch (e) {
         if (!mounted) return;
         setLoadError(e?.response?.data?.message || e?.message || "Failed to load team form");
+        showError(getApiErrorMessage(e, "Failed to load team form"));
       } finally {
         if (mounted) setLoading(false);
       }
@@ -172,9 +177,13 @@ const AddTeam = () => {
       if (id) await adminApi.teams.update(id, fd);
       else await adminApi.teams.create(fd);
 
-      navigate("/piu/admin/team");
+      showSuccess(id ? "Team member updated successfully!" : "Team member added successfully!");
+      setTimeout(() => {
+        navigate(buildDashboardPath("/piu/admin/team-list", ADMIN_TABS.TEAMS));
+      }, 1200);
     } catch (e2) {
       setLoadError(e2?.response?.data?.message || e2?.message || "Failed to save team member");
+      showError(getApiErrorMessage(e2, "Failed to save team member"));
     } finally {
       setIsSubmitting(false);
     }
@@ -191,6 +200,7 @@ const AddTeam = () => {
 
   return (
     <div className="max-w-7xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
+      <Toast />
       {/* Header */}
       <div className="bg-[#002147] p-6 text-white">
         <h2 className="text-2xl font-bold">Add Team Member</h2>

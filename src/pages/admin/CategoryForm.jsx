@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from "react";
-import { FaSpinner, FaSave, FaTimes, FaTag, FaInfoCircle, FaCheck, FaExclamationTriangle } from "react-icons/fa";
+import { FaSpinner, FaSave, FaTimes, FaTag, FaInfoCircle, FaExclamationTriangle } from "react-icons/fa";
 import { adminApi } from "../../api/admin";
+import { useFloatingToast } from "../../hooks/useFloatingToast";
+import { getApiErrorMessage } from "../../utils/apiErrors";
 
 const CategoryForm = ({ category = null, onSuccess, onCancel, mode = "create" }) => {
+  const { showSuccess, showError, Toast } = useFloatingToast();
   const [formData, setFormData] = useState({
     name: "",
     description: ""
   });
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
-  const [toast, setToast] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Initialize form with category data if editing
@@ -28,20 +30,6 @@ const CategoryForm = ({ category = null, onSuccess, onCancel, mode = "create" })
     }
     setErrors({});
   }, [category, mode]);
-
-  // Auto-dismiss toast
-  useEffect(() => {
-    if (toast) {
-      const timer = setTimeout(() => {
-        setToast(null);
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [toast]);
-
-  const showToast = (message, type = "success") => {
-    setToast({ message, type });
-  };
 
   const firstError = (field) => {
     const error = errors[field];
@@ -87,7 +75,7 @@ const CategoryForm = ({ category = null, onSuccess, onCancel, mode = "create" })
     e.preventDefault();
     
     if (!validateForm()) {
-      showToast("Please fix the errors in the form", "error");
+      showError("Please fix the errors in the form");
       return;
     }
 
@@ -97,11 +85,10 @@ const CategoryForm = ({ category = null, onSuccess, onCancel, mode = "create" })
       if (mode === "edit" && category) {
         // Update existing category
         await adminApi.categories.update(category.id, formData);
-        showToast(`Category "${formData.name}" updated successfully!`, "success");
+        showSuccess(`Category "${formData.name}" updated successfully!`);
       } else {
-        // Create new category
         await adminApi.categories.create(formData);
-        showToast(`Category "${formData.name}" created successfully!`, "success");
+        showSuccess(`Category "${formData.name}" created successfully!`);
       }
       
       // Reset form
@@ -123,55 +110,18 @@ const CategoryForm = ({ category = null, onSuccess, onCancel, mode = "create" })
       if (error.response?.status === 422) {
         const apiErrors = error.response.data.errors || {};
         setErrors(apiErrors);
-        showToast("Please fix the form errors", "error");
+        showError("Please fix the form errors");
       } else {
-        const errorMessage = error.response?.data?.message || "Failed to save category. Please try again.";
-        showToast(errorMessage, "error");
+        showError(getApiErrorMessage(error, "Failed to save category. Please try again."));
       }
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const Toast = () => {
-    if (!toast) return null;
-
-    const bgColor = toast.type === "success" ? "bg-green-50 border-green-200" : 
-                   toast.type === "error" ? "bg-red-50 border-red-200" : 
-                   "bg-yellow-50 border-yellow-200";
-    
-    const textColor = toast.type === "success" ? "text-green-800" : 
-                     toast.type === "error" ? "text-red-800" : 
-                     "text-yellow-800";
-    
-    const icon = toast.type === "success" ? <FaCheck className="text-green-500" /> : 
-                toast.type === "error" ? <FaExclamationTriangle className="text-red-500" /> : 
-                <FaInfoCircle className="text-yellow-500" />;
-
-    return (
-      <div className="fixed top-4 right-4 z-50 animate-slideIn">
-        <div className={`flex items-center p-4 mb-3 rounded-lg border ${bgColor} ${textColor} shadow-lg max-w-md`}>
-          <div className="text-lg mr-3">
-            {icon}
-          </div>
-          <div className="flex-1">
-            <p className="text-sm font-medium">{toast.message}</p>
-          </div>
-          <button
-            onClick={() => setToast(null)}
-            className="ml-3 text-gray-400 hover:text-gray-600"
-          >
-            <FaTimes />
-          </button>
-        </div>
-      </div>
-    );
-  };
-
   return (
-    <>
+    <div className="relative">
       <Toast />
-      
       <div className="bg-white rounded-xl shadow-lg overflow-hidden">
         {/* Header */}
         <div className="bg-gradient-to-r from-blue-600 to-green-700 p-6 text-white">
@@ -334,7 +284,7 @@ const CategoryForm = ({ category = null, onSuccess, onCancel, mode = "create" })
           </div>
         )}
       </div>
-    </>
+    </div>
   );
 };
 

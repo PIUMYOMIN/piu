@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { FaDownload } from "react-icons/fa";
 import adminApi from "../../api/admin";
 import { toStorageUrl } from "../../utils/api";
+import { useFloatingToast } from "../../hooks/useFloatingToast";
+import { getApiErrorMessage } from "../../utils/apiErrors";
 
 function getSubmissionYear(admission) {
   if (!admission?.created_at) return "";
@@ -25,6 +27,7 @@ function getDocumentDownloadName(pathOrUrl, fallbackName) {
 
 function AdmissionPage() {
   const navigate = useNavigate();
+  const { showError, Toast } = useFloatingToast();
   const [selectedCourseId, setSelectedCourseId] = useState("");
   const [selectedYear, setSelectedYear] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
@@ -49,6 +52,7 @@ function AdmissionPage() {
       setCourses(Array.isArray(coursesData) ? coursesData : []);
     } catch (e) {
       setError(e?.response?.data?.message || e?.message || "Failed to load admissions");
+      showError(getApiErrorMessage(e, "Failed to load admissions"));
     } finally {
       setLoading(false);
     }
@@ -405,6 +409,7 @@ function AdmissionPage() {
 
   return (
     <div className="max-w-8xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
+      <Toast />
       {/* Header */}
       <div className="bg-[#002147] p-6 text-white">
         <h2 className="text-2xl font-bold">Admissions Management</h2>

@@ -1,6 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { adminApi } from "../../api/admin";
 import { toStorageUrl } from "../../utils/api";
+import { useFloatingToast } from "../../hooks/useFloatingToast";
+import { getApiErrorMessage } from "../../utils/apiErrors";
 
 const emptyForm = {
   title: "",
@@ -12,6 +14,7 @@ const emptyForm = {
 };
 
 const SliderList = () => {
+  const { showSuccess, showError, Toast } = useFloatingToast();
   const [sliders, setSliders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -25,6 +28,7 @@ const SliderList = () => {
       setSliders(Array.isArray(data) ? data : []);
     } catch (e) {
       setError(e?.response?.data?.message || e?.message || "Failed to load slides");
+      showError(getApiErrorMessage(e, "Failed to load slides"));
       setSliders([]);
     } finally {
       setLoading(false);
@@ -91,14 +95,17 @@ const SliderList = () => {
 
       if (editingSlider.mode === "create") {
         await adminApi.slides.create(formData);
+        showSuccess("Slide created successfully!");
       } else {
         await adminApi.slides.update(editingSlider.id, formData);
+        showSuccess("Slide updated successfully!");
       }
 
       setEditingSlider(null);
       await load();
     } catch (e) {
       setError(e?.response?.data?.message || e?.message || "Failed to save slide");
+      showError(getApiErrorMessage(e, "Failed to save slide"));
     }
   };
 
@@ -106,23 +113,28 @@ const SliderList = () => {
     if (!window.confirm("Delete this slide?")) return;
     try {
       await adminApi.slides.remove(id);
+      showSuccess("Slide deleted successfully!");
       await load();
     } catch (e) {
       setError(e?.response?.data?.message || e?.message || "Failed to delete slide");
+      showError(getApiErrorMessage(e, "Failed to delete slide"));
     }
   };
 
   const toggleStatus = async (id) => {
     try {
       await adminApi.slides.toggleActive(id);
+      showSuccess("Slide status updated successfully!");
       await load();
     } catch (e) {
       setError(e?.response?.data?.message || e?.message || "Failed to update status");
+      showError(getApiErrorMessage(e, "Failed to update status"));
     }
   };
 
   return (
     <div className="max-w-7xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
+      <Toast />
       {/* Header */}
       <div className="bg-[#002147] p-6 text-white">
         <div className="flex items-center justify-between gap-4">

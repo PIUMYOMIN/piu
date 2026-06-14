@@ -2,14 +2,15 @@ import React, { useState, useEffect } from "react";
 import { useLocation, useParams, useNavigate } from "react-router-dom";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import { adminApi } from "../../api/admin";
+import { useFloatingToast } from "../../hooks/useFloatingToast";
+import { getApiErrorMessage } from "../../utils/apiErrors";
 
 export default function NewCourse() {
   const location = useLocation();
   const params = useParams();
   const navigate = useNavigate();
+  const { showSuccess, showError, Toast } = useFloatingToast();
 
   const [formData, setFormData] = useState({
     title: "",
@@ -51,7 +52,7 @@ export default function NewCourse() {
       setCategories(data);
     } catch (error) {
       console.error("Failed to load categories:", error);
-      toast.error("Failed to load categories");
+      showError(getApiErrorMessage(error, "Failed to load categories"));
     }
   };
 
@@ -84,7 +85,7 @@ export default function NewCourse() {
       }
     } catch (error) {
       console.error("Failed to load course:", error);
-      toast.error("Failed to load course data");
+      showError(getApiErrorMessage(error, "Failed to load course data"));
     } finally {
       setLoading(false);
     }
@@ -203,19 +204,16 @@ export default function NewCourse() {
 
       let response;
       if (params.id) {
-        // Update existing course
         response = await adminApi.courses.update(params.id, formDataToSend);
-        toast.success("Course updated successfully!");
+        showSuccess("Course updated successfully!");
       } else {
-        // Create new course
         response = await adminApi.courses.create(formDataToSend);
-        toast.success("Course created successfully!");
+        showSuccess("Course created successfully!");
       }
 
-      // Navigate back after a short delay
       setTimeout(() => {
         navigate("/piu/admin/course-list");
-      }, 1500);
+      }, 1200);
 
     } catch (error) {
       console.error("Error saving course:", error);
@@ -230,9 +228,9 @@ export default function NewCourse() {
         });
 
         setErrors(errorMessages);
-        toast.error("Please fix the errors in the form");
+        showError("Please fix the errors in the form");
       } else {
-        toast.error(error.response?.data?.message || "Failed to save course");
+        showError(getApiErrorMessage(error, "Failed to save course"));
       }
     } finally {
       setIsSubmitting(false);
@@ -263,7 +261,7 @@ export default function NewCourse() {
 
   return (
     <div className="max-w-7xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
-      <ToastContainer position="top-right" autoClose={3000} />
+      <Toast />
 
       {/* Header */}
       <div className="bg-[#002147] p-6 text-white">

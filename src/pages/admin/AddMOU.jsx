@@ -3,10 +3,13 @@ import { useLocation, useNavigate } from "react-router-dom";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import adminApi from "../../api/admin";
+import { useFloatingToast } from "../../hooks/useFloatingToast";
+import { getApiErrorMessage } from "../../utils/apiErrors";
 
 export default function AddMOU() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { showSuccess, showError, Toast } = useFloatingToast();
   const editingMou = location.state?.mou || null;
   const isEdit = Boolean(editingMou?.id);
 
@@ -44,12 +47,17 @@ export default function AddMOU() {
 
       if (isEdit) {
         await adminApi.partners.update(editingMou.id, payload);
+        showSuccess("MOU updated successfully!");
       } else {
         await adminApi.partners.create(payload);
+        showSuccess("MOU added successfully!");
       }
-      navigate("/piu/admin/mou");
+      setTimeout(() => {
+        navigate("/piu/admin/mou");
+      }, 1200);
     } catch (e2) {
       setError(e2?.response?.data?.message || e2?.message || "Failed to save MOU");
+      showError(getApiErrorMessage(e2, "Failed to save MOU"));
     } finally {
       setSaving(false);
     }
@@ -57,6 +65,7 @@ export default function AddMOU() {
 
   return (
     <div className="max-w-5xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
+      <Toast />
       <div className="bg-[#002147] p-6 text-white">
         <h2 className="text-2xl font-bold">{isEdit ? "Edit MOU" : "Add New MOU"}</h2>
       </div>

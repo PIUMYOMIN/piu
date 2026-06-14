@@ -2,8 +2,11 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { adminApi } from "../../api/admin";
 import { useAuth } from "../../contexts/AuthContext";
+import { useFloatingToast } from "../../hooks/useFloatingToast";
+import { getApiErrorMessage } from "../../utils/apiErrors";
 
 export default function ModulesList() {
+  const { showSuccess, showError, Toast } = useFloatingToast();
   const { user: authUser } = useAuth();
   const currentRole = String(
     authUser?.role?.name ??
@@ -25,7 +28,8 @@ export default function ModulesList() {
       const data = await adminApi.modules.list();
       setModules(Array.isArray(data) ? data : []);
     } catch (e) {
-      setError(e?.response?.data?.message || e?.message || "Failed to load modules");
+      showError(getApiErrorMessage(e, "Failed to load modules"));
+      setError(getApiErrorMessage(e, "Failed to load modules"));
       setModules([]);
     } finally {
       setLoading(false);
@@ -78,13 +82,16 @@ export default function ModulesList() {
     try {
       await adminApi.modules.remove(module.id);
       await load();
+      showSuccess(`Module "${module?.name}" deleted successfully!`);
     } catch (e) {
-      setError(e?.response?.data?.message || e?.message || "Failed to delete module");
+      showError(getApiErrorMessage(e, "Failed to delete module"));
+      setError(getApiErrorMessage(e, "Failed to delete module"));
     }
   };
 
   return (
     <div className="max-w-8xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
+      <Toast />
       <div className="bg-[#002147] p-6 text-white flex justify-between items-center">
         <div>
           <h2 className="text-2xl font-bold">Modules</h2>

@@ -3,10 +3,14 @@ import { useNavigate, useParams } from "react-router-dom";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { adminApi } from "../../api/admin";
+import { ADMIN_TABS, buildDashboardPath } from "../../utils/dashboardTabs";
+import { useFloatingToast } from "../../hooks/useFloatingToast";
+import { getApiErrorMessage } from "../../utils/apiErrors";
 
 const AddCurriculum = () => {
   const navigate = useNavigate();
   const params = useParams();
+  const { showSuccess, showError, Toast } = useFloatingToast();
 
   const [formData, setFormData] = useState({
     title: "",
@@ -54,7 +58,8 @@ const AddCurriculum = () => {
         }
       } catch (e) {
         if (!mounted) return;
-        setLoadError(e?.response?.data?.message || e?.message || "Failed to load curriculum form");
+        showError(getApiErrorMessage(e, "Failed to load curriculum form"));
+        setLoadError(getApiErrorMessage(e, "Failed to load curriculum form"));
       } finally {
         if (mounted) setLoading(false);
       }
@@ -151,12 +156,18 @@ const AddCurriculum = () => {
 
       if (params.id) {
         await adminApi.curriculums.update(params.id, payload);
+        showSuccess("Curriculum updated successfully!");
       } else {
         await adminApi.curriculums.create(payload);
+        showSuccess("Curriculum created successfully!");
       }
-      navigate("/piu/admin/curriculum-list");
+      setTimeout(
+        () => navigate(buildDashboardPath("/piu/admin/curriculum-list", ADMIN_TABS.CURRICULUMS)),
+        1200
+      );
     } catch (e2) {
-      setLoadError(e2?.response?.data?.message || e2?.message || "Failed to save curriculum");
+      showError(getApiErrorMessage(e2, "Failed to save curriculum"));
+      setLoadError(getApiErrorMessage(e2, "Failed to save curriculum"));
       setErrors(e2?.response?.data?.errors || {});
     } finally {
       setIsSubmitting(false);
@@ -179,6 +190,7 @@ const AddCurriculum = () => {
 
   return (
     <div className="max-w-7xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
+      <Toast />
       {/* Header */}
       <div className="bg-[#002147] p-6 text-white">
         <h2 className="text-2xl font-bold">

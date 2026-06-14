@@ -3,9 +3,12 @@ import { useNavigate } from "react-router-dom";
 import adminApi from "../../api/admin";
 import { toStorageUrl } from "../../utils/api";
 import { useAuth } from "../../contexts/AuthContext";
+import { useFloatingToast } from "../../hooks/useFloatingToast";
+import { getApiErrorMessage } from "../../utils/apiErrors";
 
 export default function BlogsList() {
   const { user: authUser } = useAuth();
+  const { showSuccess, showError, Toast } = useFloatingToast();
   const currentRole = String(
     authUser?.role?.name ??
       authUser?.role ??
@@ -26,6 +29,7 @@ export default function BlogsList() {
       setBlogs(Array.isArray(data) ? data : []);
     } catch (e) {
       setError(e?.response?.data?.message || e?.message || "Failed to load blogs");
+      showError(getApiErrorMessage(e, "Failed to load blogs"));
       setBlogs([]);
     } finally {
       setLoading(false);
@@ -51,23 +55,28 @@ export default function BlogsList() {
     if (!window.confirm(`Delete blog "${blog?.title}"?`)) return;
     try {
       await adminApi.blogs.remove(blog.id);
+      showSuccess(`Blog "${blog.title}" deleted successfully!`);
       await load();
     } catch (e) {
       setError(e?.response?.data?.message || e?.message || "Failed to delete blog");
+      showError(getApiErrorMessage(e, "Failed to delete blog"));
     }
   };
 
   const toggleStatus = async (blog) => {
     try {
       await adminApi.blogs.toggleActive(blog.id);
+      showSuccess(`Blog "${blog.title}" ${blog.is_active ? "unpublished" : "published"} successfully!`);
       await load();
     } catch (e) {
       setError(e?.response?.data?.message || e?.message || "Failed to toggle status");
+      showError(getApiErrorMessage(e, "Failed to toggle status"));
     }
   };
 
   return (
     <div className="max-w-8xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
+      <Toast />
       <div className="bg-[#002147] p-6 text-white">
         <h2 className="text-2xl font-bold">Blog Management</h2>
         <p className="text-blue-100 mt-1">Manage and organize blog posts</p>

@@ -2,6 +2,8 @@ import React, { useEffect, useMemo, useState } from "react";
 import { adminApi } from "../../api/admin";
 import { toStorageUrl } from "../../utils/api";
 import { useAuth } from "../../contexts/AuthContext";
+import { useFloatingToast } from "../../hooks/useFloatingToast";
+import { getApiErrorMessage } from "../../utils/apiErrors";
 
 function normalizeRole(role) {
   const v = String(role || "").toLowerCase();
@@ -28,6 +30,7 @@ function getInitials(name) {
 
 function Users() {
   const { user: authUser } = useAuth();
+  const { showSuccess, showError, Toast } = useFloatingToast();
   const currentRole = String(
     authUser?.role?.name ??
       authUser?.role ??
@@ -55,6 +58,7 @@ function Users() {
       setAvailableRoles(Array.isArray(roles) ? roles : []);
     } catch (e) {
       setError(e?.response?.data?.message || e?.message || "Failed to load users");
+      showError(getApiErrorMessage(e, "Failed to load users"));
       setUsers([]);
       setAvailableRoles([]);
     } finally {
@@ -146,13 +150,16 @@ function Users() {
     try {
       if (modal.mode === "create") {
         await adminApi.users.create({ ...modal.form, role: toApiRole(modal.form.role) });
+        showSuccess("User created successfully!");
       } else {
         await adminApi.users.update(modal.user.id, { ...modal.form, role: toApiRole(modal.form.role) });
+        showSuccess("User updated successfully!");
       }
       closeModal();
       await load();
     } catch (e) {
       setError(e?.response?.data?.message || e?.message || "Failed to save user");
+      showError(getApiErrorMessage(e, "Failed to save user"));
     } finally {
       setSaving(false);
     }
@@ -164,9 +171,11 @@ function Users() {
     setError("");
     try {
       await adminApi.users.remove(user.id);
+      showSuccess("User deleted successfully!");
       await load();
     } catch (e) {
       setError(e?.response?.data?.message || e?.message || "Failed to delete user");
+      showError(getApiErrorMessage(e, "Failed to delete user"));
     }
   };
 
@@ -175,9 +184,11 @@ function Users() {
     setError("");
     try {
       await adminApi.users.update(user.id, { role: toApiRole(nextRole) });
+      showSuccess("User role updated successfully!");
       await load();
     } catch (e) {
       setError(e?.response?.data?.message || e?.message || "Failed to assign role");
+      showError(getApiErrorMessage(e, "Failed to assign role"));
     } finally {
       setUpdatingRoleId(null);
     }
@@ -185,6 +196,7 @@ function Users() {
 
   return (
     <div className="bg-white p-6 rounded-lg shadow">
+      <Toast />
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between p-4 mb-2 bg-[#002147] text-white rounded-t-lg">
         <div>
           <h2 className="text-2xl font-bold">Users</h2>

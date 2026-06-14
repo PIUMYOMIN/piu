@@ -2,9 +2,12 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import adminApi from "../../api/admin";
 import { useAuth } from "../../contexts/AuthContext";
+import { useFloatingToast } from "../../hooks/useFloatingToast";
+import { getApiErrorMessage } from "../../utils/apiErrors";
 
 export default function DepartmentList() {
   const { user: authUser } = useAuth();
+  const { showSuccess, showError, Toast } = useFloatingToast();
   const currentRole = String(
     authUser?.role?.name ??
       authUser?.role ??
@@ -25,6 +28,7 @@ export default function DepartmentList() {
       setDepartments(Array.isArray(data) ? data : []);
     } catch (e) {
       setError(e?.response?.data?.message || e?.message || "Failed to load departments");
+      showError(getApiErrorMessage(e, "Failed to load departments"));
       setDepartments([]);
     } finally {
       setLoading(false);
@@ -50,14 +54,17 @@ export default function DepartmentList() {
     if (!window.confirm(`Delete department "${department?.name}"?`)) return;
     try {
       await adminApi.departments.remove(department.id);
+      showSuccess(`Department "${department.name}" deleted successfully!`);
       await load();
     } catch (e) {
       setError(e?.response?.data?.message || e?.message || "Failed to delete department");
+      showError(getApiErrorMessage(e, "Failed to delete department"));
     }
   };
 
   return (
     <div className="max-w-8xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
+      <Toast />
       <div className="bg-[#002147] p-6 text-white">
         <h2 className="text-2xl font-bold">Department Management</h2>
         <p className="text-blue-100 mt-1">Manage academic departments</p>

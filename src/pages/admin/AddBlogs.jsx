@@ -3,11 +3,14 @@ import { useNavigate, useParams } from "react-router-dom";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import adminApi from "../../api/admin";
+import { useFloatingToast } from "../../hooks/useFloatingToast";
+import { getApiErrorMessage } from "../../utils/apiErrors";
 
 export default function BlogsForm() {
   const navigate = useNavigate();
   const { id } = useParams();
   const isEdit = Boolean(id);
+  const { showSuccess, showError, Toast } = useFloatingToast();
 
   const [formData, setFormData] = useState({
     title: "",
@@ -36,6 +39,7 @@ export default function BlogsForm() {
       } catch (e) {
         if (!mounted) return;
         setError(e?.response?.data?.message || e?.message || "Failed to load blog");
+        showError(getApiErrorMessage(e, "Failed to load blog"));
       }
     })();
     return () => {
@@ -56,12 +60,17 @@ export default function BlogsForm() {
 
       if (isEdit) {
         await adminApi.blogs.update(id, payload);
+        showSuccess("Blog updated successfully!");
       } else {
         await adminApi.blogs.create(payload);
+        showSuccess("Blog created successfully!");
       }
-      navigate("/piu/admin/blog-list");
+      setTimeout(() => {
+        navigate("/piu/admin/blog-list");
+      }, 1200);
     } catch (e) {
       setError(e?.response?.data?.message || e?.message || "Failed to save blog");
+      showError(getApiErrorMessage(e, "Failed to save blog"));
     } finally {
       setSaving(false);
     }
@@ -69,6 +78,7 @@ export default function BlogsForm() {
 
   return (
     <div className="max-w-5xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
+      <Toast />
       <div className="bg-[#002147] p-6 text-white">
         <h2 className="text-2xl font-bold">{isEdit ? "Edit Blog Post" : "Create New Blog Post"}</h2>
       </div>

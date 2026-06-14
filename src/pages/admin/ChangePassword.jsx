@@ -1,10 +1,15 @@
 // src/pages/admin/ChangePassword.jsx
 import React, { useState } from "react";
 import { FaLock, FaEye, FaEyeSlash, FaSpinner, FaSave } from "react-icons/fa";
-import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 import { v2 } from "../../utils/api";
+import { ADMIN_TABS, buildDashboardPath } from "../../utils/dashboardTabs";
+import { useFloatingToast } from "../../hooks/useFloatingToast";
+import { getApiErrorMessage } from "../../utils/apiErrors";
 
 function ChangePassword() {
+  const navigate = useNavigate();
+  const { showSuccess, showError, Toast } = useFloatingToast();
   const [formData, setFormData] = useState({
     current_password: "",
     password: "",
@@ -27,12 +32,12 @@ function ChangePassword() {
     e.preventDefault();
     
     if (formData.password !== formData.password_confirmation) {
-      toast.error("Passwords do not match");
+      showError("Passwords do not match");
       return;
     }
     
     if (formData.password.length < 6) {
-      toast.error("Password must be at least 6 characters");
+      showError("Password must be at least 6 characters");
       return;
     }
 
@@ -45,7 +50,8 @@ function ChangePassword() {
         password_confirmation: formData.password_confirmation,
       });
       
-      toast.success("Password changed successfully!");
+      showSuccess("Password changed successfully!");
+      navigate(buildDashboardPath('/piu/admin/change-password', ADMIN_TABS.CHANGE_PASSWORD), { replace: true });
       
       // Reset form
       setFormData({
@@ -56,7 +62,7 @@ function ChangePassword() {
       
     } catch (error) {
       console.error("Error changing password:", error);
-      toast.error(error.response?.data?.message || "Failed to change password");
+      showError(getApiErrorMessage(error, "Failed to change password"));
     } finally {
       setLoading(false);
     }
@@ -64,6 +70,7 @@ function ChangePassword() {
 
   return (
     <div className="bg-white rounded-lg shadow-md w-full max-w-lg mx-auto">
+      <Toast />
       {/* Header */}
       <div className="bg-gradient-to-r from-green-600 to-green-700 text-white p-6 rounded-t-lg">
         <h2 className="text-2xl font-bold flex items-center">
