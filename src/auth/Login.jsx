@@ -1,7 +1,8 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import GoogleSignInButton from '../components/auth/GoogleSignInButton';
+import { warmGoogleAuth } from '../utils/googleAuth';
 import {
   getDashboardPathForRole,
   resolveUserRole,
@@ -18,6 +19,10 @@ export default function Login() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
   const { login, logoutLocal, studentPortalLogin, googleLogin } = useAuth();
+
+  useEffect(() => {
+    warmGoogleAuth();
+  }, []);
 
   const getErrorMessage = (err, fallback) => {
     const data = err?.response?.data;

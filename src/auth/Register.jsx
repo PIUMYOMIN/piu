@@ -1,8 +1,9 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import GoogleSignInButton from "../components/auth/GoogleSignInButton";
 import { getDashboardPathForUser } from "../utils/authRouting";
+import { warmGoogleAuth } from "../utils/googleAuth";
 
 export default function Register() {
   const [formData, setFormData] = useState({
@@ -16,6 +17,10 @@ export default function Register() {
   const [success, setSuccess] = useState("");
   const navigate = useNavigate();
   const { register, googleLogin, loading } = useAuth();
+
+  useEffect(() => {
+    warmGoogleAuth();
+  }, []);
 
   const getErrorMessage = (err, fallback) => {
     const data = err?.response?.data;

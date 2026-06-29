@@ -1,4 +1,6 @@
 let loadPromise;
+let initializedClientId = null;
+let activeCredentialHandler = null;
 
 export function getGoogleClientId() {
   return import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
@@ -36,6 +38,10 @@ export function loadGoogleIdentityScript() {
     };
 
     if (existing) {
+      if (window.google?.accounts?.id) {
+        resolve(true);
+        return;
+      }
       existing.addEventListener("load", handleReady, { once: true });
       existing.addEventListener("error", handleError, { once: true });
       return;
@@ -52,6 +58,25 @@ export function loadGoogleIdentityScript() {
   });
 
   return loadPromise;
+}
+
+function ensureGoogleInitialized(clientId) {
+  if (initializedClientId === clientId) {
+    return true;
+  }
+
+  window.google.accounts.id.initialize({
+    client_id: clientId,
+    callback: (response) => {
+      activeCredentialHandler?.(response);
+    },
+    auto_select: false,
+    cancel_on_tap_outside: true,
+    use_fedcm_for_prompt: false,
+  });
+
+  initializedClientId = clientId;
+  return true;
 }
 
 export async function renderGoogleSignInButton(container, options = {}) {
@@ -73,14 +98,12 @@ export async function renderGoogleSignInButton(container, options = {}) {
   }
 
   const clientId = getGoogleClientId();
-  container.innerHTML = "";
+  activeCredentialHandler = (response) => {
+    callback(response);
+  };
 
-  window.google.accounts.id.initialize({
-    client_id: clientId,
-    callback,
-    auto_select: false,
-    cancel_on_tap_outside: true,
-  });
+  ensureGoogleInitialized(clientId);
+  container.innerHTML = "";
 
   window.google.accounts.id.renderButton(container, {
     theme,
@@ -91,4 +114,8 @@ export async function renderGoogleSignInButton(container, options = {}) {
   });
 
   return true;
+}
+
+export function warmGoogleAuth() {
+  return loadGoogleIdentityScript();
 }

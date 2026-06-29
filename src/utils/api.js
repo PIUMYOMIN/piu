@@ -1,7 +1,7 @@
 // src/utils/api.js
 import axios from 'axios';
 import config from '../config';
-import { cleanupRecaptcha, executeRecaptcha, isRecaptchaConfigured } from './recaptchaV3';
+import { executeRecaptcha, isRecaptchaConfigured, normalizeAction } from './recaptchaV3';
 
 const API_BASE_URL = config.apiBaseUrl;
 const API_V1_URL = `${API_BASE_URL}/api/v1`;
@@ -36,10 +36,11 @@ function createApiClient(baseURL) {
             .replace(/_+/g, '_')
             .replace(/^_+|_+$/g, '');
 
-        const recaptchaToken = await executeRecaptcha(action);
+        const normalizedAction = normalizeAction(action);
+        const recaptchaToken = await executeRecaptcha(normalizedAction);
         if (recaptchaToken) {
           requestConfig.headers['X-Recaptcha-Token'] = recaptchaToken;
-          requestConfig.headers['X-Recaptcha-Action'] = action;
+          requestConfig.headers['X-Recaptcha-Action'] = normalizedAction;
         } else if (isRecaptchaConfigured()) {
           return Promise.reject(
             Object.assign(new Error('Security verification failed to load. Please refresh the page, disable ad blockers, and try again.'), {
@@ -63,12 +64,8 @@ function createApiClient(baseURL) {
   );
 
   client.interceptors.response.use(
-    (response) => {
-      cleanupRecaptcha();
-      return response;
-    },
+    (response) => response,
     (error) => {
-      cleanupRecaptcha();
       if (error.response?.status === 401) {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
@@ -132,10 +129,12 @@ export const v2 = {
   getCourseCategories: () => apiClient.get('/course-categories').then((r) => r.data),
   getGallery: () => apiClient.get('/gallery').then((r) => r.data),
 
-  // Admissions
-  submitAdmission: (formData) =>
+  // Admissions — long timeout for multi-file uploads on slow networks
+  submitAdmission: (formData, options = {}) =>
     apiClient
       .post('/admissions', formData, {
+        timeout: options.timeout ?? 300000,
+        onUploadProgress: options.onUploadProgress,
         recaptcha: { enabled: true, action: 'admission_form_submit' },
       })
       .then((r) => r.data),

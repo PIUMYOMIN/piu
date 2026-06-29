@@ -1,8 +1,36 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import LoadingSpinner from "../../components/user/LoadingSpinner";
 import { v2 } from "../../utils/api";
-import { prepareRecaptcha } from "../../utils/recaptchaV3";
+import { warmRecaptcha } from "../../utils/recaptchaV3";
+import {
+  ADMISSION_FILE_RULES,
+  formatFileSize,
+  totalAdmissionFileBytes,
+  validateAdmissionFile,
+} from "../../utils/admissionFiles";
+
+const DOC_STEPS = [
+  { id: 1, title: "Course & photo", hint: "Choose your program and profile picture first." },
+  { id: 2, title: "Personal statement", hint: "Upload one document at a time — PDF or Word, max 5 MB each." },
+  { id: 3, title: "Certificates", hint: "Education certificate is required; language doc is optional." },
+  { id: 4, title: "Review & submit", hint: "Check your files, then submit. Upload progress is shown below." },
+];
+
+function FilePickHint({ file, ruleKey }) {
+  const rule = ADMISSION_FILE_RULES[ruleKey];
+  if (!file) {
+    return (
+      <p className="mt-1 text-xs text-gray-500">
+        {rule.accept.replace(/\./g, "").toUpperCase()} · max {formatFileSize(5 * 1024 * 1024)}
+      </p>
+    );
+  }
+  return (
+    <p className="mt-1 text-xs text-green-700">
+      Ready: {file.name} ({formatFileSize(file.size)})
+    </p>
+  );
+}
 
 export default function Admission() {
   const [error, setError] = useState({});
@@ -27,12 +55,21 @@ export default function Admission() {
   const [other_document, setOtherDocument] = useState(null);
   const [course_id, setApplyCourse] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadStatus, setUploadStatus] = useState("");
   const [step, setStep] = useState(1);
+  const [docStep, setDocStep] = useState(1);
   const navigate = useNavigate();
 
   useEffect(() => {
-    prepareRecaptcha();
+    warmRecaptcha();
   }, []);
+
+  useEffect(() => {
+    if (step === 3) {
+      warmRecaptcha();
+    }
+  }, [step]);
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -73,18 +110,90 @@ export default function Admission() {
       if (!(profile instanceof File)) newError.profile = "Profile picture is required";
       if (!(personal_statement instanceof File)) newError.personal_statement = "Personal statement is required";
       if (!(education_certificate instanceof File)) newError.education_certificate = "Education certificate is required";
-      // other_document is optional
     }
 
     setError(newError);
     return Object.keys(newError).length === 0;
   };
 
-  const goNext = () => {
-    if (validateStep(step)) setStep((s) => Math.min(3, s + 1));
+  const validateDocStep = (targetDocStep) => {
+    const newError = {};
+
+    if (targetDocStep === 1) {
+      if (!course_id) newError.course_id = "Apply course is required";
+      const profileError = validateAdmissionFile("profile", profile);
+      if (profileError) newError.profile = profileError;
+    }
+    if (targetDocStep === 2) {
+      const psError = validateAdmissionFile("personal_statement", personal_statement);
+      if (psError) newError.personal_statement = psError;
+    }
+    if (targetDocStep === 3) {
+      const certError = validateAdmissionFile("education_certificate", education_certificate);
+      if (certError) newError.education_certificate = certError;
+      if (language_proficiency instanceof File) {
+        const langError = validateAdmissionFile("language_proficiency", language_proficiency);
+        if (langError) newError.language_proficiency = langError;
+      }
+    }
+    if (targetDocStep === 4 && other_document instanceof File) {
+      const otherError = validateAdmissionFile("other_document", other_document);
+      if (otherError) newError.other_document = otherError;
+    }
+
+    setError(newError);
+    return Object.keys(newError).length === 0;
   };
 
-  const goBack = () => setStep((s) => Math.max(1, s - 1));
+  const handleFileSelect = (field, fileOrNull) => {
+    const file = fileOrNull || null;
+    const validationMessage = file ? validateAdmissionFile(field, file) : null;
+
+    if (validationMessage) {
+      setError((prev) => ({ ...prev, [field]: validationMessage }));
+      return;
+    }
+
+    setError((prev) => {
+      const next = { ...prev };
+      delete next[field];
+      return next;
+    });
+
+    const setters = {
+      profile: setProfile,
+      personal_statement: setPersonalStatement,
+      education_certificate: setEducationCertificate,
+      language_proficiency: setLanguageProficiency,
+      other_document: setOtherDocument,
+    };
+    setters[field]?.(file);
+  };
+
+  const goNext = () => {
+    if (step === 3) {
+      if (validateDocStep(docStep)) {
+        setDocStep((d) => Math.min(DOC_STEPS.length, d + 1));
+      }
+      return;
+    }
+    if (validateStep(step)) {
+      if (step === 2) setDocStep(1);
+      setStep((s) => Math.min(3, s + 1));
+    }
+  };
+
+  const goBack = () => {
+    if (step === 3 && docStep > 1) {
+      setDocStep((d) => Math.max(1, d - 1));
+      return;
+    }
+    if (step === 3 && docStep === 1) {
+      setStep(2);
+      return;
+    }
+    setStep((s) => Math.max(1, s - 1));
+  };
 
   const submitApplicationForm = async (e) => {
     e.preventDefault();
@@ -100,10 +209,20 @@ export default function Admission() {
     }
     if (!validateStep(3)) {
       setStep(3);
+      setDocStep(1);
       return;
     }
+    for (let ds = 1; ds <= DOC_STEPS.length; ds += 1) {
+      if (!validateDocStep(ds)) {
+        setStep(3);
+        setDocStep(ds);
+        return;
+      }
+    }
 
-    setIsLoading(true); // Start loading
+    setIsLoading(true);
+    setUploadProgress(0);
+    setUploadStatus("Running security check…");
 
     const formData = new FormData();
     formData.append("name", name);
@@ -131,7 +250,17 @@ export default function Admission() {
     // }
 
     try {
-      const responseData = await v2.submitAdmission(formData);
+      const responseData = await v2.submitAdmission(formData, {
+        onUploadProgress: (event) => {
+          setUploadStatus("Uploading documents…");
+          if (event.total) {
+            setUploadProgress(Math.min(99, Math.round((event.loaded / event.total) * 100)));
+          }
+        },
+      });
+
+      setUploadProgress(100);
+      setUploadStatus("Upload complete. Finalizing…");
 
       if (responseData?.success) {
         navigate("/admissions/application-form/successfully-submitted", {
@@ -201,7 +330,13 @@ export default function Admission() {
         if (firstKey) {
           if (step1Fields.has(firstKey)) setStep(1);
           else if (step2Fields.has(firstKey)) setStep(2);
-          else if (step3Fields.has(firstKey)) setStep(3);
+          else if (step3Fields.has(firstKey)) {
+            setStep(3);
+            if (firstKey === "course_id" || firstKey === "profile") setDocStep(1);
+            else if (firstKey === "personal_statement") setDocStep(2);
+            else if (firstKey === "education_certificate" || firstKey === "language_proficiency") setDocStep(3);
+            else setDocStep(4);
+          }
         }
       } else {
         setError({
@@ -210,8 +345,20 @@ export default function Admission() {
       }
     } finally {
       setIsLoading(false);
+      setUploadProgress(0);
+      setUploadStatus("");
     }
   };
+
+  const selectedFiles = {
+    profile,
+    personal_statement,
+    education_certificate,
+    language_proficiency,
+    other_document,
+  };
+  const totalBytes = totalAdmissionFileBytes(selectedFiles);
+  const currentDoc = DOC_STEPS[docStep - 1];
 
   return (
     <div className="max-w-7xl mx-auto px-3 py-6">
@@ -259,6 +406,12 @@ export default function Admission() {
             <div className="text-sm text-gray-500">
               Step <span className="font-semibold text-gray-800">{step}</span> of{" "}
               <span className="font-semibold text-gray-800">3</span>
+              {step === 3 && (
+                <>
+                  {" "}· Document <span className="font-semibold text-gray-800">{docStep}</span> of{" "}
+                  <span className="font-semibold text-gray-800">{DOC_STEPS.length}</span>
+                </>
+              )}
             </div>
           </div>
 
@@ -604,163 +757,176 @@ export default function Admission() {
           <div className="border-t border-gray-200 pt-6 mt-2">
             <div className="text-lg font-semibold text-gray-900">Documents</div>
             <div className="mt-1 text-sm text-gray-500">
-              Upload clear and readable files. Accepted formats depend on each field.
+              Add files one section at a time (max 5 MB each). They are sent together when you submit — progress is shown during upload.
             </div>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {DOC_STEPS.map((item) => (
+                <span
+                  key={item.id}
+                  className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${
+                    docStep === item.id
+                      ? "bg-indigo-600 text-white"
+                      : docStep > item.id
+                        ? "bg-green-100 text-green-800"
+                        : "bg-gray-100 text-gray-600"
+                  }`}
+                >
+                  {item.id}. {item.title}
+                </span>
+              ))}
+            </div>
+            <p className="mt-3 text-sm text-indigo-800 bg-indigo-50 border border-indigo-100 rounded-lg px-3 py-2">
+              {currentDoc?.hint}
+            </p>
           </div>
 
+          {docStep === 1 && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6 mt-4">
-            <div className="w-full md:w-1/2 px-3">
-              <label
-                className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-                htmlFor="grid-profile"
-              >
-                Profile Picture <span className="text-red-600">*</span>
-              </label>
-              <input
-                className={`appearance-none block w-full bg-gray-200 text-gray-700 border ${error.profile
-                  ? "border-red-500"
-                  : "border-gray-200"} rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white`}
-                id="grid-profile"
-                type="file"
-                onChange={e => setProfile(e.target.files[0])}
-              />
-              {error.profile &&
-                <p className="text-red-500 text-xs italic">
-                  {error.profile}
-                </p>}
-            </div>
-            <div className="w-full md:w-1/2 px-3">
-              <label
-                className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-                htmlFor="grid-profile"
-              >
-                Personal Statement <span className="text-red-600">*</span>
-              </label>
-              <input
-                className={`appearance-none block w-full bg-gray-200 text-gray-700 border ${error.personal_statement
-                  ? "border-red-500"
-                  : "border-gray-200"} rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white`}
-                id="grid-profile"
-                type="file"
-                onChange={e => setPersonalStatement(e.target.files[0])}
-              />
-              {error.personal_statement &&
-                <p className="text-red-500 text-xs italic">
-                  {error.personal_statement}
-                </p>}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
-            <div className="w-full md:w-1/2 px-3">
-              <label
-                className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-                htmlFor="grid-education-certificate"
-              >
-                Education Certificate <span className="text-red-600">*</span>
-              </label>
-              <input
-                className={`appearance-none block w-full bg-gray-200 text-gray-700 border ${error.education_certificate
-                  ? "border-red-500"
-                  : "border-gray-200"} rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white`}
-                id="grid-education-certificate"
-                type="file"
-                onChange={e => setEducationCertificate(e.target.files[0])}
-              />
-              {error.education_certificate &&
-                <p className="text-red-500 text-xs italic">
-                  {error.education_certificate}
-                </p>}
-            </div>
-            <div className="w-full md:w-1/2 px-3">
-              <label
-                className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-                htmlFor="grid-profile"
-              >
-                Language Proficiency Document
-              </label>
-              <input
-                className={`appearance-none block w-full bg-gray-200 text-gray-700 border ${error.language_proficiency
-                  ? "border-red-500"
-                  : "border-gray-200"} rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white`}
-                id="grid-profile"
-                type="file"
-                onChange={e => setLanguageProficiency(e.target.files[0])}
-              />
-              {error.language_proficiency &&
-                <p className="text-red-500 text-xs italic">
-                  {error.language_proficiency}
-                </p>}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
-            <div className="w-full md:w-1/2 px-3">
-              <label
-                className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-                htmlFor="grid-profile"
-              >
-                Other Document
-              </label>
-              <input
-                className={`appearance-none block w-full bg-gray-200 text-gray-700 border ${error.other_document
-                  ? "border-red-500"
-                  : "border-gray-200"} rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white`}
-                id="grid-profile"
-                type="file"
-                onChange={e => setOtherDocument(e.target.files[0])}
-              />
-              {error.other_document &&
-                <p className="text-red-500 text-xs italic">
-                  {error.other_document}
-                </p>}
-            </div>
-            <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
-              <label
-                className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-                htmlFor="grid-state"
-              >
+            <div className="w-full px-3 mb-6 md:mb-0">
+              <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" htmlFor="apply-course">
                 Apply Course <span className="text-red-600">*</span>
               </label>
               <div className="relative">
                 <select
-                  className={`appearance-none block w-full bg-gray-200 text-gray-700 border ${error.course_id
-                    ? "border-red-500"
-                    : "border-gray-200"} rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white`}
-                  id="grid-state"
-                  onChange={e => setApplyCourse(e.target.value)}
-                  defaultValue=""
+                  className={`appearance-none block w-full bg-gray-200 text-gray-700 border ${error.course_id ? "border-red-500" : "border-gray-200"} rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white`}
+                  id="apply-course"
+                  value={course_id}
+                  onChange={(e) => setApplyCourse(e.target.value)}
                 >
-                  <option value="" disabled>
-                    Select course
-                  </option>
-                  {courses.map(course => {
+                  <option value="" disabled>Select course</option>
+                  {courses.map((course) => {
                     if (course.application_sts === "1" || course.application_sts === 1 || course.application_sts === true) {
                       return (
-                        <option key={course.id} value={course.id}>
-                          {course.title}
-                        </option>
+                        <option key={course.id} value={course.id}>{course.title}</option>
                       );
                     }
                     return null;
                   })}
                 </select>
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                  <svg
-                    className="fill-current h-4 w-4"
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 20 20"
-                  >
-                    <path d="M10 3a1 1 0 01.293.707v10.586l3.293-3.293a1 1 0 011.414 1.414l-5 5a1 1 0 01-1.414 0l-5-5a1 1 0 011.414-1.414L9 14.293V3.707A1 1 0 0110 3z" />
-                  </svg>
-                </div>
               </div>
-              {error.course_id &&
-                <p className="text-red-500 text-xs italic">
-                  {error.course_id}
-                </p>}
+              {error.course_id && <p className="text-red-500 text-xs italic mt-1">{error.course_id}</p>}
+            </div>
+            <div className="w-full px-3">
+              <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" htmlFor="grid-profile">
+                Profile Picture <span className="text-red-600">*</span>
+              </label>
+              <input
+                className={`appearance-none block w-full bg-gray-200 text-gray-700 border ${error.profile ? "border-red-500" : "border-gray-200"} rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white`}
+                id="grid-profile"
+                type="file"
+                accept={ADMISSION_FILE_RULES.profile.accept}
+                onChange={(e) => handleFileSelect("profile", e.target.files?.[0])}
+              />
+              <FilePickHint file={profile} ruleKey="profile" />
+              {error.profile && <p className="text-red-500 text-xs italic mt-1">{error.profile}</p>}
             </div>
           </div>
+          )}
+
+          {docStep === 2 && (
+          <div className="grid grid-cols-1 gap-5 mb-6 mt-4">
+            <div className="w-full px-3">
+              <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" htmlFor="personal-statement">
+                Personal Statement <span className="text-red-600">*</span>
+              </label>
+              <input
+                className={`appearance-none block w-full bg-gray-200 text-gray-700 border ${error.personal_statement ? "border-red-500" : "border-gray-200"} rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white`}
+                id="personal-statement"
+                type="file"
+                accept={ADMISSION_FILE_RULES.personal_statement.accept}
+                onChange={(e) => handleFileSelect("personal_statement", e.target.files?.[0])}
+              />
+              <FilePickHint file={personal_statement} ruleKey="personal_statement" />
+              {error.personal_statement && <p className="text-red-500 text-xs italic mt-1">{error.personal_statement}</p>}
+            </div>
+          </div>
+          )}
+
+          {docStep === 3 && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6 mt-4">
+            <div className="w-full px-3">
+              <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" htmlFor="grid-education-certificate">
+                Education Certificate <span className="text-red-600">*</span>
+              </label>
+              <input
+                className={`appearance-none block w-full bg-gray-200 text-gray-700 border ${error.education_certificate ? "border-red-500" : "border-gray-200"} rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white`}
+                id="grid-education-certificate"
+                type="file"
+                accept={ADMISSION_FILE_RULES.education_certificate.accept}
+                onChange={(e) => handleFileSelect("education_certificate", e.target.files?.[0])}
+              />
+              <FilePickHint file={education_certificate} ruleKey="education_certificate" />
+              {error.education_certificate && <p className="text-red-500 text-xs italic mt-1">{error.education_certificate}</p>}
+            </div>
+            <div className="w-full px-3">
+              <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" htmlFor="language-doc">
+                Language Proficiency Document
+              </label>
+              <input
+                className={`appearance-none block w-full bg-gray-200 text-gray-700 border ${error.language_proficiency ? "border-red-500" : "border-gray-200"} rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white`}
+                id="language-doc"
+                type="file"
+                accept={ADMISSION_FILE_RULES.language_proficiency.accept}
+                onChange={(e) => handleFileSelect("language_proficiency", e.target.files?.[0] || null)}
+              />
+              <FilePickHint file={language_proficiency} ruleKey="language_proficiency" />
+              {error.language_proficiency && <p className="text-red-500 text-xs italic mt-1">{error.language_proficiency}</p>}
+            </div>
+          </div>
+          )}
+
+          {docStep === 4 && (
+          <>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6 mt-4">
+            <div className="w-full px-3">
+              <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" htmlFor="other-doc">
+                Other Document (optional)
+              </label>
+              <input
+                className={`appearance-none block w-full bg-gray-200 text-gray-700 border ${error.other_document ? "border-red-500" : "border-gray-200"} rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white`}
+                id="other-doc"
+                type="file"
+                accept={ADMISSION_FILE_RULES.other_document.accept}
+                onChange={(e) => handleFileSelect("other_document", e.target.files?.[0] || null)}
+              />
+              <FilePickHint file={other_document} ruleKey="other_document" />
+              {error.other_document && <p className="text-red-500 text-xs italic mt-1">{error.other_document}</p>}
+            </div>
+            <div className="w-full px-3">
+              <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700">
+                <div className="font-semibold text-gray-900 mb-2">Upload summary</div>
+                <ul className="space-y-1">
+                  {Object.entries(selectedFiles).map(([key, file]) => (
+                    <li key={key} className="flex justify-between gap-2">
+                      <span>{ADMISSION_FILE_RULES[key]?.label || key}</span>
+                      <span className={file ? "text-green-700" : "text-gray-400"}>
+                        {file ? formatFileSize(file.size) : "—"}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+                <div className="mt-3 pt-3 border-t border-gray-200 flex justify-between font-semibold">
+                  <span>Total upload size</span>
+                  <span>{formatFileSize(totalBytes)}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {(isLoading || uploadProgress > 0) && (
+            <div className="px-3 mb-4">
+              <div className="flex justify-between text-xs text-gray-600 mb-1">
+                <span>{uploadStatus || "Preparing upload…"}</span>
+                <span>{uploadProgress}%</span>
+              </div>
+              <div className="h-2 w-full rounded-full bg-gray-200 overflow-hidden">
+                <div
+                  className="h-full bg-indigo-600 transition-all duration-300"
+                  style={{ width: `${uploadProgress}%` }}
+                />
+              </div>
+            </div>
+          )}
 
           <div className="flex flex-wrap text-center -mx-3 mb-2">
             <div className="w-full px-3">
@@ -773,28 +939,11 @@ export default function Admission() {
               >
                 {isLoading ? (
                   <span className="inline-flex items-center gap-2">
-                    <svg
-                      className="h-5 w-5 animate-spin text-white"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      aria-hidden="true"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      />
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-                      />
+                    <svg className="h-5 w-5 animate-spin text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
                     </svg>
-                    Submitting...
+                    {uploadStatus || "Submitting…"}
                   </span>
                 ) : (
                   "Submit Application"
@@ -802,6 +951,8 @@ export default function Admission() {
               </button>
             </div>
           </div>
+          </>
+          )}
           </div>
 
           <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-between">
@@ -814,7 +965,7 @@ export default function Admission() {
               Back
             </button>
 
-            {step < 3 ? (
+            {step < 3 || docStep < DOC_STEPS.length ? (
               <button
                 type="button"
                 onClick={goNext}
@@ -824,7 +975,7 @@ export default function Admission() {
               </button>
             ) : (
               <div className="text-sm text-gray-500 self-center">
-                reCAPTCHA is enabled silently to protect this form.
+                Review your files above, then submit. Security check runs automatically.
               </div>
             )}
           </div>

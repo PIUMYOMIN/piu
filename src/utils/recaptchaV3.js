@@ -93,6 +93,8 @@ function normalizeAction(action) {
     .slice(0, 100);
 }
 
+export { normalizeAction };
+
 export async function executeRecaptcha(action) {
   if (!isRecaptchaConfigured()) {
     return null;
@@ -103,25 +105,24 @@ export async function executeRecaptcha(action) {
     return null;
   }
 
+  const normalizedAction = normalizeAction(action);
+
   try {
     return await window.grecaptcha.execute(getRecaptchaSiteKey(), {
-      action: normalizeAction(action),
+      action: normalizedAction,
     });
   } catch (error) {
-    console.error("reCAPTCHA execution failed:", error);
+    console.warn("reCAPTCHA execution failed:", error);
     return null;
   }
 }
 
+/** Load the reCAPTCHA script once; avoid tearing it down between requests. */
+export function warmRecaptcha() {
+  return prepareRecaptcha();
+}
+
 export function cleanupRecaptcha() {
-  if (!canUseDom()) return;
-
-  document
-    .querySelectorAll('script[data-recaptcha-v3="true"], script[src*="recaptcha/api.js"]')
-    .forEach((script) => script.remove());
-
-  document.querySelectorAll(".grecaptcha-badge").forEach((badge) => badge.remove());
-
-  loadPromise = null;
-  readyPromise = null;
+  // Intentionally keep the script loaded — removing it forces a full reload
+  // on the next submit and triggers Chrome "Slow network" warnings.
 }

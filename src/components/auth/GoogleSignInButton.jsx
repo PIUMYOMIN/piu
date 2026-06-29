@@ -3,7 +3,12 @@ import { isGoogleAuthConfigured, renderGoogleSignInButton } from "../../utils/go
 
 export default function GoogleSignInButton({ onCredential, onError, disabled = false }) {
   const buttonRef = useRef(null);
+  const onCredentialRef = useRef(onCredential);
+  const onErrorRef = useRef(onError);
   const [unavailable, setUnavailable] = useState(!isGoogleAuthConfigured());
+
+  onCredentialRef.current = onCredential;
+  onErrorRef.current = onError;
 
   useEffect(() => {
     if (disabled || !isGoogleAuthConfigured() || !buttonRef.current) {
@@ -16,11 +21,10 @@ export default function GoogleSignInButton({ onCredential, onError, disabled = f
     renderGoogleSignInButton(buttonRef.current, {
       callback: (response) => {
         if (response?.credential) {
-          onCredential(response.credential);
+          onCredentialRef.current?.(response.credential);
           return;
         }
-
-        onError?.(new Error("Google sign-in was cancelled."));
+        onErrorRef.current?.(new Error("Google sign-in was cancelled."));
       },
       width: buttonRef.current.offsetWidth || 320,
     }).then((ready) => {
@@ -32,10 +36,14 @@ export default function GoogleSignInButton({ onCredential, onError, disabled = f
     return () => {
       cancelled = true;
     };
-  }, [disabled, onCredential, onError]);
+  }, [disabled]);
 
   if (unavailable) {
-    return null;
+    return (
+      <p className="text-center text-sm text-gray-500">
+        Google sign-in is not configured for this environment.
+      </p>
+    );
   }
 
   return <div ref={buttonRef} className="w-full flex justify-center min-h-[44px]" />;
