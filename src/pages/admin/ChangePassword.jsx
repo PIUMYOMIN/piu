@@ -6,9 +6,11 @@ import { v2 } from "../../utils/api";
 import { ADMIN_TABS, buildDashboardPath } from "../../utils/dashboardTabs";
 import { useFloatingToast } from "../../hooks/useFloatingToast";
 import { getApiErrorMessage } from "../../utils/apiErrors";
+import { useAuth } from "../../contexts/AuthContext";
 
 function ChangePassword() {
   const navigate = useNavigate();
+  const { logout } = useAuth();
   const { showSuccess, showError, Toast } = useFloatingToast();
   const [formData, setFormData] = useState({
     current_password: "",
@@ -30,12 +32,12 @@ function ChangePassword() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (formData.password !== formData.password_confirmation) {
       showError("Passwords do not match");
       return;
     }
-    
+
     if (formData.password.length < 6) {
       showError("Password must be at least 6 characters");
       return;
@@ -43,23 +45,27 @@ function ChangePassword() {
 
     try {
       setLoading(true);
-      
+
       await v2.changePassword({
         current_password: formData.current_password,
         password: formData.password,
         password_confirmation: formData.password_confirmation,
       });
-      
-      showSuccess("Password changed successfully!");
-      navigate(buildDashboardPath('/piu/admin/change-password', ADMIN_TABS.CHANGE_PASSWORD), { replace: true });
-      
+
+      showSuccess("Password changed successfully! Please log in again with your new password.");
+      // Invalidate the current session — the old token is no longer valid after a password change.
+      setTimeout(async () => {
+        await logout();
+        navigate("/login", { replace: true });
+      }, 1500);
+
       // Reset form
       setFormData({
         current_password: "",
         password: "",
         password_confirmation: "",
       });
-      
+
     } catch (error) {
       console.error("Error changing password:", error);
       showError(getApiErrorMessage(error, "Failed to change password"));

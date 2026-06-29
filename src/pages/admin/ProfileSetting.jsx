@@ -5,9 +5,11 @@ import { v2 } from "../../utils/api";
 import { ADMIN_TABS, buildDashboardPath } from "../../utils/dashboardTabs";
 import { useFloatingToast } from "../../hooks/useFloatingToast";
 import { getApiErrorMessage } from "../../utils/apiErrors";
+import { useAuth } from "../../contexts/AuthContext";
 
 function ProfileSetting() {
   const navigate = useNavigate();
+  const { refreshUser } = useAuth();
   const { showSuccess, showError, Toast } = useFloatingToast();
   const [formData, setFormData] = useState({
     name: "",
@@ -19,7 +21,7 @@ function ProfileSetting() {
     bio: "",
     profile_image: null,
   });
-  
+
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
@@ -34,7 +36,7 @@ function ProfileSetting() {
       setLoading(true);
       const data = await v2.getProfile();
       const userData = data?.user || data;
-      
+
       setCurrentUser(userData);
       setFormData({
         name: userData.name || "",
@@ -46,7 +48,7 @@ function ProfileSetting() {
         bio: userData.bio || "",
         profile_image: null,
       });
-      
+
       if (userData.profile_image) {
         setImagePreview(userData.profile_image);
       }
@@ -73,7 +75,7 @@ function ProfileSetting() {
         ...formData,
         profile_image: file,
       });
-      
+
       // Create preview
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -85,10 +87,10 @@ function ProfileSetting() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     try {
       setUpdating(true);
-      
+
       const formDataToSend = new FormData();
       formDataToSend.append("name", formData.name);
       formDataToSend.append("email", formData.email);
@@ -97,22 +99,23 @@ function ProfileSetting() {
       formDataToSend.append("city", formData.city);
       formDataToSend.append("country", formData.country);
       formDataToSend.append("bio", formData.bio);
-      
+
       if (formData.profile_image instanceof File) {
         formDataToSend.append("profile_image", formData.profile_image);
       }
 
       const response = await v2.updateProfile(formDataToSend);
 
-      // Update local user data
+      // Update local user data and sync back to AuthContext so navbar/sidebar reflect changes immediately
       setCurrentUser(response?.user || response?.data?.user || null);
-      
+      await refreshUser();
+
       showSuccess("Profile updated successfully!");
       navigate(buildDashboardPath('/piu/admin/profile', ADMIN_TABS.PROFILE), { replace: true });
-      
+
       // Clear file input
       setFormData(prev => ({ ...prev, profile_image: null }));
-      
+
     } catch (error) {
       console.error("Error updating profile:", error);
       showError(getApiErrorMessage(error, "Failed to update profile"));
@@ -133,7 +136,7 @@ function ProfileSetting() {
   return (
     <div className="bg-white rounded-lg shadow-md w-full">
       <Toast />
-      
+
       {/* Header */}
       <div className="bg-gradient-to-r from-[#002147] to-[#003366] text-white p-6 rounded-t-lg">
         <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
@@ -197,7 +200,7 @@ function ProfileSetting() {
               <FaUser className="mr-2 text-blue-500" />
               Personal Information
             </h3>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium mb-2 text-gray-700">
@@ -215,7 +218,7 @@ function ProfileSetting() {
                   />
                 </div>
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium mb-2 text-gray-700">
                   Email Address
@@ -255,7 +258,7 @@ function ProfileSetting() {
               <FaPhone className="mr-2 text-green-500" />
               Contact Information
             </h3>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium mb-2 text-gray-700">
@@ -272,7 +275,7 @@ function ProfileSetting() {
                   />
                 </div>
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium mb-2 text-gray-700">
                   Address
@@ -306,7 +309,7 @@ function ProfileSetting() {
                   />
                 </div>
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium mb-2 text-gray-700">
                   Country

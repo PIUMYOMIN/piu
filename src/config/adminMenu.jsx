@@ -13,21 +13,21 @@ export const adminMenu = [
     icon: <FaTachometerAlt />,
     path: '/piu/admin',
     tab: ADMIN_TABS.DASHBOARD,
-    roles: ['admin', 'teacher', 'registrar'],
+    roles: ['admin', 'registrar'],
   },
   {
     title: 'Profile Setting',
     icon: <FaUserCog />,
     path: '/piu/admin/profile',
     tab: ADMIN_TABS.PROFILE,
-    roles: ['admin', 'teacher', 'registrar'],
+    roles: ['admin', 'registrar'],
   },
   {
     title: 'Change Password',
     icon: <FaKey />,
     path: '/piu/admin/change-password',
     tab: ADMIN_TABS.CHANGE_PASSWORD,
-    roles: ['admin', 'teacher', 'registrar'],
+    roles: ['admin', 'registrar'],
   },
   {
     title: 'Users',
@@ -50,7 +50,7 @@ export const adminMenu = [
   {
     title: 'All Courses',
     icon: <FaBookOpen />,
-    roles: ['admin', 'teacher', 'registrar'],
+    roles: ['admin', 'registrar'],
     sub: [
       { name: 'Course List', path: '/piu/admin/course-list', tab: ADMIN_TABS.COURSES },
       { name: 'Add Course', path: '/piu/admin/new', tab: ADMIN_TABS.ADD_COURSE },
@@ -65,7 +65,7 @@ export const adminMenu = [
   {
     title: 'All Blogs',
     icon: <FaBlog />,
-    roles: ['admin', 'teacher', 'registrar'],
+    roles: ['admin', 'registrar'],
     sub: [
       { name: 'Blog List', path: '/piu/admin/blog-list', tab: ADMIN_TABS.BLOGS },
       { name: 'Add Blog', path: '/piu/admin/add-blog', tab: ADMIN_TABS.ADD_BLOG },
@@ -74,7 +74,7 @@ export const adminMenu = [
   {
     title: 'All News',
     icon: <FaNewspaper />,
-    roles: ['admin', 'teacher', 'registrar'],
+    roles: ['admin', 'registrar'],
     sub: [
       { name: 'News List', path: '/piu/admin/news', tab: ADMIN_TABS.NEWS },
       { name: 'Add News', path: '/piu/admin/add-news', tab: ADMIN_TABS.ADD_NEWS },
@@ -83,7 +83,7 @@ export const adminMenu = [
   {
     title: 'Events',
     icon: <FaCalendarAlt />,
-    roles: ['admin', 'teacher', 'registrar'],
+    roles: ['admin', 'registrar'],
     sub: [
       { name: 'Event List', path: '/piu/admin/event-list', tab: ADMIN_TABS.EVENTS },
       { name: 'Add Event', path: '/piu/admin/add-event', tab: ADMIN_TABS.ADD_EVENT },
@@ -101,7 +101,7 @@ export const adminMenu = [
   {
     title: 'Curriculums',
     icon: <FaListAlt />,
-    roles: ['admin', 'teacher', 'registrar'],
+    roles: ['admin', 'registrar'],
     sub: [
       { name: 'Curriculum List', path: '/piu/admin/curriculum-list', tab: ADMIN_TABS.CURRICULUMS },
       { name: 'Add Curriculum', path: '/piu/admin/add-curriculum', tab: ADMIN_TABS.ADD_CURRICULUM },
@@ -153,7 +153,7 @@ export const adminMenu = [
   {
     title: 'Seminar',
     icon: <FaChalkboardTeacher />,
-    roles: ['admin', 'teacher', 'registrar'],
+    roles: ['admin', 'registrar'],
     sub: [
       { name: 'Seminar List', path: '/piu/admin/seminars', tab: ADMIN_TABS.SEMINARS },
       { name: 'Add Seminar', path: '/piu/admin/seminars/add', tab: ADMIN_TABS.ADD_SEMINAR },
@@ -162,7 +162,7 @@ export const adminMenu = [
   {
     title: 'Students',
     icon: <FaUserGraduate />,
-    roles: ['admin', 'teacher', 'registrar'],
+    roles: ['admin', 'registrar'],
     sub: [
       { name: 'All Students', path: '/piu/admin/students', tab: ADMIN_TABS.STUDENTS },
       { name: 'Add Student', path: '/piu/admin/students/add', tab: ADMIN_TABS.ADD_STUDENT },
@@ -173,7 +173,7 @@ export const adminMenu = [
   {
     title: 'Gallery',
     icon: <FaImages />,
-    roles: ['admin', 'teacher', 'registrar'],
+    roles: ['admin', 'registrar'],
     sub: [
       { name: 'Gallery List', path: '/piu/admin/gallery', tab: ADMIN_TABS.GALLERY },
       { name: 'Add Gallery', path: '/piu/admin/gallery/add', tab: ADMIN_TABS.ADD_GALLERY },
@@ -182,7 +182,7 @@ export const adminMenu = [
   {
     title: 'Assignments',
     icon: <FaTasks />,
-    roles: ['admin', 'teacher'],
+    roles: ['admin'],
     sub: [
       { name: 'Assignment List', path: '/piu/admin/assignments', tab: ADMIN_TABS.ASSIGNMENTS },
       { name: 'Add Assignment', path: '/piu/admin/assignments/add', tab: ADMIN_TABS.ADD_ASSIGNMENT },
@@ -191,7 +191,7 @@ export const adminMenu = [
   {
     title: 'Course Modules',
     icon: <FaBook />,
-    roles: ['admin', 'teacher', 'registrar'],
+    roles: ['admin', 'registrar'],
     sub: [
       { name: 'Module List', path: '/piu/admin/modules', tab: ADMIN_TABS.MODULES },
       { name: 'Add Module', path: '/piu/admin/modules/add', tab: ADMIN_TABS.ADD_MODULE },
@@ -220,7 +220,7 @@ export const adminMenu = [
   {
     title: 'Mail Box',
     icon: <FaEnvelope />,
-    roles: ['admin', 'teacher', 'registrar'],
+    roles: ['admin', 'registrar'],
     sub: [
       { name: 'Inbox', path: '/piu/admin/inbox', tab: 'inbox' },
       { name: 'Sent Mails', path: '/piu/admin/sent-mails', tab: 'sent-mails' },
@@ -230,7 +230,7 @@ export const adminMenu = [
   {
     title: 'Subjects',
     icon: <FaBookReader />,
-    roles: ['admin', 'teacher', 'registrar'],
+    roles: ['admin', 'registrar'],
     sub: [
       { name: 'Subject List', path: '/piu/admin/subject-list', tab: 'subjects' },
       { name: 'Add Subject', path: '/piu/admin/add-subject', tab: 'add-subject' },

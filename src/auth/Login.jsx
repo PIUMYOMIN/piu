@@ -96,8 +96,8 @@ export default function Login() {
         portal === "student"
           ? "Invalid student ID or password."
           : portal === "user"
-          ? "No matching account in the user table. Please choose the correct portal."
-          : "Invalid login credentials.";
+            ? "No matching account in the user table. Please choose the correct portal."
+            : "Invalid login credentials.";
       const message = getErrorMessage(err, fallback);
       setError(message);
     } finally {
@@ -118,44 +118,40 @@ export default function Login() {
           <button
             type="button"
             onClick={() => setPortal('user')}
-            className={`w-full rounded-md border px-4 py-2 text-sm text-left transition ${
-              portal === "user"
+            className={`w-full rounded-md border px-4 py-2 text-sm text-left transition ${portal === "user"
                 ? "border-green-700 bg-green-50 text-green-900"
                 : "border-gray-300 bg-white hover:border-green-600 hover:bg-green-50"
-            }`}
+              }`}
           >
             User Portal
           </button>
           <button
             type="button"
             onClick={() => setPortal('admin')}
-            className={`w-full rounded-md border px-4 py-2 text-sm text-left transition ${
-              portal === "admin"
+            className={`w-full rounded-md border px-4 py-2 text-sm text-left transition ${portal === "admin"
                 ? "border-green-700 bg-green-50 text-green-900"
                 : "border-gray-300 bg-white hover:border-green-600 hover:bg-green-50"
-            }`}
+              }`}
           >
             Admin Portal
           </button>
           <button
             type="button"
             onClick={() => setPortal('teacher')}
-            className={`w-full rounded-md border px-4 py-2 text-sm text-left transition ${
-              portal === "teacher"
+            className={`w-full rounded-md border px-4 py-2 text-sm text-left transition ${portal === "teacher"
                 ? "border-green-700 bg-green-50 text-green-900"
                 : "border-gray-300 bg-white hover:border-green-600 hover:bg-green-50"
-            }`}
+              }`}
           >
             Teacher Portal
           </button>
           <button
             type="button"
             onClick={() => setPortal('student')}
-            className={`w-full rounded-md border px-4 py-2 text-sm text-left transition ${
-              portal === "student"
+            className={`w-full rounded-md border px-4 py-2 text-sm text-left transition ${portal === "student"
                 ? "border-green-700 bg-green-50 text-green-900"
                 : "border-gray-300 bg-white hover:border-green-600 hover:bg-green-50"
-            }`}
+              }`}
           >
             Student Portal
           </button>
@@ -164,12 +160,12 @@ export default function Login() {
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="rounded-md border border-green-200 bg-green-50 px-3 py-2 text-sm font-medium text-green-800">
             {portal === "student"
-              ? `Student Portal: sign in with your Student ID and default password (password123).`
+              ? `Student Portal: sign in with your Student ID and default password (${STUDENT_DEFAULT_PASSWORD}).`
               : portal === "admin"
-              ? "Admin Portal: admin and registrar accounts."
-              : portal === "teacher"
-              ? "Teacher Portal: teacher accounts."
-              : "User Portal: normal users can login with email and password."}
+                ? "Admin Portal: admin and registrar accounts."
+                : portal === "teacher"
+                  ? "Teacher Portal: teacher accounts."
+                  : "User Portal: normal users can login with email and password."}
           </div>
 
           <div className="rounded-md shadow-sm space-y-4">

@@ -75,9 +75,16 @@ import {
   StudentProfile,
   StudentSemesterView,
   StudentYearView,
+  TeacherAssignments,
+  TeacherAttendance,
+  TeacherCourses,
   TeacherDashboard,
+  TeacherGrades,
   TeacherLayout,
+  TeacherMessages,
+  TeacherModules,
   TeacherProfile,
+  TeacherStudents,
   TeamList,
   TeamProfile,
   UserDashboard,
@@ -303,7 +310,7 @@ const router = createBrowserRouter([
   {
     path: "piu/admin",
     element: withSeo(
-      <PrivateRoute requiredRole={["admin", "teacher", "registrar"]}>
+      <PrivateRoute requiredRole={["admin", "registrar"]}>
         <AdminLayout />
       </PrivateRoute>,
       privateSeo("Admin Dashboard", "Private PIU administration area.")
@@ -356,7 +363,15 @@ const router = createBrowserRouter([
           privateSeo("Admission Details")
         ),
       },
-      { path: "course-list", element: withSeo(<CourseList />, privateSeo("Course List")) },
+      {
+        path: "course-list",
+        element: withSeo(
+          <RoleRoute allowedRoles={["admin", "registrar"]}>
+            <CourseList />
+          </RoleRoute>,
+          privateSeo("Course List")
+        ),
+      },
       { path: "list", element: <Navigate to="/piu/admin/course-list" replace /> },
       {
         path: "course-categories",
@@ -367,16 +382,96 @@ const router = createBrowserRouter([
           privateSeo("Course Categories")
         ),
       },
-      { path: "new/:id?", element: withSeo(<NewCourse />, privateSeo("Course Editor")) },
-      { path: "blog-list", element: withSeo(<BlogsList />, privateSeo("Blog List")) },
-      { path: "add-blog", element: withSeo(<BlogsForm />, privateSeo("Add Blog")) },
-      { path: "add-blog/edit/:id", element: withSeo(<BlogsForm />, privateSeo("Edit Blog")) },
-      { path: "news", element: withSeo(<NewsList />, privateSeo("News List")) },
-      { path: "add-news", element: withSeo(<NewsForm />, privateSeo("Add News")) },
-      { path: "add-news/edit/:id", element: withSeo(<NewsForm />, privateSeo("Edit News")) },
-      { path: "campus-list", element: withSeo(<CampusList />, privateSeo("Campus List")) },
-      { path: "new-campus", element: withSeo(<CampusForm />, privateSeo("Add Campus")) },
-      { path: "campus/:id/edit", element: withSeo(<CampusForm />, privateSeo("Edit Campus")) },
+      {
+        path: "new/:id?",
+        element: withSeo(
+          <RoleRoute allowedRoles={["admin", "registrar"]}>
+            <NewCourse />
+          </RoleRoute>,
+          privateSeo("Course Editor")
+        ),
+      },
+      {
+        path: "blog-list",
+        element: withSeo(
+          <RoleRoute allowedRoles={["admin", "registrar"]}>
+            <BlogsList />
+          </RoleRoute>,
+          privateSeo("Blog List")
+        ),
+      },
+      {
+        path: "add-blog",
+        element: withSeo(
+          <RoleRoute allowedRoles={["admin", "registrar"]}>
+            <BlogsForm />
+          </RoleRoute>,
+          privateSeo("Add Blog")
+        ),
+      },
+      {
+        path: "add-blog/edit/:id",
+        element: withSeo(
+          <RoleRoute allowedRoles={["admin", "registrar"]}>
+            <BlogsForm />
+          </RoleRoute>,
+          privateSeo("Edit Blog")
+        ),
+      },
+      {
+        path: "news",
+        element: withSeo(
+          <RoleRoute allowedRoles={["admin", "registrar"]}>
+            <NewsList />
+          </RoleRoute>,
+          privateSeo("News List")
+        ),
+      },
+      {
+        path: "add-news",
+        element: withSeo(
+          <RoleRoute allowedRoles={["admin", "registrar"]}>
+            <NewsForm />
+          </RoleRoute>,
+          privateSeo("Add News")
+        ),
+      },
+      {
+        path: "add-news/edit/:id",
+        element: withSeo(
+          <RoleRoute allowedRoles={["admin", "registrar"]}>
+            <NewsForm />
+          </RoleRoute>,
+          privateSeo("Edit News")
+        ),
+      },
+      {
+        path: "campus-list",
+        element: withSeo(
+          <RoleRoute allowedRoles={["admin", "registrar"]}>
+            <CampusList />
+          </RoleRoute>,
+          privateSeo("Campus List")
+        ),
+      },
+      {
+        path: "new-campus",
+        element: withSeo(
+          <RoleRoute allowedRoles={["admin", "registrar"]}>
+            <CampusForm />
+          </RoleRoute>,
+          privateSeo("Add Campus")
+        ),
+      },
+      {
+        path: "campus/:id/edit",
+        element: withSeo(
+          <RoleRoute allowedRoles={["admin", "registrar"]}>
+            <CampusForm />
+          </RoleRoute>,
+          privateSeo("Edit Campus")
+        ),
+      },
       {
         path: "team-list",
         element: withSeo(
@@ -404,12 +499,60 @@ const router = createBrowserRouter([
           privateSeo("Edit Team Member")
         ),
       },
-      { path: "event-list", element: withSeo(<EventList />, privateSeo("Event List")) },
-      { path: "add-event", element: withSeo(<AddEvent />, privateSeo("Add Event")) },
-      { path: "events/edit/:id", element: withSeo(<AddEvent />, privateSeo("Edit Event")) },
-      { path: "curriculum-list", element: withSeo(<CurriculumList />, privateSeo("Curriculum List")) },
-      { path: "add-curriculum", element: withSeo(<AddCurriculum />, privateSeo("Add Curriculum")) },
-      { path: "add-curriculum/edit/:id", element: withSeo(<AddCurriculum />, privateSeo("Edit Curriculum")) },
+      {
+        path: "event-list",
+        element: withSeo(
+          <RoleRoute allowedRoles={["admin", "registrar"]}>
+            <EventList />
+          </RoleRoute>,
+          privateSeo("Event List")
+        ),
+      },
+      {
+        path: "add-event",
+        element: withSeo(
+          <RoleRoute allowedRoles={["admin", "registrar"]}>
+            <AddEvent />
+          </RoleRoute>,
+          privateSeo("Add Event")
+        ),
+      },
+      {
+        path: "events/edit/:id",
+        element: withSeo(
+          <RoleRoute allowedRoles={["admin", "registrar"]}>
+            <AddEvent />
+          </RoleRoute>,
+          privateSeo("Edit Event")
+        ),
+      },
+      {
+        path: "curriculum-list",
+        element: withSeo(
+          <RoleRoute allowedRoles={["admin", "registrar"]}>
+            <CurriculumList />
+          </RoleRoute>,
+          privateSeo("Curriculum List")
+        ),
+      },
+      {
+        path: "add-curriculum",
+        element: withSeo(
+          <RoleRoute allowedRoles={["admin", "registrar"]}>
+            <AddCurriculum />
+          </RoleRoute>,
+          privateSeo("Add Curriculum")
+        ),
+      },
+      {
+        path: "add-curriculum/edit/:id",
+        element: withSeo(
+          <RoleRoute allowedRoles={["admin", "registrar"]}>
+            <AddCurriculum />
+          </RoleRoute>,
+          privateSeo("Edit Curriculum")
+        ),
+      },
       {
         path: "slider",
         element: withSeo(
@@ -419,37 +562,285 @@ const router = createBrowserRouter([
           privateSeo("Slider Management")
         ),
       },
-      { path: "mou", element: withSeo(<MOUList />, privateSeo("MOU List")) },
-      { path: "mou/add", element: withSeo(<AddMOU />, privateSeo("Add MOU")) },
-      { path: "departments", element: withSeo(<DepartmentList />, privateSeo("Departments")) },
-      { path: "departments/new", element: withSeo(<AddDepartment />, privateSeo("Add Department")) },
-      { path: "departments/edit/:id", element: withSeo(<AddDepartment />, privateSeo("Edit Department")) },
-      { path: "positions", element: withSeo(<PositionList />, privateSeo("Positions")) },
-      { path: "positions/new", element: withSeo(<AddPosition />, privateSeo("Add Position")) },
-      { path: "positions/edit/:id", element: withSeo(<AddPosition />, privateSeo("Edit Position")) },
-      { path: "seminars", element: withSeo(<SeminarList />, privateSeo("Seminars")) },
-      { path: "seminars/add", element: withSeo(<AddSeminar />, privateSeo("Add Seminar")) },
-      { path: "seminars/edit/:id", element: withSeo(<AddSeminar />, privateSeo("Edit Seminar")) },
-      { path: "gallery", element: withSeo(<GalleryList />, privateSeo("Gallery Management")) },
-      { path: "gallery/add", element: withSeo(<AddGallery />, privateSeo("Add Gallery")) },
-      { path: "gallery/add/:id", element: withSeo(<AddGallery />, privateSeo("Edit Gallery")) },
-      { path: "students", element: withSeo(<AllStudents />, privateSeo("Students")) },
-      { path: "students/add", element: withSeo(<AddStudent />, privateSeo("Add Student")) },
-      { path: "students/edit/:id", element: withSeo(<AddStudent />, privateSeo("Edit Student")) },
-      { path: "students/:id/details", element: withSeo(<StudentDetails />, privateSeo("Student Details")) },
-      { path: "students/add-grading", element: withSeo(<AddStudentGrading />, privateSeo("Add Student Grading")) },
-      { path: "students/grading", element: withSeo(<StudentGradingList />, privateSeo("Student Grading")) },
-      { path: "students/:id/grading", element: withSeo(<StudentYearView />, privateSeo("Student Year View")) },
-      { path: "students/:studentId/grading/:year", element: withSeo(<StudentSemesterView />, privateSeo("Student Semester View")) },
-      { path: "students/:studentId/:year/:semester", element: withSeo(<StudentGradeView />, privateSeo("Student Grade View")) },
-      { path: "students/:studentId/:year/:semester/new", element: withSeo(<GradeForm />, privateSeo("New Grade")) },
-      { path: "students/:studentId/:year/:semester/edit/:gradeId", element: withSeo(<GradeForm />, privateSeo("Edit Grade")) },
-      { path: "assignments", element: withSeo(<AssignmentsList />, privateSeo("Assignments")) },
-      { path: "assignments/add", element: withSeo(<AddAssignment />, privateSeo("Add Assignment")) },
-      { path: "assignments/edit/:id", element: withSeo(<AddAssignment />, privateSeo("Edit Assignment")) },
-      { path: "modules", element: withSeo(<ModulesList />, privateSeo("Modules")) },
-      { path: "modules/add", element: withSeo(<ModuleForm />, privateSeo("Add Module")) },
-      { path: "modules/edit/:id", element: withSeo(<ModuleForm />, privateSeo("Edit Module")) },
+      {
+        path: "mou",
+        element: withSeo(
+          <RoleRoute allowedRoles={["admin", "registrar"]}>
+            <MOUList />
+          </RoleRoute>,
+          privateSeo("MOU List")
+        ),
+      },
+      {
+        path: "mou/add",
+        element: withSeo(
+          <RoleRoute allowedRoles={["admin", "registrar"]}>
+            <AddMOU />
+          </RoleRoute>,
+          privateSeo("Add MOU")
+        ),
+      },
+      {
+        path: "departments",
+        element: withSeo(
+          <RoleRoute allowedRoles={["admin", "registrar"]}>
+            <DepartmentList />
+          </RoleRoute>,
+          privateSeo("Departments")
+        ),
+      },
+      {
+        path: "departments/new",
+        element: withSeo(
+          <RoleRoute allowedRoles={["admin", "registrar"]}>
+            <AddDepartment />
+          </RoleRoute>,
+          privateSeo("Add Department")
+        ),
+      },
+      {
+        path: "departments/edit/:id",
+        element: withSeo(
+          <RoleRoute allowedRoles={["admin", "registrar"]}>
+            <AddDepartment />
+          </RoleRoute>,
+          privateSeo("Edit Department")
+        ),
+      },
+      {
+        path: "positions",
+        element: withSeo(
+          <RoleRoute allowedRoles={["admin", "registrar"]}>
+            <PositionList />
+          </RoleRoute>,
+          privateSeo("Positions")
+        ),
+      },
+      {
+        path: "positions/new",
+        element: withSeo(
+          <RoleRoute allowedRoles={["admin", "registrar"]}>
+            <AddPosition />
+          </RoleRoute>,
+          privateSeo("Add Position")
+        ),
+      },
+      {
+        path: "positions/edit/:id",
+        element: withSeo(
+          <RoleRoute allowedRoles={["admin", "registrar"]}>
+            <AddPosition />
+          </RoleRoute>,
+          privateSeo("Edit Position")
+        ),
+      },
+      {
+        path: "seminars",
+        element: withSeo(
+          <RoleRoute allowedRoles={["admin", "registrar"]}>
+            <SeminarList />
+          </RoleRoute>,
+          privateSeo("Seminars")
+        ),
+      },
+      {
+        path: "seminars/add",
+        element: withSeo(
+          <RoleRoute allowedRoles={["admin", "registrar"]}>
+            <AddSeminar />
+          </RoleRoute>,
+          privateSeo("Add Seminar")
+        ),
+      },
+      {
+        path: "seminars/edit/:id",
+        element: withSeo(
+          <RoleRoute allowedRoles={["admin", "registrar"]}>
+            <AddSeminar />
+          </RoleRoute>,
+          privateSeo("Edit Seminar")
+        ),
+      },
+      {
+        path: "gallery",
+        element: withSeo(
+          <RoleRoute allowedRoles={["admin", "registrar"]}>
+            <GalleryList />
+          </RoleRoute>,
+          privateSeo("Gallery Management")
+        ),
+      },
+      {
+        path: "gallery/add",
+        element: withSeo(
+          <RoleRoute allowedRoles={["admin", "registrar"]}>
+            <AddGallery />
+          </RoleRoute>,
+          privateSeo("Add Gallery")
+        ),
+      },
+      {
+        path: "gallery/add/:id",
+        element: withSeo(
+          <RoleRoute allowedRoles={["admin", "registrar"]}>
+            <AddGallery />
+          </RoleRoute>,
+          privateSeo("Edit Gallery")
+        ),
+      },
+      {
+        path: "students",
+        element: withSeo(
+          <RoleRoute allowedRoles={["admin", "registrar"]}>
+            <AllStudents />
+          </RoleRoute>,
+          privateSeo("Students")
+        ),
+      },
+      {
+        path: "students/add",
+        element: withSeo(
+          <RoleRoute allowedRoles={["admin", "registrar"]}>
+            <AddStudent />
+          </RoleRoute>,
+          privateSeo("Add Student")
+        ),
+      },
+      {
+        path: "students/edit/:id",
+        element: withSeo(
+          <RoleRoute allowedRoles={["admin", "registrar"]}>
+            <AddStudent />
+          </RoleRoute>,
+          privateSeo("Edit Student")
+        ),
+      },
+      {
+        path: "students/:id/details",
+        element: withSeo(
+          <RoleRoute allowedRoles={["admin", "registrar"]}>
+            <StudentDetails />
+          </RoleRoute>,
+          privateSeo("Student Details")
+        ),
+      },
+      {
+        path: "students/add-grading",
+        element: withSeo(
+          <RoleRoute allowedRoles={["admin", "registrar"]}>
+            <AddStudentGrading />
+          </RoleRoute>,
+          privateSeo("Add Student Grading")
+        ),
+      },
+      {
+        path: "students/grading",
+        element: withSeo(
+          <RoleRoute allowedRoles={["admin", "registrar"]}>
+            <StudentGradingList />
+          </RoleRoute>,
+          privateSeo("Student Grading")
+        ),
+      },
+      {
+        path: "students/:id/grading",
+        element: withSeo(
+          <RoleRoute allowedRoles={["admin", "registrar"]}>
+            <StudentYearView />
+          </RoleRoute>,
+          privateSeo("Student Year View")
+        ),
+      },
+      {
+        path: "students/:studentId/grading/:year",
+        element: withSeo(
+          <RoleRoute allowedRoles={["admin", "registrar"]}>
+            <StudentSemesterView />
+          </RoleRoute>,
+          privateSeo("Student Semester View")
+        ),
+      },
+      {
+        path: "students/:studentId/:year/:semester",
+        element: withSeo(
+          <RoleRoute allowedRoles={["admin", "registrar"]}>
+            <StudentGradeView />
+          </RoleRoute>,
+          privateSeo("Student Grade View")
+        ),
+      },
+      {
+        path: "students/:studentId/:year/:semester/new",
+        element: withSeo(
+          <RoleRoute allowedRoles={["admin", "registrar"]}>
+            <GradeForm />
+          </RoleRoute>,
+          privateSeo("New Grade")
+        ),
+      },
+      {
+        path: "students/:studentId/:year/:semester/edit/:gradeId",
+        element: withSeo(
+          <RoleRoute allowedRoles={["admin", "registrar"]}>
+            <GradeForm />
+          </RoleRoute>,
+          privateSeo("Edit Grade")
+        ),
+      },
+      {
+        path: "assignments",
+        element: withSeo(
+          <RoleRoute allowedRoles={["admin"]}>
+            <AssignmentsList />
+          </RoleRoute>,
+          privateSeo("Assignments")
+        ),
+      },
+      {
+        path: "assignments/add",
+        element: withSeo(
+          <RoleRoute allowedRoles={["admin"]}>
+            <AddAssignment />
+          </RoleRoute>,
+          privateSeo("Add Assignment")
+        ),
+      },
+      {
+        path: "assignments/edit/:id",
+        element: withSeo(
+          <RoleRoute allowedRoles={["admin"]}>
+            <AddAssignment />
+          </RoleRoute>,
+          privateSeo("Edit Assignment")
+        ),
+      },
+      {
+        path: "modules",
+        element: withSeo(
+          <RoleRoute allowedRoles={["admin", "registrar"]}>
+            <ModulesList />
+          </RoleRoute>,
+          privateSeo("Modules")
+        ),
+      },
+      {
+        path: "modules/add",
+        element: withSeo(
+          <RoleRoute allowedRoles={["admin", "registrar"]}>
+            <ModuleForm />
+          </RoleRoute>,
+          privateSeo("Add Module")
+        ),
+      },
+      {
+        path: "modules/edit/:id",
+        element: withSeo(
+          <RoleRoute allowedRoles={["admin", "registrar"]}>
+            <ModuleForm />
+          </RoleRoute>,
+          privateSeo("Edit Module")
+        ),
+      },
       { path: "*", element: <Navigate to="/piu/admin" replace /> },
     ],
   },
@@ -483,6 +874,14 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: withSeo(<TeacherDashboard />, privateSeo("Teacher Dashboard")) },
       { path: "profile", element: withSeo(<TeacherProfile />, privateSeo("Teacher Profile")) },
+      { path: "courses", element: withSeo(<TeacherCourses />, privateSeo("My Courses")) },
+      { path: "assignments", element: withSeo(<TeacherAssignments />, privateSeo("Assignments")) },
+      { path: "modules", element: withSeo(<TeacherModules />, privateSeo("Course Modules")) },
+      { path: "students", element: withSeo(<TeacherStudents />, privateSeo("Students")) },
+      { path: "grades", element: withSeo(<TeacherGrades />, privateSeo("Grade Students")) },
+      { path: "attendance", element: withSeo(<TeacherAttendance />, privateSeo("Attendance")) },
+      { path: "inbox", element: withSeo(<TeacherMessages type="inbox" />, privateSeo("Inbox")) },
+      { path: "sent", element: withSeo(<TeacherMessages type="sent" />, privateSeo("Sent Messages")) },
     ],
   },
   {

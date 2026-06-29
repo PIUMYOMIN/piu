@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { getDashboardPathForUser } from "../utils/authRouting";
 
 export default function Register() {
   const [formData, setFormData] = useState({
@@ -48,10 +49,10 @@ export default function Register() {
     }
 
     try {
-      await register(formData);
+      const responseData = await register(formData);
       setSuccess("Registration successful! Redirecting...");
       setTimeout(() => {
-        navigate("/piu/user");
+        navigate(getDashboardPathForUser(responseData?.user));
       }, 2000);
     } catch (error) {
       const errorMessage = getErrorMessage(
@@ -278,7 +279,7 @@ export default function Register() {
             <div className="mt-6 grid grid-cols-2 gap-3">
               <button
                 type="button"
-                onClick={() => {/* Handle Google sign up */}}
+                onClick={() => {/* Handle Google sign up */ }}
                 className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 transition duration-150"
               >
                 <span className="sr-only">Sign up with Google</span>
@@ -288,7 +289,7 @@ export default function Register() {
               </button>
               <button
                 type="button"
-                onClick={() => {/* Handle Facebook sign up */}}
+                onClick={() => {/* Handle Facebook sign up */ }}
                 className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 transition duration-150"
               >
                 <span className="sr-only">Sign up with Facebook</span>

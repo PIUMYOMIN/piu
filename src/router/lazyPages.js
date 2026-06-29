@@ -94,3 +94,10 @@ export const StudentProfile = lazy(() => import("../pages/student/StudentProfile
 export const UserDashboard = lazy(() => import("../pages/user/UserDashboard"));
 export const TeacherDashboard = lazy(() => import("../pages/teacher/TeacherDashboard"));
 export const TeacherProfile = lazy(() => import("../pages/teacher/TeacherProfile"));
+export const TeacherCourses = lazy(() => import("../pages/teacher/TeacherCourses"));
+export const TeacherAssignments = lazy(() => import("../pages/teacher/TeacherAssignments"));
+export const TeacherModules = lazy(() => import("../pages/teacher/TeacherModules"));
+export const TeacherStudents = lazy(() => import("../pages/teacher/TeacherStudents"));
+export const TeacherGrades = lazy(() => import("../pages/teacher/TeacherGrades"));
+export const TeacherAttendance = lazy(() => import("../pages/teacher/TeacherAttendance"));
+export const TeacherMessages = lazy(() => import("../pages/teacher/TeacherMessages"));
