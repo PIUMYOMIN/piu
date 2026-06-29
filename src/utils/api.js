@@ -1,7 +1,7 @@
 // src/utils/api.js
 import axios from 'axios';
 import config from '../config';
-import { cleanupRecaptcha, executeRecaptcha } from './recaptchaV3';
+import { cleanupRecaptcha, executeRecaptcha, isRecaptchaConfigured } from './recaptchaV3';
 
 const API_BASE_URL = config.apiBaseUrl;
 const API_V1_URL = `${API_BASE_URL}/api/v1`;
@@ -36,18 +36,26 @@ function createApiClient(baseURL) {
             .replace(/_+/g, '_')
             .replace(/^_+|_+$/g, '');
 
-        try {
-          const recaptchaToken = await executeRecaptcha(action);
-          if (recaptchaToken) {
-            requestConfig.headers['X-Recaptcha-Token'] = recaptchaToken;
-            requestConfig.headers['X-Recaptcha-Action'] = action;
-          }
-        } finally {
-          cleanupRecaptcha();
+        const recaptchaToken = await executeRecaptcha(action);
+        if (recaptchaToken) {
+          requestConfig.headers['X-Recaptcha-Token'] = recaptchaToken;
+          requestConfig.headers['X-Recaptcha-Action'] = action;
+        } else if (isRecaptchaConfigured()) {
+          return Promise.reject(
+            Object.assign(new Error('Security verification failed to load. Please refresh the page, disable ad blockers, and try again.'), {
+              isRecaptchaError: true,
+            })
+          );
         }
       }
 
       delete requestConfig.recaptcha;
+
+      // Let the browser set multipart boundaries for file uploads.
+      if (typeof FormData !== 'undefined' && requestConfig.data instanceof FormData) {
+        delete requestConfig.headers['Content-Type'];
+        delete requestConfig.headers['content-type'];
+      }
 
       return requestConfig;
     },
@@ -55,8 +63,12 @@ function createApiClient(baseURL) {
   );
 
   client.interceptors.response.use(
-    (response) => response,
+    (response) => {
+      cleanupRecaptcha();
+      return response;
+    },
     (error) => {
+      cleanupRecaptcha();
       if (error.response?.status === 401) {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
@@ -82,14 +94,12 @@ export const v1 = {
   submitApplicationForm: (payload) =>
     apiClient
       .post('/admissions', payload, {
-        headers: { 'Content-Type': 'multipart/form-data' },
         recaptcha: { enabled: true, action: 'admission_form_submit' },
       })
       .then((r) => r.data),
   submitContactForm: (formData) =>
     apiClient
       .post('/contact/form-submit', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
         recaptcha: { enabled: true, action: 'contact_form_submit' },
       })
       .then((r) => r.data),
@@ -99,6 +109,7 @@ export const v2 = {
   // Auth
   register: (userData) => apiClient.post('/register', userData).then((r) => r.data),
   login: (payload) => apiClient.post('/login', payload).then((r) => r.data),
+  googleLogin: (payload) => apiClient.post('/auth/google', payload).then((r) => r.data),
   studentPortalLogin: (payload) => apiClient.post('/student-portal/login', payload).then((r) => r.data),
   logout: () => apiClient.post('/logout').then((r) => r.data),
   forgotPassword: (email) => apiClient.post('/forgot-password', { email }).then((r) => r.data),
@@ -125,7 +136,6 @@ export const v2 = {
   submitAdmission: (formData) =>
     apiClient
       .post('/admissions', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
         recaptcha: { enabled: true, action: 'admission_form_submit' },
       })
       .then((r) => r.data),

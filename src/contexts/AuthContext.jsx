@@ -92,6 +92,21 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const googleLogin = async (idToken) => {
+    setLoading(true);
+    try {
+      const responseData = await v2.googleLogin({ id_token: idToken });
+      const { token, user: nextUser } = responseData;
+      const nextAccountType = resolveAccountType(nextUser, responseData.account_type || ACCOUNT_TYPES.STAFF);
+      persistSession({ token, user: nextUser, accountType: nextAccountType });
+      setUser(nextUser);
+      setAccountType(nextAccountType);
+      return responseData;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const studentPortalLogin = async (studentId, password) => {
     setLoading(true);
     try {
@@ -151,6 +166,7 @@ export const AuthProvider = ({ children }) => {
     initialized,
     register,
     login,
+    googleLogin,
     studentPortalLogin,
     logout,
     logoutLocal,

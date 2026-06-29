@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import GoogleSignInButton from "../components/auth/GoogleSignInButton";
 import { getDashboardPathForUser } from "../utils/authRouting";
 
 export default function Register() {
@@ -14,7 +15,7 @@ export default function Register() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const navigate = useNavigate();
-  const { register, loading } = useAuth();
+  const { register, googleLogin, loading } = useAuth();
 
   const getErrorMessage = (err, fallback) => {
     const data = err?.response?.data;
@@ -32,6 +33,29 @@ export default function Register() {
       [e.target.name]: e.target.value,
     });
   };
+
+  const handleGoogleCredential = useCallback(async (idToken) => {
+    setError("");
+    setSuccess("");
+
+    try {
+      const responseData = await googleLogin(idToken);
+      setSuccess("Registration successful! Redirecting...");
+      setTimeout(() => {
+        navigate(getDashboardPathForUser(responseData?.user));
+      }, 1500);
+    } catch (error) {
+      const errorMessage = getErrorMessage(
+        error,
+        "Google sign-up failed. Please try again."
+      );
+      setError(errorMessage);
+    }
+  }, [googleLogin, navigate]);
+
+  const handleGoogleError = useCallback((err) => {
+    setError(err?.message || "Google sign-up failed. Please try again.");
+  }, []);
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -276,26 +300,21 @@ export default function Register() {
               </div>
             </div>
 
-            <div className="mt-6 grid grid-cols-2 gap-3">
+            <div className="mt-6">
+              <GoogleSignInButton
+                onCredential={handleGoogleCredential}
+                onError={handleGoogleError}
+                disabled={loading}
+              />
+            </div>
+            <div className="mt-6 grid grid-cols-1 gap-3">
               <button
                 type="button"
-                onClick={() => {/* Handle Google sign up */ }}
-                className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 transition duration-150"
-              >
-                <span className="sr-only">Sign up with Google</span>
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z" />
-                </svg>
-              </button>
-              <button
-                type="button"
-                onClick={() => {/* Handle Facebook sign up */ }}
-                className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 transition duration-150"
+                disabled
+                className="w-full inline-flex justify-center py-2 px-4 border border-gray-200 rounded-md shadow-sm bg-gray-50 text-sm font-medium text-gray-400 cursor-not-allowed"
               >
                 <span className="sr-only">Sign up with Facebook</span>
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-                </svg>
+                Facebook sign-up coming soon
               </button>
             </div>
           </div>

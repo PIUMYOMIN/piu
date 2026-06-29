@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import GoogleSignInButton from '../components/auth/GoogleSignInButton';
 import {
   getDashboardPathForRole,
   resolveUserRole,
@@ -16,7 +17,7 @@ export default function Login() {
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
-  const { login, logoutLocal, studentPortalLogin } = useAuth();
+  const { login, logoutLocal, studentPortalLogin, googleLogin } = useAuth();
 
   const getErrorMessage = (err, fallback) => {
     const data = err?.response?.data;
@@ -27,6 +28,56 @@ export default function Login() {
     }
     return data?.message || data?.error || fallback;
   };
+
+  const redirectAfterStaffLogin = useCallback((userData) => {
+    const role = resolveUserRole(userData?.user);
+
+    if (portal === 'user' && role !== 'user') {
+      logoutLocal();
+      setError('This account is not a user account. Please choose the correct portal.');
+      return;
+    }
+
+    if (portal === 'admin' && role !== 'admin' && role !== 'registrar') {
+      logoutLocal();
+      setError('This account is not an admin account.');
+      return;
+    }
+
+    if (portal === 'teacher' && role !== 'teacher') {
+      logoutLocal();
+      setError('This account is not a teacher account.');
+      return;
+    }
+
+    let destination = getDashboardPathForRole(role);
+    if (role === 'admin' || role === 'registrar') {
+      destination = buildDashboardPath(destination, ADMIN_TABS.DASHBOARD);
+    } else if (role === 'teacher') {
+      destination = buildDashboardPath(destination, TEACHER_TABS.DASHBOARD);
+    }
+
+    navigate(destination, { replace: true });
+  }, [portal, logoutLocal, navigate]);
+
+  const handleGoogleCredential = useCallback(async (idToken) => {
+    setError('');
+    setIsSubmitting(true);
+
+    try {
+      const userData = await googleLogin(idToken);
+      redirectAfterStaffLogin(userData);
+    } catch (err) {
+      const message = getErrorMessage(err, 'Google sign-in failed. Please try again.');
+      setError(message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [googleLogin, redirectAfterStaffLogin]);
+
+  const handleGoogleError = useCallback((err) => {
+    setError(err?.message || 'Google sign-in failed. Please try again.');
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -63,34 +114,7 @@ export default function Login() {
       }
 
       const userData = await login(email, password);
-      const role = resolveUserRole(userData?.user);
-
-      if (portal === 'user' && role !== 'user') {
-        logoutLocal();
-        setError('This account is not a user account. Please choose the correct portal.');
-        return;
-      }
-
-      if (portal === 'admin' && role !== 'admin' && role !== 'registrar') {
-        logoutLocal();
-        setError('This account is not an admin account.');
-        return;
-      }
-
-      if (portal === 'teacher' && role !== 'teacher') {
-        logoutLocal();
-        setError('This account is not a teacher account.');
-        return;
-      }
-
-      let destination = getDashboardPathForRole(role);
-      if (role === 'admin' || role === 'registrar') {
-        destination = buildDashboardPath(destination, ADMIN_TABS.DASHBOARD);
-      } else if (role === 'teacher') {
-        destination = buildDashboardPath(destination, TEACHER_TABS.DASHBOARD);
-      }
-
-      navigate(destination, { replace: true });
+      redirectAfterStaffLogin(userData);
     } catch (err) {
       const fallback =
         portal === "student"
@@ -300,6 +324,29 @@ export default function Login() {
                   Create one
                 </Link>
               </p>
+            </div>
+          )}
+
+          {portal !== 'student' && (
+            <div className="mt-6">
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-300"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-2 bg-gradient-to-br from-green-50 to-blue-50 text-gray-500">
+                    Or continue with
+                  </span>
+                </div>
+              </div>
+
+              <div className="mt-6">
+                <GoogleSignInButton
+                  onCredential={handleGoogleCredential}
+                  onError={handleGoogleError}
+                  disabled={isSubmitting}
+                />
+              </div>
             </div>
           )}
         </form>

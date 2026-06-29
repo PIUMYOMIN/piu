@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import LoadingSpinner from "../../components/user/LoadingSpinner";
 import { v2 } from "../../utils/api";
+import { prepareRecaptcha } from "../../utils/recaptchaV3";
 
 export default function Admission() {
   const [error, setError] = useState({});
@@ -28,6 +29,10 @@ export default function Admission() {
   const [isLoading, setIsLoading] = useState(false);
   const [step, setStep] = useState(1);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    prepareRecaptcha();
+  }, []);
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -139,7 +144,18 @@ export default function Admission() {
 
     } catch (error) {
       const status = error?.response?.status;
-      if (status === 413) {
+      const responseMessage = error?.response?.data?.message || "";
+      const isRecaptchaFailure =
+        error?.isRecaptchaError ||
+        /recaptcha/i.test(responseMessage);
+
+      if (isRecaptchaFailure) {
+        setError({
+          form:
+            responseMessage ||
+            "Security verification failed. Please refresh the page, disable ad blockers, and try again.",
+        });
+      } else if (status === 413) {
         setError({
           form:
             "Your files are too large for the server to accept (413). Please compress the documents or increase PHP upload limits (upload_max_filesize / post_max_size) in XAMPP php.ini, then try again.",
@@ -154,6 +170,13 @@ export default function Admission() {
           for (const [key, val] of Object.entries(fieldErrors)) {
             next[key] = Array.isArray(val) ? val[0] : String(val || "");
           }
+        }
+
+        if (next.recaptcha) {
+          setError({
+            form: next.recaptcha,
+          });
+          return;
         }
 
         setError({
@@ -541,8 +564,8 @@ export default function Admission() {
                   <option value="" disabled>
                     Are you Alumni of PIU?
                   </option>
-                  <option value="New_student">Yes</option>
-                  <option value="Old_student">No</option>
+                  <option value="Old_student">Yes</option>
+                  <option value="New_student">No</option>
                 </select>
                 <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
                   <svg
