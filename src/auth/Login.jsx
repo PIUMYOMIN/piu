@@ -4,11 +4,10 @@ import { useAuth } from '../contexts/AuthContext';
 import GoogleSignInButton from '../components/auth/GoogleSignInButton';
 import { warmGoogleAuth } from '../utils/googleAuth';
 import {
-  getDashboardPathForRole,
+  getAuthenticatedHomePath,
   resolveUserRole,
   STUDENT_DEFAULT_PASSWORD,
 } from '../utils/authRouting';
-import { ADMIN_TABS, buildDashboardPath, STUDENT_TABS, TEACHER_TABS } from '../utils/dashboardTabs';
 
 export default function Login() {
   const [portal, setPortal] = useState('user');
@@ -55,14 +54,7 @@ export default function Login() {
       return;
     }
 
-    let destination = getDashboardPathForRole(role);
-    if (role === 'admin' || role === 'registrar') {
-      destination = buildDashboardPath(destination, ADMIN_TABS.DASHBOARD);
-    } else if (role === 'teacher') {
-      destination = buildDashboardPath(destination, TEACHER_TABS.DASHBOARD);
-    }
-
-    navigate(destination, { replace: true });
+    navigate(getAuthenticatedHomePath(userData?.user), { replace: true });
   }, [portal, logoutLocal, navigate]);
 
   const handleGoogleCredential = useCallback(async (idToken) => {
@@ -106,7 +98,7 @@ export default function Login() {
         }
 
         navigate(
-          buildDashboardPath(getDashboardPathForRole(role), STUDENT_TABS.DASHBOARD),
+          getAuthenticatedHomePath(studentData?.user),
           { replace: true }
         );
         return;

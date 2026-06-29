@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import GoogleSignInButton from "../components/auth/GoogleSignInButton";
-import { getDashboardPathForUser } from "../utils/authRouting";
+import { getAuthenticatedHomePath } from "../utils/authRouting";
 import { warmGoogleAuth } from "../utils/googleAuth";
 
 export default function Register() {
@@ -47,7 +47,7 @@ export default function Register() {
       const responseData = await googleLogin(idToken);
       setSuccess("Registration successful! Redirecting...");
       setTimeout(() => {
-        navigate(getDashboardPathForUser(responseData?.user));
+        navigate(getAuthenticatedHomePath(responseData?.user));
       }, 1500);
     } catch (error) {
       const errorMessage = getErrorMessage(
@@ -72,8 +72,8 @@ export default function Register() {
       return;
     }
 
-    if (formData.password.length < 6) {
-      setError("Password must be at least 6 characters long");
+    if (formData.password.length < 8) {
+      setError("Password must be at least 8 characters long");
       return;
     }
 
@@ -81,7 +81,7 @@ export default function Register() {
       const responseData = await register(formData);
       setSuccess("Registration successful! Redirecting...");
       setTimeout(() => {
-        navigate(getDashboardPathForUser(responseData?.user));
+        navigate(getAuthenticatedHomePath(responseData?.user));
       }, 2000);
     } catch (error) {
       const errorMessage = getErrorMessage(
@@ -176,7 +176,7 @@ export default function Register() {
                 value={formData.password}
                 onChange={handleChange}
                 className="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm transition duration-150"
-                placeholder="Password (min. 6 characters)"
+                placeholder="Password (min. 8 characters)"
               />
             </div>
 
