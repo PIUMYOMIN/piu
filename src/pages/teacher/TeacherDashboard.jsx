@@ -1,13 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
-import { adminApi } from "../../api/admin";
-import { getApiErrorMessage } from "../../utils/apiErrors";
+import { teacherApi } from "../../api/teacher";
+import ProfileAvatar from "../../components/common/ProfileAvatar";
 import { EmptyState, LoadingState, Panel, QuickLink, StatCard, StudentHero } from "../../components/student/StudentUi";
 import { TEACHER_TABS, buildDashboardPath } from "../../utils/dashboardTabs";
-
-const fallbackAvatar =
-  "https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80";
 
 function InfoRow({ label, value }) {
   return (
@@ -22,6 +19,7 @@ export default function TeacherDashboard() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({ courses: 0, assignments: 0, students: 0, modules: 0 });
+  const [programs, setPrograms] = useState([]);
   const [recentAssignments, setRecentAssignments] = useState([]);
 
   useEffect(() => {
@@ -29,24 +27,11 @@ export default function TeacherDashboard() {
     async function load() {
       setLoading(true);
       try {
-        const [aData, cData, sData, mData] = await Promise.all([
-          adminApi.assignments.list(),
-          adminApi.courses.list(),
-          adminApi.students.list(),
-          adminApi.modules.list(),
-        ]);
-        if (mounted) {
-          const assignments = Array.isArray(aData) ? aData : [];
-          setStats({
-            courses: Array.isArray(cData) ? cData.length : 0,
-            assignments: assignments.length,
-            students: Array.isArray(sData) ? sData.length : 0,
-            modules: Array.isArray(mData) ? mData.length : 0,
-          });
-          setRecentAssignments(assignments.slice(0, 5));
-        }
-      } catch (e) {
-        // Non-critical: dashboard shows zeros on failure
+        const data = await teacherApi.dashboard();
+        if (!mounted) return;
+        setStats(data?.stats || { courses: 0, assignments: 0, students: 0, modules: 0 });
+        setPrograms(Array.isArray(data?.assigned_programs) ? data.assigned_programs : []);
+        setRecentAssignments(Array.isArray(data?.recent_assignments) ? data.recent_assignments : []);
       } finally {
         if (mounted) setLoading(false);
       }
@@ -56,52 +41,51 @@ export default function TeacherDashboard() {
   }, []);
 
   const name = user?.name || "Teacher";
-  const role = String(
-    user?.role?.name ?? user?.role ?? (Array.isArray(user?.roles) ? user.roles[0]?.name || user.roles[0] : "teacher")
-  ).toUpperCase();
 
   return (
     <div className="mx-auto max-w-7xl space-y-6">
       <StudentHero
         eyebrow="Teacher Dashboard"
         title={`Welcome, ${name}`}
-        subtitle="Manage your courses, assignments, students, and attendance from one place."
+        subtitle="You only see students, modules, assignments, and grades for programs assigned to you."
       />
 
       {loading ? (
         <LoadingState label="Loading dashboard…" />
       ) : (
         <>
+          {programs.length === 0 && (
+            <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+              No programs are assigned to your account yet. Ask an administrator to assign your teaching programs in Admin → Users.
+            </div>
+          )}
+
           <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <StatCard title="Total Courses" value={stats.courses} tone="blue"
-              note="Available in the system" />
-            <StatCard title="Course Modules" value={stats.modules} tone="purple"
-              note="Modules in the library" />
-            <StatCard title="Assignments" value={stats.assignments} tone="green"
-              note="Across all courses" />
-            <StatCard title="Students" value={stats.students} tone="amber"
-              note="Enrolled students" />
+            <StatCard title="My Programs" value={stats.courses} tone="blue" note="Assigned to you" />
+            <StatCard title="Program Modules" value={stats.modules} tone="purple" note="Linked to your programs" />
+            <StatCard title="Assignments" value={stats.assignments} tone="green" note="In your programs only" />
+            <StatCard title="Students" value={stats.students} tone="amber" note="Enrolled in your programs" />
           </section>
 
           <section className="grid grid-cols-1 gap-6 lg:grid-cols-3">
             <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm lg:col-span-1">
               <div className="flex flex-col items-center text-center">
-                <img
-                  src={user?.profile || user?.profile_image || user?.avatar || fallbackAvatar}
-                  alt={name}
-                  className="h-24 w-24 rounded-full border-4 border-blue-100 object-cover"
-                  onError={(e) => { e.currentTarget.src = fallbackAvatar; }}
-                />
+                <ProfileAvatar user={user} size="lg" />
                 <h2 className="mt-4 text-xl font-semibold text-gray-900">{name}</h2>
                 <p className="text-sm text-gray-500">{user?.email || "—"}</p>
-                <span className="mt-2 inline-flex rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">
-                  {role}
-                </span>
+                {programs.length > 0 && (
+                  <div className="mt-3 flex flex-wrap justify-center gap-2">
+                    {programs.map((course) => (
+                      <span key={course.id} className="rounded-full bg-blue-100 px-2.5 py-1 text-xs font-medium text-blue-800">
+                        {course.title}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
               <div className="mt-6">
                 <InfoRow label="Phone" value={user?.phone} />
-                <InfoRow label="Department" value={user?.department} />
-                <InfoRow label="Status" value="Active" />
+                <InfoRow label="Programs" value={programs.map((p) => p.title).join(", ") || "None assigned"} />
               </div>
               <div className="mt-4">
                 <Link
@@ -117,10 +101,7 @@ export default function TeacherDashboard() {
               <Panel
                 title="Recent Assignments"
                 action={
-                  <Link
-                    to={buildDashboardPath("/piu/teacher/assignments", "assignments")}
-                    className="text-sm font-medium text-blue-700 hover:text-blue-900"
-                  >
+                  <Link to={buildDashboardPath("/piu/teacher/assignments", "assignments")} className="text-sm font-medium text-blue-700 hover:text-blue-900">
                     View all
                   </Link>
                 }
@@ -128,60 +109,24 @@ export default function TeacherDashboard() {
                 {recentAssignments.length ? (
                   <ul className="space-y-3">
                     {recentAssignments.map((a) => (
-                      <li
-                        key={a.id}
-                        className="rounded-lg border border-gray-100 bg-gray-50 p-3"
-                      >
+                      <li key={a.id} className="rounded-lg border border-gray-100 bg-gray-50 p-3">
                         <p className="font-medium text-gray-900 text-sm">{a.name}</p>
-                        {a.description && (
-                          <p className="mt-0.5 text-xs text-gray-500 line-clamp-1">{a.description}</p>
-                        )}
+                        <p className="mt-0.5 text-xs text-gray-500">{a.course?.title || "Program"}</p>
                       </li>
                     ))}
                   </ul>
                 ) : (
-                  <EmptyState message="No assignments yet." />
+                  <EmptyState message="No assignments in your assigned programs yet." />
                 )}
               </Panel>
 
               <Panel title="Quick Actions">
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  <QuickLink
-                    to="/piu/teacher/courses"
-                    tab={TEACHER_TABS.COURSES}
-                    label="My Courses"
-                    tone="blue"
-                  />
-                  <QuickLink
-                    to="/piu/teacher/modules"
-                    tab={TEACHER_TABS.MODULES}
-                    label="Course Modules"
-                    tone="purple"
-                  />
-                  <QuickLink
-                    to="/piu/teacher/assignments"
-                    tab={TEACHER_TABS.ASSIGNMENTS}
-                    label="Assignments"
-                    tone="green"
-                  />
-                  <QuickLink
-                    to="/piu/teacher/students"
-                    tab={TEACHER_TABS.STUDENTS}
-                    label="Students"
-                    tone="amber"
-                  />
-                  <QuickLink
-                    to="/piu/teacher/grades"
-                    tab={TEACHER_TABS.GRADES}
-                    label="Grade Students"
-                    tone="blue"
-                  />
-                  <QuickLink
-                    to="/piu/teacher/attendance"
-                    tab={TEACHER_TABS.ATTENDANCE}
-                    label="Mark Attendance"
-                    tone="amber"
-                  />
+                  <QuickLink to="/piu/teacher/courses" tab={TEACHER_TABS.COURSES} label="My Programs" tone="blue" />
+                  <QuickLink to="/piu/teacher/modules" tab={TEACHER_TABS.MODULES} label="Program Modules" tone="purple" />
+                  <QuickLink to="/piu/teacher/assignments" tab={TEACHER_TABS.ASSIGNMENTS} label="Assignments" tone="green" />
+                  <QuickLink to="/piu/teacher/students" tab={TEACHER_TABS.STUDENTS} label="Students" tone="amber" />
+                  <QuickLink to="/piu/teacher/grades" tab={TEACHER_TABS.GRADES} label="Grade Students" tone="blue" />
                 </div>
               </Panel>
             </div>

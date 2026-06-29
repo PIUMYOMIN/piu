@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { adminApi } from "../../api/admin";
+import { teacherApi } from "../../api/teacher";
 import { toStorageUrl } from "../../utils/api";
 import { getApiErrorMessage } from "../../utils/apiErrors";
 import { EmptyState, LoadingState, Panel, StatCard, StudentHero } from "../../components/student/StudentUi";
@@ -16,7 +16,7 @@ export default function TeacherCourses() {
       setLoading(true);
       setError("");
       try {
-        const data = await adminApi.courses.list();
+        const data = await teacherApi.courses();
         if (mounted) setCourses(Array.isArray(data) ? data : []);
       } catch (e) {
         if (mounted) setError(getApiErrorMessage(e, "Failed to load courses"));
@@ -46,8 +46,8 @@ export default function TeacherCourses() {
     <div className="mx-auto max-w-7xl space-y-6">
       <StudentHero
         eyebrow="Courses"
-        title="Course Catalogue"
-        subtitle="All courses available in the system. Use these as context when creating assignments and modules."
+        title="My Programs"
+        subtitle="Programs assigned to you by the administrator. All students, modules, and assignments are scoped to these programs."
       />
 
       {error && (

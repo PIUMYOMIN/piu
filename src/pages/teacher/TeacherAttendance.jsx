@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { adminApi } from "../../api/admin";
+import { teacherApi } from "../../api/teacher";
 import { getApiErrorMessage } from "../../utils/apiErrors";
 import { EmptyState, LoadingState, Panel, StatCard, StudentHero } from "../../components/student/StudentUi";
 
@@ -22,7 +23,7 @@ export default function TeacherAttendance() {
       setError("");
       try {
         const [sData, yData] = await Promise.all([
-          adminApi.students.list(),
+          teacherApi.students(),
           adminApi.meta.years(),
         ]);
         if (mounted) {
@@ -82,7 +83,7 @@ export default function TeacherAttendance() {
       <StudentHero
         eyebrow="Attendance"
         title="Mark Attendance"
-        subtitle="Record daily attendance for each student. Filter by year, then mark present, absent or late."
+        subtitle="Record daily attendance for students in your assigned programs."
       />
 
       {error && (

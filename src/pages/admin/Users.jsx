@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { adminApi } from "../../api/admin";
-import { toStorageUrl } from "../../utils/api";
 import { useAuth } from "../../contexts/AuthContext";
+import ProfileAvatar from "../../components/common/ProfileAvatar";
 import { useFloatingToast } from "../../hooks/useFloatingToast";
 import { getApiErrorMessage } from "../../utils/apiErrors";
 import ManagementFilters from "../../components/admin/ManagementFilters";
@@ -17,16 +17,6 @@ function getUserRoleLabel(user) {
     user?.role ||
     (Array.isArray(user?.roles) ? user.roles[0]?.name || user.roles[0] : "");
   return normalizeRole(role || "user");
-}
-
-function getInitials(name) {
-  const parts = String(name || "")
-    .trim()
-    .split(/\s+/)
-    .filter(Boolean);
-  const first = parts[0]?.[0] || "P";
-  const last = parts.length > 1 ? parts[parts.length - 1][0] : "I";
-  return (first + last).toUpperCase();
 }
 
 function Users() {
@@ -50,6 +40,8 @@ function Users() {
 
   const [modal, setModal] = useState(null); // {mode:'create'|'edit', user, form}
   const [saving, setSaving] = useState(false);
+  const [allCourses, setAllCourses] = useState([]);
+  const [loadingCourses, setLoadingCourses] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -70,6 +62,9 @@ function Users() {
 
   useEffect(() => {
     load();
+    adminApi.courses.list().then((data) => {
+      setAllCourses(Array.isArray(data) ? data : []);
+    }).catch(() => setAllCourses([]));
   }, []);
 
   const filtered = useMemo(() => {
@@ -113,11 +108,32 @@ function Users() {
     setModal({
       mode: "create",
       user: null,
-      form: { name: "", email: "", phone: "", role: "user", password: "", password_confirmation: "" },
+      form: {
+        name: "",
+        email: "",
+        phone: "",
+        role: "user",
+        password: "",
+        password_confirmation: "",
+        assignedCourseIds: [],
+      },
     });
   };
 
-  const openEdit = (user) => {
+  const openEdit = async (user) => {
+    const role = getUserRoleLabel(user);
+    let assignedCourseIds = [];
+    if (role === "teacher") {
+      setLoadingCourses(true);
+      try {
+        const res = await adminApi.users.assignedCourses(user.id);
+        assignedCourseIds = (Array.isArray(res?.course_ids) ? res.course_ids : []).map(String);
+      } catch {
+        assignedCourseIds = [];
+      } finally {
+        setLoadingCourses(false);
+      }
+    }
     setModal({
       mode: "edit",
       user,
@@ -125,9 +141,10 @@ function Users() {
         name: user?.name || "",
         email: user?.email || "",
         phone: user?.phone || "",
-        role: getUserRoleLabel(user),
+        role,
         password: "",
         password_confirmation: "",
+        assignedCourseIds,
       },
     });
   };
@@ -157,7 +174,25 @@ function Users() {
 
   const onFormChange = (e) => {
     const { name, value } = e.target;
-    setModal((prev) => (prev ? { ...prev, form: { ...prev.form, [name]: value } } : prev));
+    setModal((prev) => {
+      if (!prev) return prev;
+      const nextForm = { ...prev.form, [name]: value };
+      if (name === "role" && normalizeRole(value) !== "teacher") {
+        nextForm.assignedCourseIds = [];
+      }
+      return { ...prev, form: nextForm };
+    });
+  };
+
+  const toggleAssignedCourse = (courseId) => {
+    const key = String(courseId);
+    setModal((prev) => {
+      if (!prev) return prev;
+      const current = new Set(prev.form.assignedCourseIds || []);
+      if (current.has(key)) current.delete(key);
+      else current.add(key);
+      return { ...prev, form: { ...prev.form, assignedCourseIds: [...current] } };
+    });
   };
 
   const save = async () => {
@@ -165,13 +200,25 @@ function Users() {
     setSaving(true);
     setError("");
     try {
+      const payload = { ...modal.form, role: toApiRole(modal.form.role) };
+      delete payload.assignedCourseIds;
+
+      let userId = modal.user?.id;
       if (modal.mode === "create") {
-        await adminApi.users.create({ ...modal.form, role: toApiRole(modal.form.role) });
+        const created = await adminApi.users.create(payload);
+        userId = created?.user?.id ?? created?.id;
         showSuccess("User created successfully!");
       } else {
-        await adminApi.users.update(modal.user.id, { ...modal.form, role: toApiRole(modal.form.role) });
+        await adminApi.users.update(modal.user.id, payload);
+        userId = modal.user.id;
         showSuccess("User updated successfully!");
       }
+
+      if (normalizeRole(modal.form.role) === "teacher" && userId) {
+        const courseIds = (modal.form.assignedCourseIds || []).map((id) => Number(id)).filter(Boolean);
+        await adminApi.users.syncAssignedCourses(userId, courseIds);
+      }
+
       closeModal();
       await load();
     } catch (e) {
@@ -278,25 +325,11 @@ function Users() {
 
               {!loading &&
                 paginatedUsers.map((user) => {
-                  const img = toStorageUrl(user.profile_image) || user.profile_image || "";
                   const role = getUserRoleLabel(user);
                   return (
                     <tr key={user.id} className="border-b hover:bg-gray-50">
                       <td className="px-4 py-3">
-                        {img ? (
-                          <img
-                            src={img}
-                            alt={user.name}
-                            className="w-9 h-9 rounded-full object-cover"
-                            onError={(e) => {
-                              e.target.src = "https://via.placeholder.com/80x80?text=PIU";
-                            }}
-                          />
-                        ) : (
-                          <div className="w-9 h-9 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center text-xs font-bold">
-                            {getInitials(user.name)}
-                          </div>
-                        )}
+                        <ProfileAvatar user={user} size="sm" />
                       </td>
                       <td className="px-4 py-3 font-medium text-gray-900">{user.name}</td>
                       <td className="px-4 py-3">{user.phone || "—"}</td>
@@ -455,6 +488,38 @@ function Users() {
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                   />
                 </div>
+                {normalizeRole(modal.form.role) === "teacher" && (
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Assigned Programs
+                    </label>
+                    <p className="text-xs text-gray-500 mb-3">
+                      Select which programs this teacher can access. They will only see students, modules, assignments, and grades for these programs.
+                    </p>
+                    {loadingCourses ? (
+                      <p className="text-sm text-gray-500">Loading program assignments…</p>
+                    ) : allCourses.length ? (
+                      <div className="max-h-48 overflow-y-auto rounded-lg border border-gray-200 p-3 space-y-2">
+                        {allCourses.map((course) => {
+                          const checked = (modal.form.assignedCourseIds || []).includes(String(course.id));
+                          return (
+                            <label key={course.id} className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={checked}
+                                onChange={() => toggleAssignedCourse(course.id)}
+                                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                              />
+                              <span>{course.title}</span>
+                            </label>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-gray-500">No programs available.</p>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
 

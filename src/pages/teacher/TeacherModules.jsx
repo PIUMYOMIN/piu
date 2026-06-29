@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
-import { adminApi } from "../../api/admin";
+import { teacherApi } from "../../api/teacher";
 import { getApiErrorMessage } from "../../utils/apiErrors";
 import { EmptyState, LoadingState, Panel, StatCard, StudentHero } from "../../components/student/StudentUi";
 
@@ -8,7 +7,9 @@ export default function TeacherModules() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [modules, setModules] = useState([]);
+  const [courses, setCourses] = useState([]);
   const [search, setSearch] = useState("");
+  const [courseFilter, setCourseFilter] = useState("all");
 
   useEffect(() => {
     let mounted = true;
@@ -16,8 +17,15 @@ export default function TeacherModules() {
       setLoading(true);
       setError("");
       try {
-        const data = await adminApi.modules.list();
-        if (mounted) setModules(Array.isArray(data) ? data : []);
+        const params = courseFilter !== "all" ? { course_id: courseFilter } : {};
+        const [mData, cData] = await Promise.all([
+          teacherApi.modules(params),
+          teacherApi.courses(),
+        ]);
+        if (mounted) {
+          setModules(Array.isArray(mData) ? mData : []);
+          setCourses(Array.isArray(cData) ? cData : []);
+        }
       } catch (e) {
         if (mounted) setError(getApiErrorMessage(e, "Failed to load modules"));
       } finally {
@@ -26,7 +34,7 @@ export default function TeacherModules() {
     }
     load();
     return () => { mounted = false; };
-  }, []);
+  }, [courseFilter]);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -44,8 +52,8 @@ export default function TeacherModules() {
     <div className="mx-auto max-w-7xl space-y-6">
       <StudentHero
         eyebrow="Course Modules"
-        title="Module Library"
-        subtitle="Browse all course modules. Modules can be linked to curricula and assignments."
+        title="Program Modules"
+        subtitle="Modules linked to your assigned programs through curricula or assignments."
       />
 
       {error && (
@@ -58,8 +66,8 @@ export default function TeacherModules() {
         <StatCard title="With Assignments" value={modules.filter((m) => Number(m.assignments_count || 0) > 0).length} tone="amber" />
       </section>
 
-      <Panel title="All Modules">
-        <div className="mb-4">
+      <Panel title="Modules">
+        <div className="mb-4 flex flex-col gap-3 sm:flex-row">
           <input
             type="text"
             placeholder="Search by name or code…"
@@ -67,6 +75,16 @@ export default function TeacherModules() {
             onChange={(e) => setSearch(e.target.value)}
             className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 md:max-w-sm"
           />
+          <select
+            value={courseFilter}
+            onChange={(e) => setCourseFilter(e.target.value)}
+            className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none md:max-w-xs"
+          >
+            <option value="all">All My Programs</option>
+            {courses.map((c) => (
+              <option key={c.id} value={String(c.id)}>{c.title}</option>
+            ))}
+          </select>
         </div>
 
         {filtered.length ? (
@@ -90,7 +108,7 @@ export default function TeacherModules() {
                     <td className="py-3 pr-4 font-medium text-gray-900 whitespace-nowrap">
                       {m.name}
                     </td>
-                    <td className="py-3 pr-4 text-gray-600">{m.credit_hours ?? "—"}</td>
+                    <td className="py-3 pr-4 text-gray-600">{m.credit_hours ?? m.credit ?? "—"}</td>
                     <td className="py-3 pr-4">
                       <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
                         Number(m.assignments_count || 0) > 0
@@ -109,7 +127,7 @@ export default function TeacherModules() {
             </table>
           </div>
         ) : (
-          <EmptyState message={search ? "No modules match your search." : "No modules found."} />
+          <EmptyState message={search || courseFilter !== "all" ? "No modules match your filters." : "No modules found for your programs."} />
         )}
       </Panel>
     </div>

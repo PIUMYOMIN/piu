@@ -57,6 +57,9 @@ export const adminApi = {
     create: (payload) => client.post('/users', payload).then((r) => unwrap(r.data)),
     update: (id, payload) => client.put(`/users/${id}`, payload).then((r) => unwrap(r.data)),
     remove: (id) => client.delete(`/users/${id}`).then((r) => r.data),
+    assignedCourses: (id) => client.get(`/users/${id}/assigned-courses`).then((r) => r.data),
+    syncAssignedCourses: (id, courseIds) =>
+      client.put(`/users/${id}/assigned-courses`, { course_ids: courseIds }).then((r) => r.data),
   },
   roles: {
     list: () => client.get('/roles').then((r) => unwrap(r.data)),
