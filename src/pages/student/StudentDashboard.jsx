@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { studentApi } from "../../api/student";
+import ProfileAvatar from "../../components/common/ProfileAvatar";
 import { getApiErrorMessage } from "../../utils/apiErrors";
 import { buildDashboardPath, STUDENT_TABS } from "../../utils/dashboardTabs";
 import {
@@ -13,9 +14,6 @@ import {
   StudentHero,
 } from "../../components/student/StudentUi";
 import GradeBreakdown from "../../components/student/GradeBreakdown";
-
-const fallbackAvatar =
-  "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80";
 
 function InfoRow({ label, value }) {
   return (
@@ -117,14 +115,7 @@ export default function StudentDashboard() {
       <section className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm lg:col-span-1">
           <div className="flex flex-col items-center text-center">
-            <img
-              src={student?.profile || student?.profile_image || fallbackAvatar}
-              alt={student?.name || "Student"}
-              className="h-24 w-24 rounded-full border-4 border-blue-100 object-cover"
-              onError={(e) => {
-                e.currentTarget.src = fallbackAvatar;
-              }}
-            />
+            <ProfileAvatar user={student} size="lg" />
             <h2 className="mt-4 text-xl font-semibold text-gray-900">{student?.name || "Student"}</h2>
             <p className="text-sm text-gray-500">{student?.email || "-"}</p>
             <p className="mt-1 text-sm font-medium text-[#002147]">{student?.student_id || "-"}</p>

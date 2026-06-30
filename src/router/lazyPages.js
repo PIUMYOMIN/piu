@@ -96,6 +96,7 @@ export const TeacherDashboard = lazy(() => import("../pages/teacher/TeacherDashb
 export const TeacherProfile = lazy(() => import("../pages/teacher/TeacherProfile"));
 export const TeacherCourses = lazy(() => import("../pages/teacher/TeacherCourses"));
 export const TeacherAssignments = lazy(() => import("../pages/teacher/TeacherAssignments"));
+export const TeacherAssignmentForm = lazy(() => import("../pages/teacher/TeacherAssignmentForm"));
 export const TeacherModules = lazy(() => import("../pages/teacher/TeacherModules"));
 export const TeacherStudents = lazy(() => import("../pages/teacher/TeacherStudents"));
 export const TeacherGrades = lazy(() => import("../pages/teacher/TeacherGrades"));

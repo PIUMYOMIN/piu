@@ -2,9 +2,13 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaDownload } from "react-icons/fa";
 import adminApi from "../../api/admin";
-import { toStorageUrl } from "../../utils/api";
 import { useFloatingToast } from "../../hooks/useFloatingToast";
 import { getApiErrorMessage } from "../../utils/apiErrors";
+import {
+  downloadAdmissionDocument,
+  hasAdmissionDocument,
+  openAdmissionDocument,
+} from "../../utils/admissionDocuments";
 
 function getSubmissionYear(admission) {
   if (!admission?.created_at) return "";
@@ -212,40 +216,48 @@ function AdmissionPage() {
     return d.toLocaleString();
   };
 
-  const renderDocumentActions = (url, fileName, iconClass, iconColor, label) => {
-    if (!url) {
+  const handleDocumentAction = async (action, admissionId, field, fileName) => {
+    try {
+      if (action === "view") {
+        await openAdmissionDocument(admissionId, field);
+      } else {
+        await downloadAdmissionDocument(admissionId, field, fileName);
+      }
+    } catch (e) {
+      showError(getApiErrorMessage(e, "Failed to open admission document"));
+    }
+  };
+
+  const renderDocumentActions = (admissionId, field, fileName, iconClass, iconColor, label) => {
+    if (!field) {
       return <span className="text-gray-400 text-sm">-</span>;
     }
 
     return (
       <div className="flex flex-wrap items-center gap-2">
-        <a
-          href={url}
+        <button
+          type="button"
+          onClick={() => handleDocumentAction("view", admissionId, field, fileName)}
           className="inline-flex items-center text-blue-600 hover:text-blue-800 hover:underline"
-          target="_blank"
-          rel="noreferrer"
         >
           <i className={`${iconClass} mr-2 ${iconColor}`}></i>
           View
-        </a>
-        <a
-          href={url}
-          download={fileName}
+        </button>
+        <button
+          type="button"
+          onClick={() => handleDocumentAction("download", admissionId, field, fileName)}
           className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
           title={`Download ${label}`}
           aria-label={`Download ${label}`}
         >
           <FaDownload className="text-sm" />
-        </a>
+        </button>
       </div>
     );
   };
 
   const renderAdmissionRow = (admission, index) => {
     const course = coursesById.get(String(admission.course_id));
-    const certificateUrl = toStorageUrl(admission.education_certificate);
-    const statementUrl = toStorageUrl(admission.personal_statement);
-    const otherUrl = toStorageUrl(admission.other_document);
     const certificateName = getDocumentDownloadName(
       admission.education_certificate,
       `education-certificate-${admission.id}`
@@ -277,7 +289,8 @@ function AdmissionPage() {
         </td>
         <td className="px-4 py-4 whitespace-nowrap text-sm">
           {renderDocumentActions(
-            certificateUrl,
+            admission.id,
+            hasAdmissionDocument(admission, "education_certificate") ? "education_certificate" : null,
             certificateName,
             "fas fa-file-pdf",
             "text-red-500",
@@ -286,7 +299,8 @@ function AdmissionPage() {
         </td>
         <td className="px-4 py-4 whitespace-nowrap text-sm">
           {renderDocumentActions(
-            statementUrl,
+            admission.id,
+            hasAdmissionDocument(admission, "personal_statement") ? "personal_statement" : null,
             statementName,
             "fas fa-file-alt",
             "text-blue-500",
@@ -295,7 +309,8 @@ function AdmissionPage() {
         </td>
         <td className="px-4 py-4 whitespace-nowrap text-sm">
           {renderDocumentActions(
-            otherUrl,
+            admission.id,
+            hasAdmissionDocument(admission, "other_document") ? "other_document" : null,
             otherName,
             "fas fa-file-word",
             "text-blue-700",
@@ -329,9 +344,6 @@ function AdmissionPage() {
 
   const renderAdmissionCard = (admission, index) => {
     const course = coursesById.get(String(admission.course_id));
-    const certificateUrl = toStorageUrl(admission.education_certificate);
-    const statementUrl = toStorageUrl(admission.personal_statement);
-    const otherUrl = toStorageUrl(admission.other_document);
     const certificateName = getDocumentDownloadName(
       admission.education_certificate,
       `education-certificate-${admission.id}`
@@ -381,15 +393,15 @@ function AdmissionPage() {
           <div className="mt-3 space-y-3">
             <div className="flex items-center justify-between gap-3">
               <span className="text-sm text-gray-700">Education Certificate</span>
-              {renderDocumentActions(certificateUrl, certificateName, "fas fa-file-pdf", "text-red-500", "education certificate")}
+              {renderDocumentActions(admission.id, hasAdmissionDocument(admission, "education_certificate") ? "education_certificate" : null, certificateName, "fas fa-file-pdf", "text-red-500", "education certificate")}
             </div>
             <div className="flex items-center justify-between gap-3">
               <span className="text-sm text-gray-700">Personal Statement</span>
-              {renderDocumentActions(statementUrl, statementName, "fas fa-file-alt", "text-blue-500", "personal statement")}
+              {renderDocumentActions(admission.id, hasAdmissionDocument(admission, "personal_statement") ? "personal_statement" : null, statementName, "fas fa-file-alt", "text-blue-500", "personal statement")}
             </div>
             <div className="flex items-center justify-between gap-3">
               <span className="text-sm text-gray-700">Other Document</span>
-              {renderDocumentActions(otherUrl, otherName, "fas fa-file-word", "text-blue-700", "other document")}
+              {renderDocumentActions(admission.id, hasAdmissionDocument(admission, "other_document") ? "other_document" : null, otherName, "fas fa-file-word", "text-blue-700", "other document")}
             </div>
           </div>
         </div>

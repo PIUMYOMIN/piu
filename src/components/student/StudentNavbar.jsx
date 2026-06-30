@@ -2,10 +2,11 @@ import React from "react";
 import { FaBars, FaSignOutAlt } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
+import ProfileAvatar from "../common/ProfileAvatar";
 import logo from "../../assets/logo.png";
 
 const StudentNavbar = ({ toggleSidebar, studentName }) => {
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -41,6 +42,7 @@ const StudentNavbar = ({ toggleSidebar, studentName }) => {
 
       {/* Right side – Name + Logout */}
       <div className="flex items-center gap-2 sm:gap-4">
+        <ProfileAvatar user={user} size="sm" className="hidden border-white/30 sm:block" />
         <h1 className="hidden text-base font-semibold tracking-wide sm:block md:text-lg lg:text-xl">
           {studentName ? `${studentName}'s Dashboard` : "Student Dashboard"}
         </h1>

@@ -28,6 +28,7 @@ export const teacherMenu = [
     icon: <FaTasks />,
     sub: [
       { name: 'Assignment List', path: '/piu/teacher/assignments', tab: 'assignments' },
+      { name: 'Add Assignment', path: '/piu/teacher/assignments/add', tab: TEACHER_TABS.CREATE_ASSIGNMENT },
     ],
   },
   {

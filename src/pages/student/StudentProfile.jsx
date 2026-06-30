@@ -14,10 +14,8 @@ import { useAuth } from "../../contexts/AuthContext";
 import { useFloatingToast } from "../../hooks/useFloatingToast";
 import { getApiErrorMessage } from "../../utils/apiErrors";
 import { STUDENT_TABS } from "../../utils/dashboardTabs";
+import { resolveProfileImage, FALLBACK_AVATAR } from "../../utils/profileImage";
 import { LoadingState } from "../../components/student/StudentUi";
-
-const fallbackAvatar =
-  "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80";
 
 const PROFILE_TABS = {
   PERSONAL: "personal",
@@ -97,7 +95,7 @@ export default function StudentProfile() {
           country: nextUser.country || "",
           profile: null,
         });
-        setImagePreview(nextUser.profile || nextUser.profile_image || null);
+        setImagePreview(resolveProfileImage(nextUser, ""));
       } catch (e) {
         if (mounted) showError(getApiErrorMessage(e, "Failed to load profile"));
       } finally {
@@ -166,7 +164,7 @@ export default function StudentProfile() {
       const response = await studentApi.updateProfile(formData);
       if (response?.user) {
         await refreshUser();
-        setImagePreview(response.user.profile || response.user.profile_image || imagePreview);
+        setImagePreview(resolveProfileImage(response.user, imagePreview));
       } else {
         await refreshUser();
       }
@@ -231,11 +229,11 @@ export default function StudentProfile() {
           <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-start">
             <div className="relative shrink-0">
               <img
-                src={imagePreview || user?.profile || user?.profile_image || fallbackAvatar}
+                src={imagePreview || resolveProfileImage(user)}
                 alt={user?.name || "Student"}
                 className="h-28 w-28 rounded-full border-4 border-white/30 object-cover shadow-lg sm:h-32 sm:w-32"
                 onError={(e) => {
-                  e.currentTarget.src = fallbackAvatar;
+                  e.currentTarget.src = FALLBACK_AVATAR;
                 }}
               />
               <label

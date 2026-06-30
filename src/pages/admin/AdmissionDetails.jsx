@@ -1,9 +1,14 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import adminApi from "../../api/admin";
-import { toStorageUrl } from "../../utils/api";
 import { useFloatingToast } from "../../hooks/useFloatingToast";
 import { getApiErrorMessage } from "../../utils/apiErrors";
+import {
+  downloadAdmissionDocument,
+  getAdmissionDocumentObjectUrl,
+  hasAdmissionDocument,
+  openAdmissionDocument,
+} from "../../utils/admissionDocuments";
 
 function Row({ label, value }) {
   return (
@@ -11,6 +16,35 @@ function Row({ label, value }) {
       <td className="px-4 py-3 bg-gray-50 text-sm font-medium text-gray-700 w-60">{label}</td>
       <td className="px-4 py-3 text-sm text-gray-900">{value || "—"}</td>
     </tr>
+  );
+}
+
+function DocumentLink({ admissionId, field, label, onError }) {
+  const open = async () => {
+    try {
+      await openAdmissionDocument(admissionId, field);
+    } catch (e) {
+      onError?.(getApiErrorMessage(e, `Failed to open ${label}`));
+    }
+  };
+
+  const download = async () => {
+    try {
+      await downloadAdmissionDocument(admissionId, field, `${field}-${admissionId}`);
+    } catch (e) {
+      onError?.(getApiErrorMessage(e, `Failed to download ${label}`));
+    }
+  };
+
+  return (
+    <div className="flex flex-wrap gap-3">
+      <button type="button" onClick={open} className="text-blue-600 hover:underline">
+        View
+      </button>
+      <button type="button" onClick={download} className="text-gray-700 hover:underline">
+        Download
+      </button>
+    </div>
   );
 }
 
@@ -26,6 +60,7 @@ export default function AdmissionDetails() {
   const [error, setError] = useState("");
   const [admission, setAdmission] = useState(null);
   const [courses, setCourses] = useState([]);
+  const [profilePreview, setProfilePreview] = useState("");
 
   useEffect(() => {
     let mounted = true;
@@ -53,6 +88,32 @@ export default function AdmissionDetails() {
       mounted = false;
     };
   }, [initialId, applicantFromState]);
+
+  useEffect(() => {
+    let mounted = true;
+    let objectUrl = "";
+
+    async function loadProfilePreview() {
+      if (!admission?.id || !hasAdmissionDocument(admission, "profile")) {
+        if (mounted) setProfilePreview("");
+        return;
+      }
+
+      try {
+        const result = await getAdmissionDocumentObjectUrl(admission.id, "profile");
+        objectUrl = result.url;
+        if (mounted) setProfilePreview(objectUrl);
+      } catch {
+        if (mounted) setProfilePreview("");
+      }
+    }
+
+    loadProfilePreview();
+    return () => {
+      mounted = false;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [admission?.id, admission?.profile]);
 
   const coursesById = useMemo(() => {
     const map = new Map();
@@ -86,11 +147,6 @@ export default function AdmissionDetails() {
     );
   }
 
-  const profileUrl = toStorageUrl(admission?.profile);
-  const certificateUrl = toStorageUrl(admission?.education_certificate);
-  const statementUrl = toStorageUrl(admission?.personal_statement);
-  const otherUrl = toStorageUrl(admission?.other_document);
-  const languageUrl = toStorageUrl(admission?.language_proficiency);
   const courseTitle = admission?.course_id ? coursesById.get(String(admission.course_id))?.title : "";
 
   return (
@@ -110,7 +166,13 @@ export default function AdmissionDetails() {
         {error && <div className="mb-4 p-3 rounded-lg border border-red-200 bg-red-50 text-red-700 text-sm">{error}</div>}
 
         <div className="mb-6 flex items-center gap-4">
-          <img src={profileUrl || "https://via.placeholder.com/96"} alt={admission.name} className="w-24 h-24 rounded-full border object-cover" />
+          {profilePreview ? (
+            <img src={profilePreview} alt={admission.name} className="w-24 h-24 rounded-full border object-cover" />
+          ) : (
+            <div className="w-24 h-24 rounded-full border bg-gray-100 flex items-center justify-center text-gray-400 text-sm">
+              No photo
+            </div>
+          )}
           <div>
             <p className="text-xl font-semibold text-gray-900">{admission.name || "—"}</p>
             <p className="text-blue-700">{courseTitle || `Course #${admission.course_id ?? "-"}`}</p>
@@ -136,19 +198,35 @@ export default function AdmissionDetails() {
               <Row label="Student ID" value={admission.student_id} />
               <Row
                 label="Education Certificate"
-                value={certificateUrl ? <a href={certificateUrl} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline">View</a> : "—"}
+                value={
+                  hasAdmissionDocument(admission, "education_certificate") ? (
+                    <DocumentLink admissionId={admission.id} field="education_certificate" label="education certificate" onError={showError} />
+                  ) : "—"
+                }
               />
               <Row
                 label="Personal Statement"
-                value={statementUrl ? <a href={statementUrl} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline">View</a> : "—"}
+                value={
+                  hasAdmissionDocument(admission, "personal_statement") ? (
+                    <DocumentLink admissionId={admission.id} field="personal_statement" label="personal statement" onError={showError} />
+                  ) : "—"
+                }
               />
               <Row
                 label="Other Document"
-                value={otherUrl ? <a href={otherUrl} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline">View</a> : "—"}
+                value={
+                  hasAdmissionDocument(admission, "other_document") ? (
+                    <DocumentLink admissionId={admission.id} field="other_document" label="other document" onError={showError} />
+                  ) : "—"
+                }
               />
               <Row
                 label="Language Proficiency"
-                value={languageUrl ? <a href={languageUrl} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline">View</a> : "—"}
+                value={
+                  hasAdmissionDocument(admission, "language_proficiency") ? (
+                    <DocumentLink admissionId={admission.id} field="language_proficiency" label="language proficiency" onError={showError} />
+                  ) : "—"
+                }
               />
             </tbody>
           </table>

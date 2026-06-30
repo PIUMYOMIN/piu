@@ -111,6 +111,8 @@ export const adminApi = {
     list: () => client.get('/admissions').then((r) => unwrap(r.data)),
     get: (id) => client.get(`/admissions/${id}`).then((r) => unwrap(r.data)),
     update: (id, payload) => client.put(`/admissions/${id}`, payload).then((r) => unwrap(r.data)),
+    downloadDocument: (id, field) =>
+      client.get(`/admissions/${id}/documents/${field}`, { responseType: 'blob' }),
   },
 
   // Gallery

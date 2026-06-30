@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { adminApi } from "../../api/admin";
 import { teacherApi } from "../../api/teacher";
 import { toStorageUrl } from "../../utils/api";
@@ -80,7 +81,8 @@ export default function TeacherAssignments() {
       </section>
 
       <Panel title="Assignments">
-        <div className="mb-4 flex flex-col gap-3 sm:flex-row">
+        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-3 sm:flex-row">
           <input
             type="text"
             placeholder="Search by name, program or module…"
@@ -98,6 +100,13 @@ export default function TeacherAssignments() {
               <option key={c.id} value={String(c.id)}>{c.title}</option>
             ))}
           </select>
+          </div>
+          <Link
+            to="/piu/teacher/assignments/add"
+            className="inline-flex justify-center rounded-lg bg-[#002147] px-4 py-2 text-sm font-medium text-white hover:bg-[#003366]"
+          >
+            + Add Assignment
+          </Link>
         </div>
 
         {filtered.length ? (
@@ -129,6 +138,12 @@ export default function TeacherAssignments() {
                         Brief file
                       </a>
                     )}
+                    <Link
+                      to={`/piu/teacher/assignments/edit/${a.id}`}
+                      className="inline-flex rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50"
+                    >
+                      Edit
+                    </Link>
                     <button
                       type="button"
                       onClick={() => remove(a.id)}

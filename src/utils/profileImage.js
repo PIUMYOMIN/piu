@@ -1,3 +1,5 @@
+import { toStorageUrl } from "./api";
+
 const FALLBACK_AVATAR =
   "https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80";
 
@@ -13,7 +15,11 @@ export function resolveProfileImage(userOrStudent, fallback = FALLBACK_AVATAR) {
 
   for (const value of candidates) {
     if (typeof value === "string" && value.trim()) {
-      return value.trim();
+      const trimmed = value.trim();
+      if (trimmed.startsWith("http://") || trimmed.startsWith("https://") || trimmed.startsWith("blob:") || trimmed.startsWith("data:")) {
+        return trimmed;
+      }
+      return toStorageUrl(trimmed);
     }
   }
 
