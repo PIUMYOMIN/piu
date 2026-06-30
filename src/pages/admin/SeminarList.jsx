@@ -1,8 +1,10 @@
 import React, { useMemo, useState } from "react";
 import AddSeminar from "./AddSeminar";
 import ManagementFilters from "../../components/admin/ManagementFilters";
+import { useConfirmDelete } from "../../contexts/ConfirmContext";
 
 function SeminarList() {
+  const confirmDeleteAction = useConfirmDelete();
   const [seminars, setSeminars] = useState([
     {
       id: 1,
@@ -50,8 +52,10 @@ function SeminarList() {
     setLocationFilter("all");
   };
 
-  const handleDelete = (id) => {
-    setSeminars(seminars.filter((seminar) => seminar.id !== id));
+  const handleDelete = async (seminar) => {
+    const ok = await confirmDeleteAction({ itemName: seminar?.name, itemType: "seminar" });
+    if (!ok) return;
+    setSeminars(seminars.filter((item) => item.id !== seminar.id));
   };
 
   const handleEdit = (seminar) => {
@@ -83,6 +87,7 @@ function SeminarList() {
         summary={`Showing ${filteredSeminars.length} of ${seminars.length} seminars`}
       />
 
+      <div className="overflow-x-auto">
       <table className="min-w-full border">
         <thead>
           <tr className="bg-gray-200">
@@ -126,7 +131,7 @@ function SeminarList() {
                   </button>
                   <button
                     className="bg-red-600 text-white px-3 py-1 rounded"
-                    onClick={() => handleDelete(seminar.id)}
+                    onClick={() => handleDelete(seminar)}
                   >
                     Delete
                   </button>
@@ -136,6 +141,7 @@ function SeminarList() {
           )}
         </tbody>
       </table>
+      </div>
 
       {editData && (
         <div className="mt-6">

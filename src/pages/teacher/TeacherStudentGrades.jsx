@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { adminApi } from "../../api/admin";
 import { teacherApi } from "../../api/teacher";
+import { useConfirmDelete } from "../../contexts/ConfirmContext";
 import ProfileAvatar from "../../components/common/ProfileAvatar";
 import { useFloatingToast } from "../../hooks/useFloatingToast";
 import { getApiErrorMessage } from "../../utils/apiErrors";
@@ -41,6 +42,7 @@ function markToGradeValue(mark) {
 export default function TeacherStudentGrades() {
   const { id } = useParams();
   const { showSuccess, showError, Toast } = useFloatingToast();
+  const confirmDeleteAction = useConfirmDelete();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -157,7 +159,8 @@ export default function TeacherStudentGrades() {
   };
 
   const remove = async (gradeId) => {
-    if (!window.confirm("Delete this grade record?")) return;
+    const ok = await confirmDeleteAction({ itemType: "grade record" });
+    if (!ok) return;
     try {
       await teacherApi.deleteGrade(gradeId);
       showSuccess("Grade deleted.");

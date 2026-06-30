@@ -4,12 +4,14 @@ import { FaEdit, FaTrash, FaPlus, FaSpinner } from "react-icons/fa";
 import { adminApi } from "../../api/admin";
 import { useAuth } from "../../contexts/AuthContext";
 import { useFloatingToast } from "../../hooks/useFloatingToast";
+import { useConfirmDelete } from "../../contexts/ConfirmContext";
 import { getApiErrorMessage } from "../../utils/apiErrors";
 import ManagementFilters from "../../components/admin/ManagementFilters";
 
 function RolesPage() {
   const { user: authUser } = useAuth();
   const { showSuccess, showError, Toast } = useFloatingToast();
+  const confirmDeleteAction = useConfirmDelete();
   const currentRole = String(
     authUser?.role?.name ??
       authUser?.role ??
@@ -90,7 +92,8 @@ function RolesPage() {
 
   const handleDeleteRole = async (roleId) => {
     if (!isAdmin) return;
-    if (!window.confirm("Are you sure you want to delete this role?")) {
+    const ok = await confirmDeleteAction({ itemType: "role" });
+    if (!ok) {
       return;
     }
 

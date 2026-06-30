@@ -5,9 +5,17 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import App from './App';
 import { AuthProvider } from './contexts/AuthContext';
+import { ConfirmProvider } from './contexts/ConfirmContext';
 import { AuthInitializer } from './components/AuthInitializer';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import InstallAppPrompt from './components/common/InstallAppPrompt';
 import './index.css';
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  });
+}
 
 const LoadingSpinner = () => (
   <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-blue-50">
@@ -22,9 +30,11 @@ ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <ErrorBoundary>
       <AuthProvider>
+        <ConfirmProvider>
         <AuthInitializer fallback={<LoadingSpinner />}>
           <Suspense fallback={<LoadingSpinner />}>
             <App />
+            <InstallAppPrompt />
           </Suspense>
         </AuthInitializer>
         <ToastContainer
@@ -41,6 +51,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           limit={3}
           stacked
         />
+        </ConfirmProvider>
       </AuthProvider>
     </ErrorBoundary>
   </React.StrictMode>

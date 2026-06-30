@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { adminApi } from "../../api/admin";
 import { teacherApi } from "../../api/teacher";
+import { useAuth } from "../../contexts/AuthContext";
 import { useFloatingToast } from "../../hooks/useFloatingToast";
 import { getApiErrorMessage } from "../../utils/apiErrors";
 import { EmptyState, LoadingState, StudentHero } from "../../components/student/StudentUi";
@@ -16,7 +17,10 @@ export default function AssignmentForm({ scope = "admin" }) {
 
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { showSuccess, showError, Toast } = useFloatingToast();
+
+  const [ownerUserId, setOwnerUserId] = useState(null);
 
   const [courses, setCourses] = useState([]);
   const [modules, setModules] = useState([]);
@@ -98,6 +102,7 @@ export default function AssignmentForm({ scope = "admin" }) {
       try {
         const data = await adminApi.assignments.get(id);
         if (!mounted) return;
+        setOwnerUserId(data?.user_id ?? null);
         setFormData({
           name: data?.name || "",
           description: data?.description || "",
@@ -121,6 +126,13 @@ export default function AssignmentForm({ scope = "admin" }) {
     if (!formData.module_id) return subjects;
     return subjects.filter((subject) => String(subject.module_id) === String(formData.module_id));
   }, [subjects, formData.module_id]);
+
+  const isReadOnlyForTeacher =
+    isTeacherScope &&
+    id &&
+    ownerUserId != null &&
+    user?.id != null &&
+    Number(ownerUserId) !== Number(user.id);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -165,6 +177,27 @@ export default function AssignmentForm({ scope = "admin" }) {
       setIsSubmitting(false);
     }
   };
+
+  if (isReadOnlyForTeacher) {
+    return (
+      <div className="mx-auto max-w-7xl space-y-6">
+        <Toast />
+        <StudentHero
+          eyebrow="Assignments"
+          title="Edit Assignment"
+          subtitle="You can only edit assignments you created."
+        />
+        <EmptyState message="This assignment was created by another teacher. You can view it in the list but cannot edit it." />
+        <button
+          type="button"
+          onClick={() => navigate(listPath)}
+          className="rounded-lg border border-gray-300 px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+        >
+          Back to assignments
+        </button>
+      </div>
+    );
+  }
 
   if (loading) {
     return (

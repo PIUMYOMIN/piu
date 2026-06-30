@@ -3,12 +3,14 @@ import { Link, useNavigate } from "react-router-dom";
 import adminApi from "../../api/admin";
 import { useAuth } from "../../contexts/AuthContext";
 import { useFloatingToast } from "../../hooks/useFloatingToast";
+import { useConfirmDelete } from "../../contexts/ConfirmContext";
 import { getApiErrorMessage } from "../../utils/apiErrors";
 import ManagementFilters from "../../components/admin/ManagementFilters";
 
 export default function DepartmentList() {
   const { user: authUser } = useAuth();
   const { showSuccess, showError, Toast } = useFloatingToast();
+  const confirmDeleteAction = useConfirmDelete();
   const currentRole = String(
     authUser?.role?.name ??
       authUser?.role ??
@@ -52,7 +54,8 @@ export default function DepartmentList() {
 
   const remove = async (department) => {
     if (!isAdmin) return;
-    if (!window.confirm(`Delete department "${department?.name}"?`)) return;
+    const ok = await confirmDeleteAction({ itemName: department?.name, itemType: "department" });
+    if (!ok) return;
     try {
       await adminApi.departments.remove(department.id);
       showSuccess(`Department "${department.name}" deleted successfully!`);

@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import ManagementFilters from "../../components/admin/ManagementFilters";
+import { useConfirmDelete } from "../../contexts/ConfirmContext";
 
 function CampusList() {
   const navigate = useNavigate();
+  const confirmDeleteAction = useConfirmDelete();
   
   const [campuses, setCampuses] = useState([
     {
@@ -38,10 +40,10 @@ function CampusList() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
 
-  const handleDelete = (id) => {
-    if (window.confirm("Are you sure you want to delete this campus?")) {
-      setCampuses(campuses.filter(campus => campus.id !== id));
-    }
+  const handleDelete = async (campus) => {
+    const ok = await confirmDeleteAction({ itemName: campus?.name, itemType: "campus" });
+    if (!ok) return;
+    setCampuses(campuses.filter((item) => item.id !== campus.id));
   };
 
   const toggleStatus = (id) => {
@@ -198,7 +200,7 @@ function CampusList() {
                         Edit
                       </Link>
                       <button
-                        onClick={() => handleDelete(campus.id)}
+                        onClick={() => handleDelete(campus)}
                         className="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 px-3 py-1 rounded-md transition-colors"
                         title="Delete campus"
                       >

@@ -2,11 +2,13 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { adminApi } from "../../api/admin";
 import { useFloatingToast } from "../../hooks/useFloatingToast";
+import { useConfirmDelete } from "../../contexts/ConfirmContext";
 import { getApiErrorMessage } from "../../utils/apiErrors";
 import ManagementFilters from "../../components/admin/ManagementFilters";
 
 const AssignmentsList = () => {
   const { showSuccess, showError, Toast } = useFloatingToast();
+  const confirmDeleteAction = useConfirmDelete();
   const [assignments, setAssignments] = useState([]);
   const [courses, setCourses] = useState([]);
   const [modules, setModules] = useState([]);
@@ -71,10 +73,11 @@ const AssignmentsList = () => {
     setCourseFilter("all");
   };
 
-  const remove = async (id) => {
-    if (!window.confirm("Delete this assignment?")) return;
+  const remove = async (assignment) => {
+    const ok = await confirmDeleteAction({ itemName: assignment?.name, itemType: "assignment" });
+    if (!ok) return;
     try {
-      await adminApi.assignments.remove(id);
+      await adminApi.assignments.remove(assignment.id);
       const data = await adminApi.assignments.list();
       setAssignments(Array.isArray(data) ? data : []);
       showSuccess("Assignment deleted successfully!");
@@ -173,7 +176,7 @@ const AssignmentsList = () => {
                       </Link>
                       <button
                         type="button"
-                        onClick={() => remove(a.id)}
+                        onClick={() => remove(a)}
                         className="text-red-600 hover:underline"
                       >
                         Delete

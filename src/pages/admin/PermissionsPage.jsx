@@ -3,12 +3,14 @@ import { FaEdit, FaTrash, FaPlus, FaSpinner } from "react-icons/fa";
 import { adminApi } from "../../api/admin";
 import { useAuth } from "../../contexts/AuthContext";
 import { useFloatingToast } from "../../hooks/useFloatingToast";
+import { useConfirmDelete } from "../../contexts/ConfirmContext";
 import { getApiErrorMessage } from "../../utils/apiErrors";
 import ManagementFilters from "../../components/admin/ManagementFilters";
 
 function PermissionsPage() {
   const { user: authUser } = useAuth();
   const { showSuccess, showError, Toast } = useFloatingToast();
+  const confirmDeleteAction = useConfirmDelete();
   const currentRole = String(
     authUser?.role?.name ??
       authUser?.role ??
@@ -145,7 +147,8 @@ function PermissionsPage() {
 
   const handleDeletePermission = async (permissionId) => {
     if (!isAdmin) return;
-    if (!window.confirm("Are you sure you want to delete this permission?")) {
+    const ok = await confirmDeleteAction({ itemType: "permission" });
+    if (!ok) {
       return;
     }
 

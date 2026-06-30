@@ -2,12 +2,16 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { adminApi } from "../../api/admin";
 import { teacherApi } from "../../api/teacher";
+import { useAuth } from "../../contexts/AuthContext";
+import { useConfirmDelete } from "../../contexts/ConfirmContext";
 import { toStorageUrl } from "../../utils/api";
 import { useFloatingToast } from "../../hooks/useFloatingToast";
 import { getApiErrorMessage } from "../../utils/apiErrors";
 import { EmptyState, LoadingState, Panel, StatCard, StudentHero } from "../../components/student/StudentUi";
 
 export default function TeacherAssignments() {
+  const { user } = useAuth();
+  const confirmDeleteAction = useConfirmDelete();
   const { showSuccess, showError, Toast } = useFloatingToast();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -48,10 +52,16 @@ export default function TeacherAssignments() {
     });
   }, [assignments, search]);
 
-  const remove = async (id) => {
-    if (!window.confirm("Delete this assignment?")) return;
+  const canManage = (assignment) => {
+    if (!user?.id) return false;
+    return Number(assignment.user_id) === Number(user.id);
+  };
+
+  const remove = async (assignment) => {
+    const ok = await confirmDeleteAction({ itemName: assignment.name, itemType: "assignment" });
+    if (!ok) return;
     try {
-      await adminApi.assignments.remove(id);
+      await adminApi.assignments.remove(assignment.id);
       await load();
       showSuccess("Assignment deleted.");
     } catch (e) {
@@ -138,19 +148,28 @@ export default function TeacherAssignments() {
                         Brief file
                       </a>
                     )}
-                    <Link
-                      to={`/piu/teacher/assignments/edit/${a.id}`}
-                      className="inline-flex rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50"
-                    >
-                      Edit
-                    </Link>
-                    <button
-                      type="button"
-                      onClick={() => remove(a.id)}
-                      className="inline-flex rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-medium text-red-700 hover:bg-red-100"
-                    >
-                      Delete
-                    </button>
+                    {canManage(a) && (
+                      <>
+                        <Link
+                          to={`/piu/teacher/assignments/edit/${a.id}`}
+                          className="inline-flex rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50"
+                        >
+                          Edit
+                        </Link>
+                        <button
+                          type="button"
+                          onClick={() => remove(a)}
+                          className="inline-flex rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-medium text-red-700 hover:bg-red-100"
+                        >
+                          Delete
+                        </button>
+                      </>
+                    )}
+                    {!canManage(a) && (
+                      <span className="inline-flex rounded-lg border border-gray-100 bg-gray-50 px-3 py-1.5 text-xs text-gray-500">
+                        Created by another teacher
+                      </span>
+                    )}
                   </div>
                 </div>
               </article>

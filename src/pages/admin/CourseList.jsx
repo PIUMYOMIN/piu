@@ -3,12 +3,14 @@ import { useNavigate } from "react-router-dom";
 import { FaSearch, FaTag, FaUserCheck, FaPlusCircle, FaEdit, FaTrash, FaToggleOn, FaToggleOff, FaCalendarAlt, FaUserTie, FaDollarSign, FaGraduationCap, FaBook, FaUsers, FaSpinner } from "react-icons/fa";
 import { adminApi } from "../../api/admin";
 import { useFloatingToast } from "../../hooks/useFloatingToast";
+import { useConfirmDelete } from "../../contexts/ConfirmContext";
 import { getApiErrorMessage } from "../../utils/apiErrors";
 import ManagementFilters from "../../components/admin/ManagementFilters";
 
 const CourseList = () => {
   const navigate = useNavigate();
   const { showSuccess, showError, Toast } = useFloatingToast();
+  const confirmDeleteAction = useConfirmDelete();
 
   const [courses, setCourses] = useState([]);
   const [categories, setCategories] = useState([]); // Store fetched categories
@@ -145,7 +147,8 @@ const CourseList = () => {
 
   const handleDelete = async (id) => {
     const courseTitle = courses.find(c => c.id === id)?.title;
-    if (!window.confirm(`Are you sure you want to delete "${courseTitle}"?`)) {
+    const ok = await confirmDeleteAction({ itemName: courseTitle, itemType: "course" });
+    if (!ok) {
       return;
     }
 

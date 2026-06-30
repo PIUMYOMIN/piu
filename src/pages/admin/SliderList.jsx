@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { adminApi } from "../../api/admin";
 import { toStorageUrl } from "../../utils/api";
 import { useFloatingToast } from "../../hooks/useFloatingToast";
+import { useConfirmDelete } from "../../contexts/ConfirmContext";
 import { getApiErrorMessage } from "../../utils/apiErrors";
 import ManagementFilters from "../../components/admin/ManagementFilters";
 
@@ -16,6 +17,7 @@ const emptyForm = {
 
 const SliderList = () => {
   const { showSuccess, showError, Toast } = useFloatingToast();
+  const confirmDeleteAction = useConfirmDelete();
   const [sliders, setSliders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -134,7 +136,8 @@ const SliderList = () => {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Delete this slide?")) return;
+    const ok = await confirmDeleteAction({ itemType: "slide" });
+    if (!ok) return;
     try {
       await adminApi.slides.remove(id);
       showSuccess("Slide deleted successfully!");

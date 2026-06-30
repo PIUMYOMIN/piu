@@ -4,6 +4,7 @@ import adminApi from "../../api/admin";
 import { toStorageUrl } from "../../utils/api";
 import { useAuth } from "../../contexts/AuthContext";
 import { useFloatingToast } from "../../hooks/useFloatingToast";
+import { useConfirmDelete } from "../../contexts/ConfirmContext";
 import { getApiErrorMessage } from "../../utils/apiErrors";
 import ManagementFilters from "../../components/admin/ManagementFilters";
 import StatusToggle, { parseIsActive } from "../../components/admin/StatusToggle";
@@ -11,6 +12,7 @@ import StatusToggle, { parseIsActive } from "../../components/admin/StatusToggle
 export default function NewsList() {
   const { user: authUser } = useAuth();
   const { showSuccess, showError, Toast } = useFloatingToast();
+  const confirmDeleteAction = useConfirmDelete();
   const currentRole = String(
     authUser?.role?.name ??
       authUser?.role ??
@@ -61,7 +63,8 @@ export default function NewsList() {
   }, [news, search, statusFilter]);
 
   const remove = async (item) => {
-    if (!window.confirm(`Delete news "${item?.title}"?`)) return;
+    const ok = await confirmDeleteAction({ itemName: item?.title, itemType: "news article" });
+    if (!ok) return;
     try {
       await adminApi.news.remove(item.id);
       showSuccess(`"${item.title}" deleted successfully!`);

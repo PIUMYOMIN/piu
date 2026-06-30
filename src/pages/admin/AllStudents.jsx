@@ -4,6 +4,7 @@ import { adminApi } from "../../api/admin";
 import { toStorageUrl } from "../../utils/api";
 import { useAuth } from "../../contexts/AuthContext";
 import { useFloatingToast } from "../../hooks/useFloatingToast";
+import { useConfirmDelete } from "../../contexts/ConfirmContext";
 import { getApiErrorMessage } from "../../utils/apiErrors";
 import StatusToggle, { parseIsActive } from "../../components/admin/StatusToggle";
 import ManagementFilters from "../../components/admin/ManagementFilters";
@@ -84,6 +85,7 @@ function StudentStatCard({ title, value, note, iconClass, iconBg, active, onClic
 const AllStudents = () => {
   const { user: authUser } = useAuth();
   const { showSuccess, showError, Toast } = useFloatingToast();
+  const confirmDeleteAction = useConfirmDelete();
   const currentRole = String(
     authUser?.role?.name ??
       authUser?.role ??
@@ -126,6 +128,22 @@ const AllStudents = () => {
       setYears([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const removeStudent = async (student) => {
+    const ok = await confirmDeleteAction({
+      itemName: student?.name || student?.email,
+      itemType: "student",
+    });
+    if (!ok) return;
+    try {
+      await adminApi.students.remove(student.id);
+      showSuccess("Student deleted successfully!");
+      await load();
+    } catch (e) {
+      setError(e?.response?.data?.message || e?.message || "Failed to delete student");
+      showError(getApiErrorMessage(e, "Failed to delete student"));
     }
   };
 
@@ -515,17 +533,7 @@ const AllStudents = () => {
                         </button>
                         {isAdmin && (
                           <button
-                            onClick={async () => {
-                              if (!window.confirm("Delete this student?")) return;
-                              try {
-                                await adminApi.students.remove(student.id);
-                                showSuccess("Student deleted successfully!");
-                                await load();
-                              } catch (e) {
-                                setError(e?.response?.data?.message || e?.message || "Failed to delete student");
-                                showError(getApiErrorMessage(e, "Failed to delete student"));
-                              }
-                            }}
+                            onClick={() => removeStudent(student)}
                             className="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 px-4 py-2 rounded-md transition-colors"
                             title="Delete student"
                           >

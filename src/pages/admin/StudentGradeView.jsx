@@ -1,9 +1,10 @@
-// src/pages/admin/grades/SemesterView.jsx
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { FaArrowLeft } from "react-icons/fa";
+import { useConfirmDelete } from "../../contexts/ConfirmContext";
 
 const StudentGradeView = () => {
+  const confirmDeleteAction = useConfirmDelete();
   const { studentId, year, semester } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
@@ -55,10 +56,10 @@ const StudentGradeView = () => {
     });
   };
 
-  const handleDelete = (gradeId) => {
-    if (window.confirm("Are you sure you want to delete this grade?")) {
-      setGrades((prev) => prev.filter((g) => g.id !== gradeId));
-    }
+  const handleDelete = async (gradeId) => {
+    const ok = await confirmDeleteAction({ itemType: "grade" });
+    if (!ok) return;
+    setGrades((prev) => prev.filter((g) => g.id !== gradeId));
   };
 
   if (!student) return <p>Loading...</p>;

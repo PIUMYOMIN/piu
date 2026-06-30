@@ -4,11 +4,13 @@ import adminApi from "../../api/admin";
 import { toStorageUrl } from "../../utils/api";
 import { useAuth } from "../../contexts/AuthContext";
 import { useFloatingToast } from "../../hooks/useFloatingToast";
+import { useConfirmDelete } from "../../contexts/ConfirmContext";
 import { getApiErrorMessage } from "../../utils/apiErrors";
 import ManagementFilters from "../../components/admin/ManagementFilters";
 
 export default function MOUList() {
   const { showSuccess, showError, Toast } = useFloatingToast();
+  const confirmDeleteAction = useConfirmDelete();
   const { user: authUser } = useAuth();
   const currentRole = String(
     authUser?.role?.name ??
@@ -53,7 +55,8 @@ export default function MOUList() {
 
   const remove = async (item) => {
     if (!isAdmin) return;
-    if (!window.confirm(`Delete "${item?.name}"?`)) return;
+    const ok = await confirmDeleteAction({ itemName: item?.name, itemType: "partner" });
+    if (!ok) return;
     try {
       await adminApi.partners.remove(item.id);
       await load();

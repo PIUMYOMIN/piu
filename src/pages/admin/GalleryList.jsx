@@ -3,12 +3,14 @@ import { useNavigate } from "react-router-dom";
 import { adminApi } from "../../api/admin";
 import { toStorageUrl } from "../../utils/api";
 import { useFloatingToast } from "../../hooks/useFloatingToast";
+import { useConfirmDelete } from "../../contexts/ConfirmContext";
 import { getApiErrorMessage } from "../../utils/apiErrors";
 import ManagementFilters from "../../components/admin/ManagementFilters";
 
 const GalleryList = () => {
   const navigate = useNavigate();
   const { showSuccess, showError, Toast } = useFloatingToast();
+  const confirmDeleteAction = useConfirmDelete();
   const parseIsActive = (value) => {
     if (typeof value === "boolean") return value;
     if (typeof value === "number") return value === 1;
@@ -47,7 +49,8 @@ const GalleryList = () => {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this image?")) return;
+    const ok = await confirmDeleteAction({ itemType: "gallery image" });
+    if (!ok) return;
     setError("");
     try {
       await adminApi.gallery.remove(id);

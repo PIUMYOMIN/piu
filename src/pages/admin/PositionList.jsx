@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import ManagementFilters from "../../components/admin/ManagementFilters";
+import { useConfirmDelete } from "../../contexts/ConfirmContext";
 
 const PositionList = () => {
   const navigate = useNavigate();
+  const confirmDeleteAction = useConfirmDelete();
   const [positions, setPositions] = useState([
     { id: 1, name: "Professor" },
     { id: 2, name: "Assistant Professor" },
@@ -11,10 +13,10 @@ const PositionList = () => {
   ]);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const handleDelete = (id) => {
-    if (window.confirm("Are you sure you want to delete this position?")) {
-      setPositions(positions.filter((pos) => pos.id !== id));
-    }
+  const handleDelete = async (pos) => {
+    const ok = await confirmDeleteAction({ itemName: pos?.name, itemType: "position" });
+    if (!ok) return;
+    setPositions(positions.filter((item) => item.id !== pos.id));
   };
 
   const handleEdit = (pos) => {
@@ -90,7 +92,7 @@ const PositionList = () => {
                           Edit
                         </button>
                         <button
-                          onClick={() => handleDelete(pos.id)}
+                          onClick={() => handleDelete(pos)}
                           className="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 px-3 py-1 rounded-md transition-colors"
                           title="Delete position"
                         >

@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import ManagementFilters from "../../components/admin/ManagementFilters";
+import { useConfirmDelete } from "../../contexts/ConfirmContext";
 
 const EventList = () => {
   const navigate = useNavigate();
+  const confirmDeleteAction = useConfirmDelete();
   
   const [events, setEvents] = useState([
     {
@@ -58,10 +60,10 @@ const EventList = () => {
     );
   };
 
-  const deleteEvent = (id) => {
-    if (window.confirm("Are you sure you want to delete this event?")) {
-      setEvents((prev) => prev.filter((event) => event.id !== id));
-    }
+  const deleteEvent = async (event) => {
+    const ok = await confirmDeleteAction({ itemName: event?.title, itemType: "event" });
+    if (!ok) return;
+    setEvents((prev) => prev.filter((item) => item.id !== event.id));
   };
 
   // Filter events based on search and filters
@@ -240,7 +242,7 @@ const EventList = () => {
                         Edit
                       </Link>
                       <button
-                        onClick={() => deleteEvent(event.id)}
+                        onClick={() => deleteEvent(event)}
                         className="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 px-3 py-1 rounded-md transition-colors"
                         title="Delete event"
                       >

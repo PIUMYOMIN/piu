@@ -6,11 +6,13 @@ import {
 import { adminApi } from "../../api/admin";
 import CategoryModal from "./CategoryModal";
 import { useFloatingToast } from "../../hooks/useFloatingToast";
+import { useConfirmDelete } from "../../contexts/ConfirmContext";
 import { getApiErrorMessage } from "../../utils/apiErrors";
 import ManagementFilters from "../../components/admin/ManagementFilters";
 
 const CourseCategories = () => {
   const { showSuccess, showError, Toast } = useFloatingToast();
+  const confirmDeleteAction = useConfirmDelete();
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -69,7 +71,9 @@ const CourseCategories = () => {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this category?")) {
+    const category = categories.find((item) => item.id === id);
+    const ok = await confirmDeleteAction({ itemName: category?.name, itemType: "category" });
+    if (!ok) {
       return;
     }
 

@@ -4,6 +4,7 @@ import adminApi from "../../api/admin";
 import { toStorageUrl } from "../../utils/api";
 import { useAuth } from "../../contexts/AuthContext";
 import { useFloatingToast } from "../../hooks/useFloatingToast";
+import { useConfirmDelete } from "../../contexts/ConfirmContext";
 import { getApiErrorMessage } from "../../utils/apiErrors";
 import ManagementFilters, { PUBLISH_FILTER_OPTIONS } from "../../components/admin/ManagementFilters";
 import { parseIsActive } from "../../components/admin/StatusToggle";
@@ -11,6 +12,7 @@ import { parseIsActive } from "../../components/admin/StatusToggle";
 export default function BlogsList() {
   const { user: authUser } = useAuth();
   const { showSuccess, showError, Toast } = useFloatingToast();
+  const confirmDeleteAction = useConfirmDelete();
   const currentRole = String(
     authUser?.role?.name ??
       authUser?.role ??
@@ -66,7 +68,8 @@ export default function BlogsList() {
 
   const remove = async (blog) => {
     if (!isAdmin) return;
-    if (!window.confirm(`Delete blog "${blog?.title}"?`)) return;
+    const ok = await confirmDeleteAction({ itemName: blog?.title, itemType: "blog post" });
+    if (!ok) return;
     try {
       await adminApi.blogs.remove(blog.id);
       showSuccess(`Blog "${blog.title}" deleted successfully!`);

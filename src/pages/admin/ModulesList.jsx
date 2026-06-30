@@ -3,11 +3,13 @@ import { Link } from "react-router-dom";
 import { adminApi } from "../../api/admin";
 import { useAuth } from "../../contexts/AuthContext";
 import { useFloatingToast } from "../../hooks/useFloatingToast";
+import { useConfirmDelete } from "../../contexts/ConfirmContext";
 import { getApiErrorMessage } from "../../utils/apiErrors";
 import ManagementFilters from "../../components/admin/ManagementFilters";
 
 export default function ModulesList() {
   const { showSuccess, showError, Toast } = useFloatingToast();
+  const confirmDeleteAction = useConfirmDelete();
   const { user: authUser } = useAuth();
   const currentRole = String(
     authUser?.role?.name ??
@@ -84,7 +86,8 @@ export default function ModulesList() {
 
   const remove = async (module) => {
     if (!isAdmin) return;
-    if (!window.confirm(`Delete module "${module?.name}"?`)) return;
+    const ok = await confirmDeleteAction({ itemName: module?.name, itemType: "module" });
+    if (!ok) return;
     setError("");
     try {
       await adminApi.modules.remove(module.id);

@@ -2,12 +2,14 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { adminApi } from "../../api/admin";
 import { useFloatingToast } from "../../hooks/useFloatingToast";
+import { useConfirmDelete } from "../../contexts/ConfirmContext";
 import { getApiErrorMessage } from "../../utils/apiErrors";
 import ManagementFilters from "../../components/admin/ManagementFilters";
 
 const CurriculumList = () => {
   const navigate = useNavigate();
   const { showSuccess, showError, Toast } = useFloatingToast();
+  const confirmDeleteAction = useConfirmDelete();
 
   const [curriculums, setCurriculums] = useState([]);
   const [courses, setCourses] = useState([]);
@@ -53,7 +55,8 @@ const CurriculumList = () => {
   const modulesById = useMemo(() => new Map(modules.map((m) => [String(m.id), m])), [modules]);
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this curriculum?")) return;
+    const ok = await confirmDeleteAction({ itemType: "curriculum" });
+    if (!ok) return;
     try {
       await adminApi.curriculums.remove(id);
       await load();

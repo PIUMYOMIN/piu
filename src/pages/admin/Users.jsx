@@ -3,6 +3,7 @@ import { adminApi } from "../../api/admin";
 import { useAuth } from "../../contexts/AuthContext";
 import ProfileAvatar from "../../components/common/ProfileAvatar";
 import { useFloatingToast } from "../../hooks/useFloatingToast";
+import { useConfirmDelete } from "../../contexts/ConfirmContext";
 import { getApiErrorMessage } from "../../utils/apiErrors";
 import ManagementFilters from "../../components/admin/ManagementFilters";
 
@@ -22,6 +23,7 @@ function getUserRoleLabel(user) {
 function Users() {
   const { user: authUser } = useAuth();
   const { showSuccess, showError, Toast } = useFloatingToast();
+  const confirmDeleteAction = useConfirmDelete();
   const currentRole = String(
     authUser?.role?.name ??
       authUser?.role ??
@@ -231,7 +233,11 @@ function Users() {
 
   const remove = async (user) => {
     if (!isAdmin) return;
-    if (!window.confirm(`Delete user "${user?.name || user?.email || user?.id}"?`)) return;
+    const ok = await confirmDeleteAction({
+      itemName: user?.name || user?.email || String(user?.id),
+      itemType: "user",
+    });
+    if (!ok) return;
     setError("");
     try {
       await adminApi.users.remove(user.id);

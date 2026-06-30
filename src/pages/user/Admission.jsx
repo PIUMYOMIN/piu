@@ -32,6 +32,33 @@ function FilePickHint({ file, ruleKey }) {
   );
 }
 
+function ProfilePhotoPreview({ file }) {
+  const [previewUrl, setPreviewUrl] = useState(null);
+
+  useEffect(() => {
+    if (!(file instanceof File) || !file.type.startsWith("image/")) {
+      setPreviewUrl(null);
+      return undefined;
+    }
+    const url = URL.createObjectURL(file);
+    setPreviewUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [file]);
+
+  if (!previewUrl) return null;
+
+  return (
+    <div className="mt-3 flex items-center gap-3">
+      <img
+        src={previewUrl}
+        alt="Profile preview"
+        className="h-24 w-24 rounded-full border-2 border-gray-200 object-cover shadow-sm"
+      />
+      <p className="text-xs text-gray-500">Preview of your profile photo</p>
+    </div>
+  );
+}
+
 export default function Admission() {
   const [error, setError] = useState({});
   const [courses, setCourses] = useState([]);
@@ -818,6 +845,7 @@ export default function Admission() {
                 onChange={(e) => handleFileSelect("profile", e.target.files?.[0])}
               />
               <FilePickHint file={profile} ruleKey="profile" />
+              <ProfilePhotoPreview file={profile} />
               {error.profile && <p className="text-red-500 text-xs italic mt-1">{error.profile}</p>}
             </div>
           </div>

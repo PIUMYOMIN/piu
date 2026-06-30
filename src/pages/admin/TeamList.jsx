@@ -4,6 +4,7 @@ import { adminApi } from "../../api/admin";
 import { toStorageUrl } from "../../utils/api";
 import { ADMIN_TABS, buildDashboardPath } from "../../utils/dashboardTabs";
 import { useFloatingToast } from "../../hooks/useFloatingToast";
+import { useConfirmDelete } from "../../contexts/ConfirmContext";
 import { getApiErrorMessage } from "../../utils/apiErrors";
 import ManagementFilters from "../../components/admin/ManagementFilters";
 
@@ -17,6 +18,7 @@ function normalizeTeamActive(team) {
 const TeamList = () => {
   const navigate = useNavigate();
   const { showSuccess, showError, Toast } = useFloatingToast();
+  const confirmDeleteAction = useConfirmDelete();
 
   const [teams, setTeams] = useState([]);
   const [departments, setDepartments] = useState([]);
@@ -81,7 +83,8 @@ const TeamList = () => {
   };
 
   const handleDelete = async (team) => {
-    if (!window.confirm(`Are you sure you want to delete "${team.name}"?`)) return;
+    const ok = await confirmDeleteAction({ itemName: team.name, itemType: "team member" });
+    if (!ok) return;
     try {
       await adminApi.teams.remove(team.id);
       setTeams((prev) => prev.filter((item) => item.id !== team.id));
