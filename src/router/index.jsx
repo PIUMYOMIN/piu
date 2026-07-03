@@ -341,7 +341,7 @@ const router = createBrowserRouter([
       {
         path: "admission",
         element: withSeo(
-          <RoleRoute allowedRoles={["admin", "registrar"]}>
+          <RoleRoute allowedRoles={["admin"]}>
             <AdmissionPage />
           </RoleRoute>,
           privateSeo("Admission Management")
@@ -350,7 +350,7 @@ const router = createBrowserRouter([
       {
         path: "admission/:id",
         element: withSeo(
-          <RoleRoute allowedRoles={["admin", "registrar"]}>
+          <RoleRoute allowedRoles={["admin"]}>
             <AdmissionDetails />
           </RoleRoute>,
           privateSeo("Admission Details")
@@ -359,7 +359,7 @@ const router = createBrowserRouter([
       {
         path: "admission/details",
         element: withSeo(
-          <RoleRoute allowedRoles={["admin", "registrar"]}>
+          <RoleRoute allowedRoles={["admin"]}>
             <AdmissionDetails />
           </RoleRoute>,
           privateSeo("Admission Details")
@@ -368,7 +368,7 @@ const router = createBrowserRouter([
       {
         path: "course-list",
         element: withSeo(
-          <RoleRoute allowedRoles={["admin", "registrar"]}>
+          <RoleRoute allowedRoles={["admin"]}>
             <CourseList />
           </RoleRoute>,
           privateSeo("Course List")
@@ -378,7 +378,7 @@ const router = createBrowserRouter([
       {
         path: "course-categories",
         element: withSeo(
-          <RoleRoute allowedRoles={["admin", "registrar"]}>
+          <RoleRoute allowedRoles={["admin"]}>
             <CourseCategories />
           </RoleRoute>,
           privateSeo("Course Categories")
@@ -387,7 +387,7 @@ const router = createBrowserRouter([
       {
         path: "new/:id?",
         element: withSeo(
-          <RoleRoute allowedRoles={["admin", "registrar"]}>
+          <RoleRoute allowedRoles={["admin"]}>
             <NewCourse />
           </RoleRoute>,
           privateSeo("Course Editor")
@@ -396,7 +396,7 @@ const router = createBrowserRouter([
       {
         path: "blog-list",
         element: withSeo(
-          <RoleRoute allowedRoles={["admin", "registrar"]}>
+          <RoleRoute allowedRoles={["admin"]}>
             <BlogsList />
           </RoleRoute>,
           privateSeo("Blog List")
@@ -405,7 +405,7 @@ const router = createBrowserRouter([
       {
         path: "add-blog",
         element: withSeo(
-          <RoleRoute allowedRoles={["admin", "registrar"]}>
+          <RoleRoute allowedRoles={["admin"]}>
             <BlogsForm />
           </RoleRoute>,
           privateSeo("Add Blog")
@@ -414,7 +414,7 @@ const router = createBrowserRouter([
       {
         path: "add-blog/edit/:id",
         element: withSeo(
-          <RoleRoute allowedRoles={["admin", "registrar"]}>
+          <RoleRoute allowedRoles={["admin"]}>
             <BlogsForm />
           </RoleRoute>,
           privateSeo("Edit Blog")
@@ -423,7 +423,7 @@ const router = createBrowserRouter([
       {
         path: "news",
         element: withSeo(
-          <RoleRoute allowedRoles={["admin", "registrar"]}>
+          <RoleRoute allowedRoles={["admin"]}>
             <NewsList />
           </RoleRoute>,
           privateSeo("News List")
@@ -432,7 +432,7 @@ const router = createBrowserRouter([
       {
         path: "add-news",
         element: withSeo(
-          <RoleRoute allowedRoles={["admin", "registrar"]}>
+          <RoleRoute allowedRoles={["admin"]}>
             <NewsForm />
           </RoleRoute>,
           privateSeo("Add News")
@@ -441,7 +441,7 @@ const router = createBrowserRouter([
       {
         path: "add-news/edit/:id",
         element: withSeo(
-          <RoleRoute allowedRoles={["admin", "registrar"]}>
+          <RoleRoute allowedRoles={["admin"]}>
             <NewsForm />
           </RoleRoute>,
           privateSeo("Edit News")
@@ -450,7 +450,7 @@ const router = createBrowserRouter([
       {
         path: "campus-list",
         element: withSeo(
-          <RoleRoute allowedRoles={["admin", "registrar"]}>
+          <RoleRoute allowedRoles={["admin"]}>
             <CampusList />
           </RoleRoute>,
           privateSeo("Campus List")
@@ -459,7 +459,7 @@ const router = createBrowserRouter([
       {
         path: "new-campus",
         element: withSeo(
-          <RoleRoute allowedRoles={["admin", "registrar"]}>
+          <RoleRoute allowedRoles={["admin"]}>
             <CampusForm />
           </RoleRoute>,
           privateSeo("Add Campus")
@@ -468,7 +468,7 @@ const router = createBrowserRouter([
       {
         path: "campus/:id/edit",
         element: withSeo(
-          <RoleRoute allowedRoles={["admin", "registrar"]}>
+          <RoleRoute allowedRoles={["admin"]}>
             <CampusForm />
           </RoleRoute>,
           privateSeo("Edit Campus")
@@ -504,7 +504,7 @@ const router = createBrowserRouter([
       {
         path: "event-list",
         element: withSeo(
-          <RoleRoute allowedRoles={["admin", "registrar"]}>
+          <RoleRoute allowedRoles={["admin"]}>
             <EventList />
           </RoleRoute>,
           privateSeo("Event List")
@@ -513,7 +513,7 @@ const router = createBrowserRouter([
       {
         path: "add-event",
         element: withSeo(
-          <RoleRoute allowedRoles={["admin", "registrar"]}>
+          <RoleRoute allowedRoles={["admin"]}>
             <AddEvent />
           </RoleRoute>,
           privateSeo("Add Event")
@@ -522,7 +522,7 @@ const router = createBrowserRouter([
       {
         path: "events/edit/:id",
         element: withSeo(
-          <RoleRoute allowedRoles={["admin", "registrar"]}>
+          <RoleRoute allowedRoles={["admin"]}>
             <AddEvent />
           </RoleRoute>,
           privateSeo("Edit Event")
@@ -531,7 +531,7 @@ const router = createBrowserRouter([
       {
         path: "curriculum-list",
         element: withSeo(
-          <RoleRoute allowedRoles={["admin", "registrar"]}>
+          <RoleRoute allowedRoles={["admin"]}>
             <CurriculumList />
           </RoleRoute>,
           privateSeo("Curriculum List")
@@ -540,7 +540,7 @@ const router = createBrowserRouter([
       {
         path: "add-curriculum",
         element: withSeo(
-          <RoleRoute allowedRoles={["admin", "registrar"]}>
+          <RoleRoute allowedRoles={["admin"]}>
             <AddCurriculum />
           </RoleRoute>,
           privateSeo("Add Curriculum")
@@ -549,7 +549,7 @@ const router = createBrowserRouter([
       {
         path: "add-curriculum/edit/:id",
         element: withSeo(
-          <RoleRoute allowedRoles={["admin", "registrar"]}>
+          <RoleRoute allowedRoles={["admin"]}>
             <AddCurriculum />
           </RoleRoute>,
           privateSeo("Edit Curriculum")
@@ -567,7 +567,7 @@ const router = createBrowserRouter([
       {
         path: "mou",
         element: withSeo(
-          <RoleRoute allowedRoles={["admin", "registrar"]}>
+          <RoleRoute allowedRoles={["admin"]}>
             <MOUList />
           </RoleRoute>,
           privateSeo("MOU List")
@@ -576,7 +576,7 @@ const router = createBrowserRouter([
       {
         path: "mou/add",
         element: withSeo(
-          <RoleRoute allowedRoles={["admin", "registrar"]}>
+          <RoleRoute allowedRoles={["admin"]}>
             <AddMOU />
           </RoleRoute>,
           privateSeo("Add MOU")
@@ -585,7 +585,7 @@ const router = createBrowserRouter([
       {
         path: "departments",
         element: withSeo(
-          <RoleRoute allowedRoles={["admin", "registrar"]}>
+          <RoleRoute allowedRoles={["admin"]}>
             <DepartmentList />
           </RoleRoute>,
           privateSeo("Departments")
@@ -594,7 +594,7 @@ const router = createBrowserRouter([
       {
         path: "departments/new",
         element: withSeo(
-          <RoleRoute allowedRoles={["admin", "registrar"]}>
+          <RoleRoute allowedRoles={["admin"]}>
             <AddDepartment />
           </RoleRoute>,
           privateSeo("Add Department")
@@ -603,7 +603,7 @@ const router = createBrowserRouter([
       {
         path: "departments/edit/:id",
         element: withSeo(
-          <RoleRoute allowedRoles={["admin", "registrar"]}>
+          <RoleRoute allowedRoles={["admin"]}>
             <AddDepartment />
           </RoleRoute>,
           privateSeo("Edit Department")
@@ -612,7 +612,7 @@ const router = createBrowserRouter([
       {
         path: "positions",
         element: withSeo(
-          <RoleRoute allowedRoles={["admin", "registrar"]}>
+          <RoleRoute allowedRoles={["admin"]}>
             <PositionList />
           </RoleRoute>,
           privateSeo("Positions")
@@ -621,7 +621,7 @@ const router = createBrowserRouter([
       {
         path: "positions/new",
         element: withSeo(
-          <RoleRoute allowedRoles={["admin", "registrar"]}>
+          <RoleRoute allowedRoles={["admin"]}>
             <AddPosition />
           </RoleRoute>,
           privateSeo("Add Position")
@@ -630,7 +630,7 @@ const router = createBrowserRouter([
       {
         path: "positions/edit/:id",
         element: withSeo(
-          <RoleRoute allowedRoles={["admin", "registrar"]}>
+          <RoleRoute allowedRoles={["admin"]}>
             <AddPosition />
           </RoleRoute>,
           privateSeo("Edit Position")
@@ -639,7 +639,7 @@ const router = createBrowserRouter([
       {
         path: "seminars",
         element: withSeo(
-          <RoleRoute allowedRoles={["admin", "registrar"]}>
+          <RoleRoute allowedRoles={["admin"]}>
             <SeminarList />
           </RoleRoute>,
           privateSeo("Seminars")
@@ -648,7 +648,7 @@ const router = createBrowserRouter([
       {
         path: "seminars/add",
         element: withSeo(
-          <RoleRoute allowedRoles={["admin", "registrar"]}>
+          <RoleRoute allowedRoles={["admin"]}>
             <AddSeminar />
           </RoleRoute>,
           privateSeo("Add Seminar")
@@ -657,7 +657,7 @@ const router = createBrowserRouter([
       {
         path: "seminars/edit/:id",
         element: withSeo(
-          <RoleRoute allowedRoles={["admin", "registrar"]}>
+          <RoleRoute allowedRoles={["admin"]}>
             <AddSeminar />
           </RoleRoute>,
           privateSeo("Edit Seminar")
@@ -666,7 +666,7 @@ const router = createBrowserRouter([
       {
         path: "gallery",
         element: withSeo(
-          <RoleRoute allowedRoles={["admin", "registrar"]}>
+          <RoleRoute allowedRoles={["admin"]}>
             <GalleryList />
           </RoleRoute>,
           privateSeo("Gallery Management")
@@ -675,7 +675,7 @@ const router = createBrowserRouter([
       {
         path: "gallery/add",
         element: withSeo(
-          <RoleRoute allowedRoles={["admin", "registrar"]}>
+          <RoleRoute allowedRoles={["admin"]}>
             <AddGallery />
           </RoleRoute>,
           privateSeo("Add Gallery")
@@ -684,7 +684,7 @@ const router = createBrowserRouter([
       {
         path: "gallery/add/:id",
         element: withSeo(
-          <RoleRoute allowedRoles={["admin", "registrar"]}>
+          <RoleRoute allowedRoles={["admin"]}>
             <AddGallery />
           </RoleRoute>,
           privateSeo("Edit Gallery")
@@ -792,7 +792,7 @@ const router = createBrowserRouter([
       {
         path: "assignments",
         element: withSeo(
-          <RoleRoute allowedRoles={["admin"]}>
+          <RoleRoute allowedRoles={["admin", "registrar"]}>
             <AssignmentsList />
           </RoleRoute>,
           privateSeo("Assignments")
@@ -801,7 +801,7 @@ const router = createBrowserRouter([
       {
         path: "assignments/add",
         element: withSeo(
-          <RoleRoute allowedRoles={["admin"]}>
+          <RoleRoute allowedRoles={["admin", "registrar"]}>
             <AddAssignment />
           </RoleRoute>,
           privateSeo("Add Assignment")
@@ -810,7 +810,7 @@ const router = createBrowserRouter([
       {
         path: "assignments/edit/:id",
         element: withSeo(
-          <RoleRoute allowedRoles={["admin"]}>
+          <RoleRoute allowedRoles={["admin", "registrar"]}>
             <AddAssignment />
           </RoleRoute>,
           privateSeo("Edit Assignment")

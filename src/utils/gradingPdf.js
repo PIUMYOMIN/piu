@@ -85,7 +85,13 @@ function tableHeaders() {
 /**
  * Generate and download a grading record PDF with tabular layout.
  */
-export async function downloadGradingRecordPdf({ student, summary = {}, grades = [], byYear = [] }) {
+export async function downloadGradingRecordPdf({
+  student,
+  summary = {},
+  grades = [],
+  byYear = [],
+  fileNameSuffix = "",
+}) {
   const [{ jsPDF }, { default: autoTable }] = await Promise.all([
     import("jspdf"),
     import("jspdf-autotable"),
@@ -213,6 +219,10 @@ export async function downloadGradingRecordPdf({ student, summary = {}, grades =
   }
 
   const studentId = safeText(student?.student_id, "student").replace(/[^\w-]+/g, "_");
-  const fileName = `grading-record-${studentId}-${new Date().toISOString().slice(0, 10)}.pdf`;
+  const suffix = safeText(fileNameSuffix, "")
+    .replace(/[^\w-]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+  const suffixPart = suffix ? `-${suffix}` : "";
+  const fileName = `grading-record-${studentId}${suffixPart}-${new Date().toISOString().slice(0, 10)}.pdf`;
   doc.save(fileName);
 }

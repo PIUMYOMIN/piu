@@ -35,6 +35,23 @@ export function resolveAccountType(user, fallback = ACCOUNT_TYPES.STAFF) {
   return fallback;
 }
 
+export function isAdminRole(role) {
+  return String(role || '').toLowerCase() === 'admin';
+}
+
+export function isRegistrarRole(role) {
+  return String(role || '').toLowerCase() === 'registrar';
+}
+
+export function canManageStudents(user) {
+  const role = resolveUserRole(user);
+  return isAdminRole(role) || isRegistrarRole(role);
+}
+
+export function canManageAcademicRecords(user) {
+  return canManageStudents(user);
+}
+
 export function getDashboardPathForRole(role) {
   switch (String(role || '').toLowerCase()) {
     case 'admin':

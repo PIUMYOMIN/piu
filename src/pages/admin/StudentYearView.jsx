@@ -1,39 +1,64 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useParams, useNavigate } from "react-router-dom";
 import { FaArrowLeft } from "react-icons/fa";
+import { adminApi } from "../../api/admin";
+import { getApiErrorMessage } from "../../utils/apiErrors";
+import { YEAR_LABELS, getStudentDisplayName } from "../../utils/gradingHelpers";
 
 export default function StudentYearView() {
   const { id } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
-  const [student, setStudent] = useState(null);
+  const [student, setStudent] = useState(location.state || null);
+  const [loading, setLoading] = useState(!location.state);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if (location.state) {
       setStudent(location.state);
-    } else {
-      // fallback if no state (simulate fetch)
-      setStudent({
-        id,
-        name: "Unknown Student",
-        program: "ICT",
-        studentId: `ST${String(id).padStart(3, "0")}`,
-      });
+      setLoading(false);
+      return;
     }
+
+    let mounted = true;
+    async function load() {
+      setLoading(true);
+      setError("");
+      try {
+        const data = await adminApi.students.get(id);
+        if (!mounted) return;
+        setStudent({
+          ...data,
+          name: getStudentDisplayName(data),
+          studentId: data.student_id || data.studentId || "",
+          program: data.course?.title || data.program || "Unassigned",
+        });
+      } catch (err) {
+        if (!mounted) return;
+        setError(getApiErrorMessage(err, "Failed to load student"));
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    }
+
+    load();
+    return () => {
+      mounted = false;
+    };
   }, [id, location.state]);
 
-  if (!student) return <p className="p-6">Loading...</p>;
+  if (loading) return <p className="p-6 text-gray-500">Loading...</p>;
 
-  const years = [
-    { value: "first", label: "First Year" },
-    { value: "second", label: "Second Year" },
-    { value: "third", label: "Third Year" },
-    { value: "fourth", label: "Fourth Year" },
-  ];
+  if (!student) {
+    return (
+      <p className="p-6 text-red-600">{error || "Student not found."}</p>
+    );
+  }
+
+  const years = Object.entries(YEAR_LABELS).map(([value, label]) => ({ value, label }));
 
   return (
     <div className="w-full mx-auto bg-white rounded-lg shadow-md overflow-hidden">
-      {/* Page Header with Back Button */}
       <div className="bg-[#002147] px-6 py-4 flex items-center">
         <button
           onClick={() => navigate(-1)}
@@ -47,9 +72,15 @@ export default function StudentYearView() {
       </div>
 
       <div className="p-6 space-y-6">
+        {error && (
+          <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+            {error}
+          </div>
+        )}
+
         <div className="bg-gray-50 p-4 rounded-md">
           <p className="mb-2">
-            <strong>Student ID:</strong> {student.studentId}
+            <strong>Student ID:</strong> {student.studentId || "—"}
           </p>
           <p>
             <strong>Program:</strong> {student.program}

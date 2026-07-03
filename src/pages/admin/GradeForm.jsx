@@ -1,243 +1,368 @@
-// src/pages/admin/grades/GradeForm.jsx
 import React, { useEffect, useMemo, useState } from "react";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
+import { FaArrowLeft } from "react-icons/fa";
+import { adminApi } from "../../api/admin";
+import { useFloatingToast } from "../../hooks/useFloatingToast";
+import { getApiErrorMessage } from "../../utils/apiErrors";
+import {
+  YEAR_LABELS,
+  getStudentDisplayName,
+  markToGradePoint,
+  markToGradeValue,
+  resolveSemesterIdFromSlug,
+  resolveYearIdFromSlug,
+  semesterLabelFromSlug,
+} from "../../utils/gradingHelpers";
 
-const MODULE_OPTIONS = [
-  { code: "ICT101", label: "Introduction to Programming" },
-  { code: "ICT102", label: "Computer Systems" },
-  { code: "BUS201", label: "Marketing Fundamentals" },
-  { code: "ENG110", label: "English Composition" },
-];
-
-const YEAR_OPTIONS = [
-  { value: "first", label: "First Year" },
-  { value: "second", label: "Second Year" },
-  { value: "third", label: "Third Year" },
-  { value: "fourth", label: "Fourth Year" },
-];
+const EMPTY_FORM = {
+  assignment_id: "",
+  module_id: "",
+  mark: "",
+  grade_point: "",
+  grade_value: "",
+};
 
 export default function GradeForm() {
-  const { studentId, semester, gradeId } = useParams();
+  const { studentId, year, semester, gradeId } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
+  const { showSuccess, showError, Toast } = useFloatingToast();
 
-  // If we came from SemesterView (edit mode)
+  const isEdit = Boolean(gradeId);
   const passedStudent = location.state?.student;
   const passedGrade = location.state?.grade;
 
-  // Check if we are editing
-  const isEdit = Boolean(gradeId);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [student, setStudent] = useState(passedStudent || null);
+  const [assignments, setAssignments] = useState([]);
+  const [modules, setModules] = useState([]);
+  const [years, setYears] = useState([]);
+  const [semesters, setSemesters] = useState([]);
+  const [form, setForm] = useState(EMPTY_FORM);
 
-  const [form, setForm] = useState({
-    studentName: "",
-    year: "",
-    semester: semester || "",
-    moduleCode: "",
-    assignment: "",
-    marks: "",
-    gpaPoint: "",
-    gpaValue: "",
-  });
+  const courseId = student?.course_id ?? student?.course?.id;
+  const yearId = resolveYearIdFromSlug(years, year);
+  const semesterId = resolveSemesterIdFromSlug(semesters, semester);
+  const semesterLabel = semesterLabelFromSlug(semester);
+  const yearLabel = YEAR_LABELS[year] || year;
 
-  // Prefill when editing
+  const gradeViewPath = `/piu/admin/students/${studentId}/${year}/${semester}`;
+
   useEffect(() => {
-    if (isEdit && passedStudent && passedGrade) {
-      setForm({
-        studentName: passedStudent.name,
-        year: passedGrade.year || "",
-        semester: semester,
-        moduleCode: passedGrade.moduleCode || "",
-        assignment: passedGrade.assignment || "",
-        marks: passedGrade.marks || "",
-        gpaPoint: passedGrade.gpaPoint || "",
-        gpaValue: passedGrade.gpaValue || "",
-      });
+    let mounted = true;
+
+    async function load() {
+      setLoading(true);
+      setError("");
+      try {
+        const programParams = { student_id: studentId };
+
+        const [studentData, assignmentsData, modulesData, yearsData, semestersData] = await Promise.all([
+          passedStudent ? Promise.resolve(passedStudent) : adminApi.students.get(studentId),
+          adminApi.assignments.list(programParams),
+          adminApi.modules.list(programParams),
+          adminApi.meta.years(),
+          adminApi.meta.semesters(),
+        ]);
+
+        if (!mounted) return;
+
+        const resolvedStudent = passedStudent || studentData;
+        setStudent(resolvedStudent);
+        setAssignments(Array.isArray(assignmentsData) ? assignmentsData : []);
+        setModules(Array.isArray(modulesData) ? modulesData : []);
+        setYears(Array.isArray(yearsData) ? yearsData : []);
+        setSemesters(Array.isArray(semestersData) ? semestersData : []);
+
+        if (isEdit && passedGrade) {
+          setForm({
+            assignment_id: String(passedGrade.assignment_id || ""),
+            module_id: String(passedGrade.module_id || ""),
+            mark: passedGrade.mark != null ? String(passedGrade.mark) : "",
+            grade_point:
+              passedGrade.grade_point != null
+                ? String(passedGrade.grade_point)
+                : passedGrade.gpaPoint != null
+                  ? String(passedGrade.gpaPoint)
+                  : "",
+            grade_value: passedGrade.grade_value || passedGrade.gpaValue || "",
+          });
+        } else if (isEdit && gradeId) {
+          const result = await adminApi.grades.forStudent(studentId);
+          const grade = (Array.isArray(result?.data) ? result.data : []).find(
+            (g) => String(g.id) === String(gradeId)
+          );
+          if (grade) {
+            setForm({
+              assignment_id: String(grade.assignment_id || ""),
+              module_id: String(grade.module_id || ""),
+              mark: grade.mark != null ? String(grade.mark) : "",
+              grade_point: grade.grade_point != null ? String(grade.grade_point) : "",
+              grade_value: grade.grade_value || "",
+            });
+          }
+        }
+      } catch (err) {
+        if (!mounted) return;
+        setError(getApiErrorMessage(err, "Failed to load grade form"));
+      } finally {
+        if (mounted) setLoading(false);
+      }
     }
-  }, [isEdit, passedStudent, passedGrade, semester]);
+
+    load();
+    return () => {
+      mounted = false;
+    };
+  }, [studentId, gradeId, isEdit, passedStudent, passedGrade]);
+
+  const assignmentsById = useMemo(
+    () => new Map(assignments.map((a) => [String(a.id), a])),
+    [assignments]
+  );
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    setForm((prev) => {
+      const next = { ...prev, [name]: value };
+      if (name === "assignment_id" && value) {
+        const assignment = assignmentsById.get(String(value));
+        if (assignment?.module_id) next.module_id = String(assignment.module_id);
+      }
+      if (name === "mark" && value !== "") {
+        next.grade_point = markToGradePoint(value);
+        next.grade_value = markToGradeValue(value);
+      }
+      return next;
+    });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (isEdit) {
-      console.log("Update grade:", { gradeId, studentId, semester, ...form });
-    } else {
-      console.log("Create new grade:", form);
+    if (!student || !courseId || !yearId) {
+      showError("Missing student or academic year information.");
+      return;
     }
 
-    navigate("/piu/admin/students/add-grading");
+    setSaving(true);
+    try {
+      const payload = {
+        mark: Number(form.mark),
+        grade_point: Number(form.grade_point),
+        grade_value: form.grade_value,
+      };
+
+      if (isEdit) {
+        await adminApi.grades.update(gradeId, {
+          ...payload,
+          semester_id: semesterId || undefined,
+        });
+        showSuccess("Grade updated.");
+      } else {
+        await adminApi.grades.save({
+          student_id: Number(studentId),
+          course_id: Number(courseId),
+          assignment_id: Number(form.assignment_id),
+          module_id: Number(form.module_id),
+          year_id: Number(yearId),
+          semester_id: semesterId || undefined,
+          ...payload,
+        });
+        showSuccess("Grade recorded.");
+      }
+
+      navigate(gradeViewPath, {
+        state: {
+          ...student,
+          name: getStudentDisplayName(student),
+          studentId: student.student_id || student.studentId || "",
+          program: student.program || student.course?.title || "",
+        },
+      });
+    } catch (err) {
+      showError(getApiErrorMessage(err, isEdit ? "Failed to update grade" : "Failed to save grade"));
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const title = isEdit ? "Edit Grading" : "Add Grading";
-  const semesterLabel =
-    semester === "first"
-      ? "First Semester"
-      : semester === "second"
-      ? "Second Semester"
-      : "";
+  const studentName = getStudentDisplayName(student);
+  const programName = student?.program || student?.course?.title || "—";
+
+  if (loading) {
+    return (
+      <div className="mx-auto w-full max-w-full overflow-hidden rounded-xl bg-white p-8 text-center text-gray-500 shadow-md">
+        Loading grade form...
+      </div>
+    );
+  }
 
   return (
-    <div className="w-full mx-auto bg-white rounded-lg shadow-md overflow-hidden">
-      {/* Page Title */}
-      <div className="bg-[#002147] px-6 py-4">
-        <h2 className="text-xl font-bold text-white">{title}</h2>
+    <div className="mx-auto w-full max-w-full overflow-hidden rounded-xl bg-white shadow-md">
+      <Toast />
+      <div className="bg-[#002147] px-4 py-4 sm:px-6">
+        <div className="flex items-center gap-3">
+          <Link to={gradeViewPath} className="text-white hover:text-gray-200">
+            <FaArrowLeft />
+          </Link>
+          <div>
+            <h2 className="text-xl font-bold text-white sm:text-2xl">
+              {isEdit ? "Edit Grading" : "Add Grading"}
+            </h2>
+            <p className="mt-1 text-sm text-blue-100">
+              {studentName} — {programName} — {yearLabel} — {semesterLabel}
+            </p>
+          </div>
+        </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="p-6 space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Student Name */}
+      <form onSubmit={handleSubmit} className="space-y-6 p-4 sm:p-6">
+        {error && (
+          <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+            {error}
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Student Name
-            </label>
+            <label className="mb-1 block text-sm font-medium text-gray-700">Student Name</label>
             <input
               type="text"
-              name="studentName"
-              value={form.studentName}
-              onChange={handleChange}
-              readOnly={isEdit}
-              className={`w-full border rounded px-3 py-2 ${
-                isEdit ? "bg-gray-100" : ""
-              }`}
-              required
+              value={studentName}
+              readOnly
+              className="w-full rounded border bg-gray-100 px-3 py-2"
             />
           </div>
 
-          {/* Year */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Choose Year
-            </label>
+            <label className="mb-1 block text-sm font-medium text-gray-700">Academic Year</label>
+            <input
+              type="text"
+              value={yearLabel}
+              readOnly
+              className="w-full rounded border bg-gray-100 px-3 py-2"
+            />
+          </div>
+
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700">Semester</label>
+            <input
+              type="text"
+              value={semesterLabel}
+              readOnly
+              className="w-full rounded border bg-gray-100 px-3 py-2"
+            />
+          </div>
+
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700">Study Program</label>
+            <input
+              type="text"
+              value={programName}
+              readOnly
+              className="w-full rounded border bg-gray-100 px-3 py-2"
+            />
+          </div>
+
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700">Assignment</label>
             <select
-              name="year"
-              value={form.year}
+              name="assignment_id"
+              value={form.assignment_id}
               onChange={handleChange}
-              className="w-full border rounded px-3 py-2"
               required
+              disabled={isEdit}
+              className="w-full rounded border px-3 py-2 disabled:bg-gray-100"
             >
-              <option value="">Select year</option>
-              {YEAR_OPTIONS.map((y) => (
-                <option key={y.value} value={y.value}>
-                  {y.label}
+              <option value="">Select assignment</option>
+              {assignments.map((a) => (
+                <option key={a.id} value={String(a.id)}>
+                  {a.name}
                 </option>
               ))}
             </select>
           </div>
 
-          {/* Semester */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Semester
-            </label>
-            <input
-              type="text"
-              value={semesterLabel || form.semester}
-              readOnly
-              className="w-full border rounded px-3 py-2 bg-gray-100"
-            />
-          </div>
-
-          {/* Module Code */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Module Code
-            </label>
+            <label className="mb-1 block text-sm font-medium text-gray-700">Module</label>
             <select
-              name="moduleCode"
-              value={form.moduleCode}
+              name="module_id"
+              value={form.module_id}
               onChange={handleChange}
-              className="w-full border rounded px-3 py-2"
               required
+              disabled={isEdit}
+              className="w-full rounded border px-3 py-2 disabled:bg-gray-100"
             >
               <option value="">Select module</option>
-              {MODULE_OPTIONS.map((m) => (
-                <option key={m.code} value={m.code}>
-                  {m.code} — {m.label}
+              {modules.map((m) => (
+                <option key={m.id} value={String(m.id)}>
+                  {m.module_code ? `${m.module_code} — ` : ""}
+                  {m.name}
                 </option>
               ))}
             </select>
           </div>
 
-          {/* Assignment */}
           <div>
-            <label className="block font-medium">Assignments</label>
-            <select
-              name="assignment"
-              value={form.assignment}
-              onChange={handleChange}
-              className="w-full border px-3 py-2 rounded"
-              required
-            >
-              <option value="">-- Select Assignment --</option>
-              <option value="English">English</option>
-              <option value="Humanities">Humanities</option>
-              <option value="Mathematics">Mathematics</option>
-              <option value="Computer Science">Computer Science</option>
-            </select>
-          </div>
-
-          {/* Marks */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Enter Marks
-            </label>
+            <label className="mb-1 block text-sm font-medium text-gray-700">Mark (0–100)</label>
             <input
               type="number"
-              name="marks"
-              value={form.marks}
+              name="mark"
+              value={form.mark}
               onChange={handleChange}
-              className="w-full border rounded px-3 py-2"
               min="0"
               max="100"
+              step="0.01"
               required
+              className="w-full rounded border px-3 py-2"
             />
           </div>
 
-          {/* GPA Point */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              GPA Point
-            </label>
+            <label className="mb-1 block text-sm font-medium text-gray-700">Grade Point</label>
             <input
               type="number"
-              step="0.01"
-              name="gpaPoint"
-              value={form.gpaPoint}
+              name="grade_point"
+              value={form.grade_point}
               onChange={handleChange}
-              className="w-full border rounded px-3 py-2"
+              min="0"
+              max="4"
+              step="0.1"
               required
+              className="w-full rounded border px-3 py-2"
             />
           </div>
 
-          {/* GPA Value */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              GPA Value
-            </label>
+            <label className="mb-1 block text-sm font-medium text-gray-700">Grade Value</label>
             <input
               type="text"
-              name="gpaValue"
-              value={form.gpaValue}
+              name="grade_value"
+              value={form.grade_value}
               onChange={handleChange}
               placeholder="A, B+, C, ..."
-              className="w-full border rounded px-3 py-2"
               required
+              className="w-full rounded border px-3 py-2"
             />
           </div>
         </div>
 
-        {/* Submit */}
-        <div className="pt-2">
+        <div className="flex flex-wrap gap-3 pt-2">
           <button
             type="submit"
-            className="px-6 py-2 bg-blue-600 text-white font-medium rounded hover:bg-blue-700"
+            disabled={saving}
+            className="rounded bg-blue-600 px-6 py-2 font-medium text-white hover:bg-blue-700 disabled:opacity-60"
           >
-            {isEdit ? "Update" : "Submit"}
+            {saving ? "Saving..." : isEdit ? "Update" : "Submit"}
           </button>
+          <Link
+            to={gradeViewPath}
+            className="rounded border border-gray-300 px-6 py-2 text-gray-700 hover:bg-gray-50"
+          >
+            Cancel
+          </Link>
         </div>
       </form>
     </div>

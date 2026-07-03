@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { adminApi } from "../../api/admin";
 import { useAuth } from "../../contexts/AuthContext";
+import { canManageAcademicRecords } from "../../utils/authRouting";
 import { useFloatingToast } from "../../hooks/useFloatingToast";
 import { useConfirmDelete } from "../../contexts/ConfirmContext";
 import { getApiErrorMessage } from "../../utils/apiErrors";
@@ -11,12 +12,7 @@ export default function ModulesList() {
   const { showSuccess, showError, Toast } = useFloatingToast();
   const confirmDeleteAction = useConfirmDelete();
   const { user: authUser } = useAuth();
-  const currentRole = String(
-    authUser?.role?.name ??
-      authUser?.role ??
-      (Array.isArray(authUser?.roles) ? authUser.roles[0]?.name || authUser.roles[0] : "")
-  ).toLowerCase();
-  const isAdmin = currentRole === "admin";
+  const canManage = canManageAcademicRecords(authUser);
   const [modules, setModules] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -85,7 +81,7 @@ export default function ModulesList() {
   }, [currentPage, totalPages]);
 
   const remove = async (module) => {
-    if (!isAdmin) return;
+    if (!canManage) return;
     const ok = await confirmDeleteAction({ itemName: module?.name, itemType: "module" });
     if (!ok) return;
     setError("");
@@ -181,7 +177,7 @@ export default function ModulesList() {
                       <Link to={`/piu/admin/modules/edit/${m.id}`} className="text-blue-600 hover:underline">
                         Edit
                       </Link>
-                      {isAdmin && (
+                      {canManage && (
                         <button
                           className="text-red-600 hover:underline disabled:cursor-not-allowed disabled:opacity-40"
                           onClick={() => remove(m)}

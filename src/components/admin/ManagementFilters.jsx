@@ -40,7 +40,7 @@ export default function ManagementFilters({
           <select
             value={statusValue}
             onChange={(e) => onStatusChange(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg bg-white"
+            className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 sm:w-auto"
           >
             {statusOptions.map((opt) => (
               <option key={opt.value} value={opt.value}>
@@ -55,7 +55,7 @@ export default function ManagementFilters({
             key={filter.key}
             value={filter.value}
             onChange={(e) => filter.onChange(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg bg-white"
+            className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 sm:w-auto"
           >
             {filter.options.map((opt) => (
               <option key={opt.value} value={opt.value}>

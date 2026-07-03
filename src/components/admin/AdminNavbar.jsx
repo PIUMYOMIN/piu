@@ -1,11 +1,14 @@
 import React, { useState, useEffect, useRef } from "react";
-import { FaEnvelope, FaBook, FaUserGraduate, FaUserCircle, FaBars, FaTimes, FaSignOutAlt, FaCog, FaHome } from "react-icons/fa";
+import { FaBars, FaBook, FaHome, FaSignOutAlt, FaCog, FaTasks, FaTimes, FaUserCircle, FaUserGraduate } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
+import { isRegistrarRole, resolveUserRole } from "../../utils/authRouting";
 import logo from "../../assets/logo.png";
 
 const AdminNavbar = ({ toggleSidebar, isSidebarOpen }) => {
   const { user, logout } = useAuth();
+  const role = resolveUserRole(user);
+  const isRegistrar = isRegistrarRole(role);
   const navigate = useNavigate();
   const [isAccountOpen, setIsAccountOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -71,22 +74,50 @@ const AdminNavbar = ({ toggleSidebar, isSidebarOpen }) => {
 
       {/* Center - Quick Links for Desktop */}
       <div className="hidden lg:flex items-center space-x-8">
-        <Link 
-          to="/piu/admin/admission" 
-          className="flex items-center space-x-2 hover:text-blue-200 transition-colors"
-        >
-          <FaUserGraduate />
-          <span>Admissions</span>
-        </Link>
-        <Link 
-          to="/piu/admin/course-list" 
-          className="flex items-center space-x-2 hover:text-blue-200 transition-colors"
-        >
-          <FaBook />
-          <span>Courses</span>
-        </Link>
-        <Link 
-          to="/" 
+        {isRegistrar ? (
+          <>
+            <Link
+              to="/piu/admin/students"
+              className="flex items-center space-x-2 hover:text-blue-200 transition-colors"
+            >
+              <FaUserGraduate />
+              <span>Students</span>
+            </Link>
+            <Link
+              to="/piu/admin/modules"
+              className="flex items-center space-x-2 hover:text-blue-200 transition-colors"
+            >
+              <FaBook />
+              <span>Modules</span>
+            </Link>
+            <Link
+              to="/piu/admin/assignments"
+              className="flex items-center space-x-2 hover:text-blue-200 transition-colors"
+            >
+              <FaTasks />
+              <span>Assignments</span>
+            </Link>
+          </>
+        ) : (
+          <>
+            <Link
+              to="/piu/admin/admission"
+              className="flex items-center space-x-2 hover:text-blue-200 transition-colors"
+            >
+              <FaUserGraduate />
+              <span>Admissions</span>
+            </Link>
+            <Link
+              to="/piu/admin/course-list"
+              className="flex items-center space-x-2 hover:text-blue-200 transition-colors"
+            >
+              <FaBook />
+              <span>Courses</span>
+            </Link>
+          </>
+        )}
+        <Link
+          to="/"
           target="_blank"
           className="flex items-center space-x-2 hover:text-blue-200 transition-colors"
         >
@@ -99,24 +130,10 @@ const AdminNavbar = ({ toggleSidebar, isSidebarOpen }) => {
       <div className="flex items-center space-x-4 sm:space-x-6">
         {/* Desktop Icons */}
         <div className="hidden lg:flex items-center space-x-6">
-          {/* Messages */}
-          <div className="relative group">
-            <Link to="/piu/admin/inbox" className="relative hover:text-blue-200 transition-colors">
-              <FaEnvelope size={20} />
-              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
-                3
-              </span>
-            </Link>
-            <div className="absolute bottom-[-60px] left-1/2 -translate-x-1/2 bg-gray-900 text-white px-3 py-2 rounded text-sm opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
-              Messages (3 unread)
-            </div>
-          </div>
-
-          {/* User Info */}
           <div className="flex items-center space-x-3">
             <div className="text-right hidden md:block">
-              <div className="text-sm font-medium">{user?.name || 'Admin User'}</div>
-              <div className="text-xs text-gray-300">{user?.role || 'Administrator'}</div>
+              <div className="text-sm font-medium">{user?.name || (isRegistrar ? 'Registrar User' : 'Admin User')}</div>
+              <div className="text-xs text-gray-300 capitalize">{role || 'Administrator'}</div>
             </div>
           </div>
         </div>
@@ -210,35 +227,55 @@ const AdminNavbar = ({ toggleSidebar, isSidebarOpen }) => {
           </div>
           
           <div className="py-2">
-            <Link 
-              to="/piu/admin/admission" 
-              className="flex items-center px-4 py-3 hover:bg-[#002147] transition-colors"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              <FaUserGraduate className="mr-3" />
-              Admissions
-            </Link>
-            <Link 
-              to="/piu/admin/course-list" 
-              className="flex items-center px-4 py-3 hover:bg-[#002147] transition-colors"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              <FaBook className="mr-3" />
-              Courses
-            </Link>
-            <Link 
-              to="/piu/admin/inbox" 
-              className="flex items-center px-4 py-3 hover:bg-[#002147] transition-colors"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              <FaEnvelope className="mr-3" />
-              Messages
-              <span className="ml-auto bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                3
-              </span>
-            </Link>
-            <Link 
-              to="/" 
+            {isRegistrar ? (
+              <>
+                <Link
+                  to="/piu/admin/students"
+                  className="flex items-center px-4 py-3 hover:bg-[#002147] transition-colors"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <FaUserGraduate className="mr-3" />
+                  Students
+                </Link>
+                <Link
+                  to="/piu/admin/modules"
+                  className="flex items-center px-4 py-3 hover:bg-[#002147] transition-colors"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <FaBook className="mr-3" />
+                  Modules
+                </Link>
+                <Link
+                  to="/piu/admin/assignments"
+                  className="flex items-center px-4 py-3 hover:bg-[#002147] transition-colors"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <FaTasks className="mr-3" />
+                  Assignments
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link
+                  to="/piu/admin/admission"
+                  className="flex items-center px-4 py-3 hover:bg-[#002147] transition-colors"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <FaUserGraduate className="mr-3" />
+                  Admissions
+                </Link>
+                <Link
+                  to="/piu/admin/course-list"
+                  className="flex items-center px-4 py-3 hover:bg-[#002147] transition-colors"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <FaBook className="mr-3" />
+                  Courses
+                </Link>
+              </>
+            )}
+            <Link
+              to="/"
               target="_blank"
               className="flex items-center px-4 py-3 hover:bg-[#002147] transition-colors"
               onClick={() => setIsMobileMenuOpen(false)}

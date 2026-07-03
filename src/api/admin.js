@@ -76,12 +76,12 @@ export const adminApi = {
 
   // Assignments / Modules
   assignments: {
-    list: () =>
-      client.get('/assignments').then((r) => {
+    list: (params) =>
+      client.get('/assignments', { params }).then((r) => {
         const data = unwrap(r.data);
         return data?.assignments || [];
       }),
-    meta: () => client.get('/assignments').then((r) => unwrap(r.data)),
+    meta: (params) => client.get('/assignments', { params }).then((r) => unwrap(r.data)),
     // Backend `show` accepts numeric id or slug.
     get: (idOrSlug) =>
       client.get(`/assignments/${idOrSlug}`).then((r) => {
@@ -99,7 +99,7 @@ export const adminApi = {
     remove: (id) => client.delete(`/assignments/${id}`).then((r) => r.data),
   },
   modules: {
-    list: () => client.get('/modules').then((r) => unwrap(r.data)),
+    list: (params) => client.get('/modules', { params }).then((r) => unwrap(r.data)),
     get: (id) => client.get(`/modules/${id}`).then((r) => unwrap(r.data)),
     create: (payload) => client.post('/modules', payload).then((r) => unwrap(r.data)),
     update: (id, payload) => client.put(`/modules/${id}`, payload).then((r) => unwrap(r.data)),
@@ -207,8 +207,17 @@ export const adminApi = {
 
   meta: {
     years: () => client.get('/years').then((r) => unwrap(r.data)),
+    semesters: () => client.get('/semesters').then((r) => unwrap(r.data)),
     departments: () => client.get('/departments').then((r) => unwrap(r.data)),
     positions: () => client.get('/positions').then((r) => unwrap(r.data)),
+  },
+
+  grades: {
+    list: (params) => client.get('/grades', { params }).then((r) => unwrap(r.data)),
+    forStudent: (studentId) => client.get(`/students/${studentId}/grades`).then((r) => r.data),
+    save: (payload) => client.post('/grades', payload).then((r) => r.data),
+    update: (id, payload) => client.put(`/grades/${id}`, payload).then((r) => r.data),
+    remove: (id) => client.delete(`/grades/${id}`).then((r) => r.data),
   },
 
   departments: {

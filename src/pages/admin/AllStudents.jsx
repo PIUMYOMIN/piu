@@ -82,6 +82,87 @@ function StudentStatCard({ title, value, note, iconClass, iconBg, active, onClic
   return <div className={className}>{content}</div>;
 }
 
+function StudentMobileCard({
+  student,
+  fullName,
+  course,
+  yearName,
+  isActive,
+  avatar,
+  togglingId,
+  onToggleStatus,
+  onEdit,
+  onDelete,
+  showDelete,
+}) {
+  return (
+    <article className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+      <div className="flex items-start gap-3">
+        <div className="shrink-0">
+          {avatar ? (
+            <img
+              className="h-12 w-12 rounded-full object-cover"
+              src={avatar}
+              alt={fullName}
+              onError={(e) => {
+                e.target.src = "https://via.placeholder.com/80x80?text=PIU";
+              }}
+            />
+          ) : (
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-sm font-bold text-slate-600">
+              {getInitials(fullName)}
+            </div>
+          )}
+        </div>
+        <div className="min-w-0 flex-1">
+          <h3 className="truncate text-sm font-semibold text-gray-900">{fullName || "—"}</h3>
+          <p className="truncate text-sm text-gray-500">{student.email}</p>
+          <p className="mt-1 text-xs text-gray-600">ID: {student.student_id || "—"}</p>
+        </div>
+        <StatusToggle
+          checked={isActive}
+          loading={togglingId === student.id}
+          onChange={() => onToggleStatus(student)}
+        />
+      </div>
+
+      <div className="mt-4 grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
+        <div className="rounded-lg bg-gray-50 px-3 py-2">
+          <p className="text-xs font-medium uppercase tracking-wide text-gray-500">Program</p>
+          <p className="mt-1 font-medium text-gray-800">{course?.title || "—"}</p>
+        </div>
+        <div className="rounded-lg bg-gray-50 px-3 py-2">
+          <p className="text-xs font-medium uppercase tracking-wide text-gray-500">Academic Year</p>
+          <div className="mt-1">
+            <AcademicYearBadge label={yearName} />
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+        <button
+          type="button"
+          onClick={() => onEdit(student.id)}
+          className="inline-flex flex-1 items-center justify-center rounded-md bg-blue-50 px-4 py-2 text-sm font-medium text-blue-700 transition-colors hover:bg-blue-100"
+        >
+          <i className="fas fa-edit mr-2"></i>
+          Edit
+        </button>
+        {showDelete && (
+          <button
+            type="button"
+            onClick={() => onDelete(student)}
+            className="inline-flex flex-1 items-center justify-center rounded-md bg-red-50 px-4 py-2 text-sm font-medium text-red-700 transition-colors hover:bg-red-100"
+          >
+            <i className="fas fa-trash mr-2"></i>
+            Delete
+          </button>
+        )}
+      </div>
+    </article>
+  );
+}
+
 const AllStudents = () => {
   const { user: authUser } = useAuth();
   const { showSuccess, showError, Toast } = useFloatingToast();
@@ -282,15 +363,14 @@ const AllStudents = () => {
   };
 
   return (
-    <div className="max-w-8xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
+    <div className="mx-auto w-full max-w-full overflow-hidden rounded-xl bg-white shadow-md">
       <Toast />
-      {/* Header */}
-      <div className="bg-[#002147] p-6 text-white">
-        <h2 className="text-2xl font-bold">Student Management</h2>
-        <p className="text-blue-100 mt-1">Manage student records and information</p>
+      <div className="bg-[#002147] p-4 text-white sm:p-6">
+        <h2 className="text-xl font-bold sm:text-2xl">Student Management</h2>
+        <p className="mt-1 text-sm text-blue-100 sm:text-base">Manage student records and information</p>
       </div>
 
-      <div className="p-6 border-b border-gray-200 bg-gray-50">
+      <div className="border-b border-gray-200 bg-gray-50 p-4 sm:p-6">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div>
             <div className="flex flex-wrap items-center gap-2">
@@ -388,7 +468,7 @@ const AllStudents = () => {
         </div>
       </div>
 
-      <div className="p-6">
+      <div className="p-4 sm:p-6">
         {error && (
           <div className="mb-4 p-3 rounded-lg border border-red-200 bg-red-50 text-red-700 text-sm">
             {error}
@@ -433,27 +513,76 @@ const AllStudents = () => {
           }
         />
 
-        {/* Students Table */}
-        <div className="overflow-x-auto rounded-lg border border-gray-200">
-          <table className="w-full">
+        {/* Mobile cards */}
+        <div className="space-y-4 md:hidden">
+          {loading && (
+            <div className="rounded-lg border border-gray-200 px-4 py-12 text-center text-gray-500">
+              Loading students...
+            </div>
+          )}
+
+          {!loading && filteredStudents.length > 0
+            ? paginatedStudents.map((student) => {
+                const fullName = `${student.fname || ""} ${student.lname || ""}`.trim();
+                const programId = student.course_id ?? student.course?.id;
+                const course = coursesById.get(String(programId));
+                const yearName = resolveStudentYearName(student, yearsById);
+                const isActive = parseIsActive(student.is_active ?? student.status);
+                const avatar = toStorageUrl(student.profile) || student.profile || "";
+
+                return (
+                  <StudentMobileCard
+                    key={student.id}
+                    student={student}
+                    fullName={fullName}
+                    course={course}
+                    yearName={yearName}
+                    isActive={isActive}
+                    avatar={avatar}
+                    togglingId={togglingId}
+                    onToggleStatus={toggleStatus}
+                    onEdit={(id) => navigate(`/piu/admin/students/edit/${id}`)}
+                    onDelete={removeStudent}
+                    showDelete={isAdmin}
+                  />
+                );
+              })
+            : null}
+
+          {!loading && filteredStudents.length === 0 && (
+            <div className="rounded-lg border border-gray-200 px-4 py-12 text-center text-gray-500">
+              <i className="fas fa-user-graduate mb-3 text-4xl text-gray-300"></i>
+              <p className="text-lg font-medium">No students found</p>
+              <p className="mt-1 text-sm">
+                {searchTerm || filter || yearFilter || statusFilter !== "all"
+                  ? "Try adjusting your search or filters"
+                  : "Get started by adding your first student"}
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Desktop table */}
+        <div className="hidden overflow-x-auto rounded-lg border border-gray-200 md:block">
+          <table className="min-w-[920px] w-full">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 lg:px-6">
                   Student
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 lg:px-6">
                   Student ID
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 lg:px-6">
                   Program
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 lg:px-6">
                   Academic Year
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 lg:px-6">
                   Status
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 lg:px-6">
                   Actions
                 </th>
               </tr>
@@ -477,7 +606,7 @@ const AllStudents = () => {
                   const avatar = toStorageUrl(student.profile) || student.profile || "";
                   return (
                   <tr key={student.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="whitespace-nowrap px-4 py-4 lg:px-6">
                       <div className="flex items-center">
                         <div className="flex-shrink-0 h-10 w-10">
                           {avatar ? (
@@ -505,27 +634,28 @@ const AllStudents = () => {
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                    <td className="whitespace-nowrap px-4 py-4 text-sm text-gray-700 lg:px-6">
                       {student.student_id}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                    <td className="whitespace-nowrap px-4 py-4 text-sm text-gray-700 lg:px-6">
                       {course?.title || "—"}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="whitespace-nowrap px-4 py-4 lg:px-6">
                       <AcademicYearBadge label={yearName} />
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="whitespace-nowrap px-4 py-4 lg:px-6">
                       <StatusToggle
                         checked={isActive}
                         loading={togglingId === student.id}
                         onChange={() => toggleStatus(student)}
                       />
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <div className="flex gap-2">
+                    <td className="whitespace-nowrap px-4 py-4 text-sm font-medium lg:px-6">
+                      <div className="flex flex-wrap gap-2">
                         <button
+                          type="button"
                           onClick={() => navigate(`/piu/admin/students/edit/${student.id}`)}
-                          className="text-blue-600 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 px-4 py-2 rounded-md transition-colors"
+                          className="rounded-md bg-blue-50 px-3 py-2 text-sm text-blue-600 transition-colors hover:bg-blue-100 hover:text-blue-900"
                           title="Edit student"
                         >
                           <i className="fas fa-edit mr-1"></i>
@@ -533,8 +663,9 @@ const AllStudents = () => {
                         </button>
                         {isAdmin && (
                           <button
+                            type="button"
                             onClick={() => removeStudent(student)}
-                            className="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 px-4 py-2 rounded-md transition-colors"
+                            className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-600 transition-colors hover:bg-red-100 hover:text-red-900"
                             title="Delete student"
                           >
                             <i className="fas fa-trash mr-1"></i>
@@ -569,17 +700,20 @@ const AllStudents = () => {
         </div>
 
         {/* Summary */}
-        <div className="mt-4 flex items-center justify-between text-sm text-gray-600">
-          <div>
+        <div className="mt-4 flex flex-col gap-3 text-sm text-gray-600 sm:flex-row sm:items-center sm:justify-between">
+          <div className="text-center sm:text-left">
             Showing {paginatedStudents.length} of {filteredStudents.length} students (total {students.length})
           </div>
           {filteredStudents.length > 0 && (
-            <div className="flex gap-2">
+            <div className="flex items-center justify-center gap-2 sm:justify-end">
+              <span className="text-xs text-gray-500 sm:text-sm">
+                Page {currentPage} of {totalPages}
+              </span>
               <button
                 type="button"
                 onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
-                className="px-3 py-1 border rounded disabled:opacity-50"
+                className="rounded border px-3 py-1.5 disabled:opacity-50"
               >
                 Prev
               </button>
@@ -587,7 +721,7 @@ const AllStudents = () => {
                 type="button"
                 onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages}
-                className="px-3 py-1 border rounded disabled:opacity-50"
+                className="rounded border px-3 py-1.5 disabled:opacity-50"
               >
                 Next
               </button>

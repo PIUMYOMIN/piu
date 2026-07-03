@@ -65,8 +65,7 @@ export default function TeacherStudentGrades() {
       setStudent(s);
       setGrades(Array.isArray(result?.data) ? result.data : []);
 
-      const cid = s?.course_id ?? s?.course?.id;
-      const params = cid ? { course_id: cid } : {};
+      const params = { student_id: id };
       const [aData, mData, yData] = await Promise.all([
         teacherApi.assignments(params),
         teacherApi.modules(params),

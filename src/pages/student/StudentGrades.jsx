@@ -127,11 +127,13 @@ export default function StudentGrades() {
 
       {byYear.length > 0 ? (
         <Panel title="Results by Academic Year and Semester">
-          <GradeBreakdown byYear={byYear} />
+          <GradeBreakdown byYear={byYear} student={data?.student} onExportError={setExportError} />
         </Panel>
       ) : grades.length ? (
         <Panel title="All Grades">
           <GradeBreakdown
+            student={data?.student}
+            onExportError={setExportError}
             byYear={[
               {
                 year: "All Records",

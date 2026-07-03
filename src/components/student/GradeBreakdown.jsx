@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState } from "react";
+import { FaFilePdf } from "react-icons/fa";
 import { computeGradesSummary } from "../../utils/gradingSummary";
 
 function GradesTable({ grades, showSemester = false }) {
@@ -108,12 +109,63 @@ function normalizeYearBlocks(byYear = []) {
   });
 }
 
-export default function GradeBreakdown({ byYear = [], compact = false }) {
+function slugify(value) {
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^\w-]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+export default function GradeBreakdown({ byYear = [], compact = false, student = null, onExportError }) {
+  const [downloadingKey, setDownloadingKey] = useState("");
   const yearBlocks = normalizeYearBlocks(byYear);
 
   if (!yearBlocks.length) {
     return null;
   }
+
+  const handleSemesterDownload = async ({ yearBlock, semesterBlock, semesterGrades, semesterSummary }) => {
+    const key = `${yearBlock.year}-${semesterBlock.semester}`;
+    setDownloadingKey(key);
+    onExportError?.("");
+
+    try {
+      const { downloadGradingRecordPdf } = await import("../../utils/gradingPdf");
+      await downloadGradingRecordPdf({
+        student,
+        summary: {
+          average_gpa: semesterSummary.average_gpa,
+          total_modules: semesterGrades.length,
+        },
+        byYear: [
+          {
+            ...yearBlock,
+            modules: semesterGrades.length,
+            total_credit: semesterSummary.total_credit,
+            average_gpa: semesterSummary.average_gpa,
+            grade_value: semesterSummary.grade_value,
+            grades: semesterGrades,
+            semesters: [
+              {
+                ...semesterBlock,
+                modules: semesterGrades.length,
+                total_credit: semesterSummary.total_credit,
+                average_gpa: semesterSummary.average_gpa,
+                grade_value: semesterSummary.grade_value,
+                grades: semesterGrades,
+              },
+            ],
+          },
+        ],
+        fileNameSuffix: [yearBlock.year, semesterBlock.semester].map(slugify).filter(Boolean).join("-"),
+      });
+    } catch (error) {
+      onExportError?.(error?.message || "Failed to generate semester grading PDF.");
+    } finally {
+      setDownloadingKey("");
+    }
+  };
 
   return (
     <div className="space-y-5">
@@ -130,6 +182,7 @@ export default function GradeBreakdown({ byYear = [], compact = false }) {
               {(yearBlock.semesters || []).map((semesterBlock) => {
                 const semesterGrades = semesterBlock.grades || [];
                 const semesterSummary = resolveSummary(semesterBlock, semesterGrades);
+                const semesterKey = `${yearBlock.year}-${semesterBlock.semester}`;
 
                 return (
                   <div
@@ -138,9 +191,29 @@ export default function GradeBreakdown({ byYear = [], compact = false }) {
                   >
                     <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
                       <h4 className="text-sm font-semibold text-gray-800">{semesterBlock.semester}</h4>
-                      <span className="inline-flex rounded-full bg-purple-100 px-3 py-1 text-xs font-semibold text-purple-800">
-                        {semesterBlock.modules || semesterGrades.length || 0} modules
-                      </span>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="inline-flex rounded-full bg-purple-100 px-3 py-1 text-xs font-semibold text-purple-800">
+                          {semesterBlock.modules || semesterGrades.length || 0} modules
+                        </span>
+                        {!compact && semesterGrades.length > 0 ? (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleSemesterDownload({
+                                yearBlock,
+                                semesterBlock,
+                                semesterGrades,
+                                semesterSummary,
+                              })
+                            }
+                            disabled={downloadingKey === semesterKey}
+                            className="inline-flex items-center gap-2 rounded-md bg-[#002147] px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-[#003366] disabled:cursor-not-allowed disabled:opacity-60"
+                          >
+                            <FaFilePdf />
+                            {downloadingKey === semesterKey ? "Generating..." : "Download PDF"}
+                          </button>
+                        ) : null}
+                      </div>
                     </div>
 
                     {!compact ? (

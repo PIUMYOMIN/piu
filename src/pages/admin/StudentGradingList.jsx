@@ -1,66 +1,108 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaEye, FaSort, FaSortUp, FaSortDown } from "react-icons/fa";
+import { adminApi } from "../../api/admin";
 import ManagementFilters from "../../components/admin/ManagementFilters";
+import { parseIsActive } from "../../components/admin/StatusToggle";
+import { getApiErrorMessage } from "../../utils/apiErrors";
+
+function getStudentName(student) {
+  return (
+    student.name ||
+    `${student.fname || ""} ${student.lname || ""}`.trim() ||
+    student.email ||
+    "Unnamed student"
+  );
+}
+
+function resolveProgramName(student, coursesById) {
+  const programId = student.course_id ?? student.course?.id;
+  const course = programId != null ? coursesById.get(String(programId)) : null;
+  return student.course?.title || course?.title || student.program || "Unassigned";
+}
 
 export default function StudentGradingList() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [programFilter, setProgramFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'ascending' });
+  const [students, setStudents] = useState([]);
+  const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const students = [
-  { id: 1, name: "Lucifer Morningstar", studentId: "ST001", program: "ICT", year: "3rd", semester: "2nd" },
-  { id: 2, name: "Chloe Decker", studentId: "ST002", program: "Business", year: "2nd", semester: "1st" },
-  { id: 3, name: "Amenadiel", studentId: "ST003", program: "ICT", year: "4th", semester: "1st" },
-  { id: 4, name: "Maze", studentId: "ST004", program: "Engineering", year: "1st", semester: "2nd" },
-  { id: 5, name: "Linda Martin", studentId: "ST005", program: "Business", year: "3rd", semester: "2nd" },
-  { id: 6, name: "Dan Espinoza", studentId: "ST006", program: "ICT", year: "2nd", semester: "2nd" },
-  { id: 7, name: "Ella Lopez", studentId: "ST007", program: "Engineering", year: "4th", semester: "1st" },
-  { id: 8, name: "Trixie Espinoza", studentId: "ST008", program: "Business", year: "1st", semester: "1st" },
-  { id: 9, name: "Charlotte Richards", studentId: "ST009", program: "ICT", year: "3rd", semester: "1st" },
-  { id: 10, name: "Dr. Louis", studentId: "ST010", program: "Business", year: "4th", semester: "2nd" },
-  { id: 11, name: "Cain", studentId: "ST011", program: "Engineering", year: "2nd", semester: "1st" },
-  { id: 12, name: "Eve", studentId: "ST012", program: "ICT", year: "1st", semester: "2nd" },
-  { id: 13, name: "Azrael", studentId: "ST013", program: "Business", year: "3rd", semester: "2nd" },
-  { id: 14, name: "Remiel", studentId: "ST014", program: "Engineering", year: "3rd", semester: "1st" },
-  { id: 15, name: "Michael", studentId: "ST015", program: "ICT", year: "4th", semester: "2nd" },
-  { id: 16, name: "Gabriel", studentId: "ST016", program: "Business", year: "2nd", semester: "2nd" },
-  { id: 17, name: "Uriel", studentId: "ST017", program: "ICT", year: "1st", semester: "1st" },
-  { id: 18, name: "Castiel", studentId: "ST018", program: "Engineering", year: "4th", semester: "2nd" },
-  { id: 19, name: "Dean Winchester", studentId: "ST019", program: "Business", year: "3rd", semester: "1st" },
-  { id: 20, name: "Sam Winchester", studentId: "ST020", program: "ICT", year: "2nd", semester: "1st" },
-  { id: 21, name: "Crowley", studentId: "ST021", program: "Engineering", year: "1st", semester: "1st" },
-  { id: 22, name: "Rowena MacLeod", studentId: "ST022", program: "Business", year: "4th", semester: "1st" },
-  { id: 23, name: "Bobby Singer", studentId: "ST023", program: "ICT", year: "3rd", semester: "2nd" },
-  { id: 24, name: "Chuck Shurley", studentId: "ST024", program: "Engineering", year: "2nd", semester: "2nd" },
-  { id: 25, name: "Metatron", studentId: "ST025", program: "Business", year: "1st", semester: "2nd" },
-  { id: 26, name: "Balthazar", studentId: "ST026", program: "ICT", year: "4th", semester: "1st" },
-  { id: 27, name: "Abaddon", studentId: "ST027", program: "Engineering", year: "3rd", semester: "2nd" },
-  { id: 28, name: "Meg Masters", studentId: "ST028", program: "Business", year: "2nd", semester: "1st" },
-  { id: 29, name: "Jody Mills", studentId: "ST029", program: "ICT", year: "1st", semester: "2nd" },
-  { id: 30, name: "Garth Fitzgerald IV", studentId: "ST030", program: "Engineering", year: "4th", semester: "1st" },
-  { id: 31, name: "Jack Kline", studentId: "ST031", program: "Business", year: "3rd", semester: "1st" },
-  { id: 32, name: "Amara", studentId: "ST032", program: "ICT", year: "2nd", semester: "2nd" },
-  { id: 33, name: "Lucifer (SPN)", studentId: "ST033", program: "Engineering", year: "1st", semester: "1st" },
-  { id: 34, name: "Gabriel (SPN)", studentId: "ST034", program: "Business", year: "4th", semester: "2nd" },
-  { id: 35, name: "Asmodeus", studentId: "ST035", program: "ICT", year: "3rd", semester: "1st" },
-];
-  const programOptions = useMemo(() => {
-    const programs = [...new Set(students.map((s) => s.program))].sort();
-    return [
-      { value: "all", label: "All Programs" },
-      ...programs.map((p) => ({ value: p, label: p })),
-    ];
+  useEffect(() => {
+    let mounted = true;
+
+    async function loadStudents() {
+      setLoading(true);
+      setError("");
+      try {
+        const [studentsData, coursesData] = await Promise.all([
+          adminApi.students.list(),
+          adminApi.courses.list(),
+        ]);
+
+        if (!mounted) return;
+        setStudents(Array.isArray(studentsData) ? studentsData : []);
+        setCourses(Array.isArray(coursesData) ? coursesData : []);
+      } catch (err) {
+        if (!mounted) return;
+        setStudents([]);
+        setCourses([]);
+        setError(getApiErrorMessage(err, "Failed to load students"));
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    }
+
+    loadStudents();
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
-  const filteredStudents = students.filter((student) => {
+  const coursesById = useMemo(() => new Map(courses.map((course) => [String(course.id), course])), [courses]);
+
+  const displayStudents = useMemo(
+    () =>
+      students.map((student) => ({
+        ...student,
+        name: getStudentName(student),
+        studentId: student.student_id || student.studentId || "",
+        program: resolveProgramName(student, coursesById),
+      })),
+    [students, coursesById]
+  );
+
+  const programOptions = useMemo(() => {
+    const programIds = [...new Set(displayStudents.map((s) => String(s.course_id ?? s.course?.id)).filter(Boolean))];
+    return [
+      { value: "all", label: "All Programs" },
+      ...programIds.map((id) => ({
+        value: id,
+        label: coursesById.get(id)?.title || `Program #${id}`,
+      })),
+    ];
+  }, [displayStudents, coursesById]);
+
+  const filteredStudents = displayStudents.filter((student) => {
+    const q = searchTerm.trim().toLowerCase();
+    const programId = String(student.course_id ?? student.course?.id ?? "");
+    const isActive = parseIsActive(student.is_active ?? student.status);
     const matchesSearch =
-      student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.studentId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.program.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesProgram = programFilter === "all" || student.program === programFilter;
-    return matchesSearch && matchesProgram;
+      !q ||
+      student.name.toLowerCase().includes(q) ||
+      student.studentId.toLowerCase().includes(q) ||
+      student.program.toLowerCase().includes(q);
+    const matchesProgram = programFilter === "all" || programId === programFilter;
+    const matchesStatus =
+      statusFilter === "all" ||
+      (statusFilter === "active" && isActive) ||
+      (statusFilter === "inactive" && !isActive);
+    return matchesSearch && matchesProgram && matchesStatus;
   });
 
   // Sort students
@@ -97,6 +139,7 @@ export default function StudentGradingList() {
   const resetFilters = () => {
     setSearchTerm("");
     setProgramFilter("all");
+    setStatusFilter("all");
   };
 
   return (
@@ -119,9 +162,18 @@ export default function StudentGradingList() {
               options: programOptions,
             },
           ]}
+          showStatus
+          statusValue={statusFilter}
+          onStatusChange={setStatusFilter}
           onReset={resetFilters}
-          summary={`Showing ${filteredStudents.length} of ${students.length} students`}
+          summary={loading ? "Loading students..." : `Showing ${filteredStudents.length} of ${students.length} students`}
         />
+
+        {error && (
+          <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+            {error}
+          </div>
+        )}
 
         {/* Table */}
         <div className="overflow-x-auto">
@@ -155,8 +207,7 @@ export default function StudentGradingList() {
                     {getSortIcon('studentId')}
                   </div>
                 </th>
-                <th 
-                  className="p-3 font-semibold text-gray-700 border-b cursor-pointer"
+                <th className="p-3 font-semibold text-gray-700 border-b cursor-pointer"
                   onClick={() => requestSort('program')}
                 >
                   <div className="flex items-center">
@@ -164,12 +215,21 @@ export default function StudentGradingList() {
                     {getSortIcon('program')}
                   </div>
                 </th>
+                <th className="p-3 font-semibold text-gray-700 border-b text-center">Status</th>
                 <th className="p-3 font-semibold text-gray-700 border-b text-center">Action</th>
               </tr>
             </thead>
             <tbody>
-              {sortedStudents.length > 0 ? (
-                sortedStudents.map((student, idx) => (
+              {loading ? (
+                <tr>
+                  <td colSpan="6" className="p-6 text-center text-gray-500 border-b">
+                    Loading students...
+                  </td>
+                </tr>
+              ) : sortedStudents.length > 0 ? (
+                sortedStudents.map((student, idx) => {
+                  const isActive = parseIsActive(student.is_active ?? student.status);
+                  return (
                   <tr key={student.id} className="hover:bg-gray-50 transition-colors">
                     <td className="p-3 border-b">{idx + 1}</td>
                     <td className="p-3 border-b font-medium">{student.name}</td>
@@ -177,6 +237,15 @@ export default function StudentGradingList() {
                     <td className="p-3 border-b">
                       <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
                         {student.program}
+                      </span>
+                    </td>
+                    <td className="p-3 border-b text-center">
+                      <span
+                        className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${
+                          isActive ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-600"
+                        }`}
+                      >
+                        {isActive ? "Active" : "Inactive"}
                       </span>
                     </td>
                     <td className="p-3 border-b text-center">
@@ -189,10 +258,11 @@ export default function StudentGradingList() {
                       </button>
                     </td>
                   </tr>
-                ))
+                  );
+                })
               ) : (
                 <tr>
-                  <td colSpan="7" className="p-6 text-center text-gray-500 border-b">
+                  <td colSpan="6" className="p-6 text-center text-gray-500 border-b">
                     No students found matching your search criteria.
                   </td>
                 </tr>

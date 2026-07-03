@@ -1,9 +1,11 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, PieChart, Pie, Cell
 } from "recharts";
 import adminApi from "../../api/admin";
+import { useAuth } from "../../contexts/AuthContext";
+import { isRegistrarRole, resolveUserRole } from "../../utils/authRouting";
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
 
@@ -27,6 +29,9 @@ const Card = ({ title, value, icon, trend }) => (
 );
 
 const DashboardPage = () => {
+  const { user } = useAuth();
+  const role = resolveUserRole(user);
+  const isRegistrar = isRegistrarRole(role);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [stats, setStats] = useState({
@@ -34,6 +39,8 @@ const DashboardPage = () => {
     totalStudents: 0,
     totalAdmissions: 0,
     activeCourses: 0,
+    totalModules: 0,
+    totalAssignments: 0,
   });
   const [recentAdmissions, setRecentAdmissions] = useState([]);
   const [enrollmentData, setEnrollmentData] = useState([]);
@@ -45,51 +52,87 @@ const DashboardPage = () => {
       setLoading(true);
       setError("");
       try {
-        const [usersData, studentsData, coursesData, admissionsData] = await Promise.all([
-          adminApi.users.list(),
-          adminApi.students.list(),
-          adminApi.courses.list(),
-          adminApi.admissions.list(),
+        const studentsPromise = adminApi.students.list();
+        const coursesPromise = adminApi.courses.list();
+        const modulesPromise = adminApi.modules.list();
+        const assignmentsPromise = adminApi.assignments.list();
+
+        const [studentsData, coursesData, modulesData, assignmentsPayload] = await Promise.all([
+          studentsPromise,
+          coursesPromise,
+          modulesPromise,
+          assignmentsPromise,
         ]);
 
+        let users = [];
+        let admissions = [];
+        if (!isRegistrar) {
+          const [usersData, admissionsData] = await Promise.all([
+            adminApi.users.list(),
+            adminApi.admissions.list(),
+          ]);
+          users = Array.isArray(usersData) ? usersData : [];
+          admissions = Array.isArray(admissionsData) ? admissionsData : [];
+        }
+
         if (!mounted) return;
-        const users = Array.isArray(usersData) ? usersData : [];
         const students = Array.isArray(studentsData) ? studentsData : [];
         const courses = Array.isArray(coursesData) ? coursesData : [];
-        const admissions = Array.isArray(admissionsData) ? admissionsData : [];
+        const modules = Array.isArray(modulesData) ? modulesData : [];
+        const assignments = Array.isArray(assignmentsPayload) ? assignmentsPayload : [];
 
         const totalUsers = users.length;
-        // Students are managed in a dedicated `students` resource (not just `users` with role).
         const totalStudents = students.length;
         const totalAdmissions = admissions.length;
         const activeCourses = courses.filter((c) => c?.is_active === true || c?.is_active === 1 || c?.is_active === undefined).length;
+        const totalModules = modules.length;
+        const totalAssignments = assignments.length;
 
-        setStats({ totalUsers, totalStudents, totalAdmissions, activeCourses });
-
-        // Recent admissions (latest 5 by created_at)
-        const recent = admissions
-          .slice()
-          .sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime())
-          .slice(0, 5);
-        setRecentAdmissions(recent);
-
-        // Enrollment trend (last 12 months count by month, based on admissions created_at)
-        const now = new Date();
-        const months = Array.from({ length: 12 }, (_, i) => {
-          const d = new Date(now.getFullYear(), now.getMonth() - (11 - i), 1);
-          return { year: d.getFullYear(), month: d.getMonth(), label: d.toLocaleString("en-US", { month: "short" }) };
+        setStats({
+          totalUsers,
+          totalStudents,
+          totalAdmissions,
+          activeCourses,
+          totalModules,
+          totalAssignments,
         });
-        const counts = months.map((m) => {
-          const c = admissions.filter((a) => {
-            if (!a?.created_at) return false;
-            const d = new Date(a.created_at);
-            return d.getFullYear() === m.year && d.getMonth() === m.month;
-          }).length;
-          return { month: m.label, students: c };
-        });
-        setEnrollmentData(counts);
 
-        // Course distribution (by category name if present)
+        if (!isRegistrar) {
+          const recent = admissions
+            .slice()
+            .sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime())
+            .slice(0, 5);
+          setRecentAdmissions(recent);
+
+          const now = new Date();
+          const months = Array.from({ length: 12 }, (_, i) => {
+            const d = new Date(now.getFullYear(), now.getMonth() - (11 - i), 1);
+            return { year: d.getFullYear(), month: d.getMonth(), label: d.toLocaleString("en-US", { month: "short" }) };
+          });
+          const counts = months.map((m) => {
+            const c = admissions.filter((a) => {
+              if (!a?.created_at) return false;
+              const d = new Date(a.created_at);
+              return d.getFullYear() === m.year && d.getMonth() === m.month;
+            }).length;
+            return { month: m.label, students: c };
+          });
+          setEnrollmentData(counts);
+        } else {
+          setRecentAdmissions([]);
+          const programMap = new Map();
+          for (const student of students) {
+            const programName = student?.course?.title || "Unassigned";
+            programMap.set(programName, (programMap.get(programName) || 0) + 1);
+          }
+          setEnrollmentData(
+            Array.from(programMap.entries())
+              .map(([month, studentsCount]) => ({ month, students: studentsCount }))
+              .sort((a, b) => b.students - a.students)
+              .slice(0, 6)
+          );
+        }
+
         const distMap = new Map();
         for (const c of courses) {
           const name = c?.category?.name || c?.course_category?.name || "Other";
@@ -111,7 +154,7 @@ const DashboardPage = () => {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [isRegistrar]);
 
   // (kept simple; charts render even when 0s)
 
@@ -139,8 +182,26 @@ const DashboardPage = () => {
     </svg>
   );
 
+  const moduleIcon = (
+    <svg className="w-6 h-6 text-indigo-600 dark:text-indigo-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+    </svg>
+  );
+
+  const assignmentIcon = (
+    <svg className="w-6 h-6 text-amber-600 dark:text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+    </svg>
+  );
+
   return (
     <div className="space-y-6">
+      {isRegistrar && (
+        <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-blue-900">
+          Registrar workspace — manage student registration, course modules, and assignments.
+        </div>
+      )}
+
       {error && (
         <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
           {error}
@@ -149,33 +210,57 @@ const DashboardPage = () => {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card 
-          title="Total Students" 
-          value={loading ? "—" : stats.totalStudents} 
+        <Card
+          title="Total Students"
+          value={loading ? "—" : stats.totalStudents}
           icon={studentIcon}
         />
-        <Card 
-          title="Total Admissions" 
-          value={loading ? "—" : stats.totalAdmissions} 
-          icon={admissionIcon}
-        />
-        <Card 
-          title="Active Courses" 
-          value={loading ? "—" : stats.activeCourses} 
-          icon={courseIcon}
-        />
-        <Card 
-          title="Total Users" 
-          value={loading ? "—" : stats.totalUsers} 
-          icon={queryIcon}
-        />
+        {isRegistrar ? (
+          <>
+            <Card
+              title="Course Modules"
+              value={loading ? "—" : stats.totalModules}
+              icon={moduleIcon}
+            />
+            <Card
+              title="Assignments"
+              value={loading ? "—" : stats.totalAssignments}
+              icon={assignmentIcon}
+            />
+            <Card
+              title="Active Programs"
+              value={loading ? "—" : stats.activeCourses}
+              icon={courseIcon}
+            />
+          </>
+        ) : (
+          <>
+            <Card
+              title="Total Admissions"
+              value={loading ? "—" : stats.totalAdmissions}
+              icon={admissionIcon}
+            />
+            <Card
+              title="Active Courses"
+              value={loading ? "—" : stats.activeCourses}
+              icon={courseIcon}
+            />
+            <Card
+              title="Total Users"
+              value={loading ? "—" : stats.totalUsers}
+              icon={queryIcon}
+            />
+          </>
+        )}
       </div>
 
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Enrollment Trend Chart */}
         <div className="bg-white rounded-lg shadow p-6 dark:bg-gray-800">
-          <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Enrollment Trends</h2>
+          <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
+            {isRegistrar ? "Students by Program" : "Enrollment Trends"}
+          </h2>
           {loading ? (
             <div className="h-[300px] flex items-center justify-center text-gray-500">Loading…</div>
           ) : (
@@ -224,7 +309,7 @@ const DashboardPage = () => {
 
       {/* Recent Queries and Quick Actions */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Recent Admissions */}
+        {!isRegistrar && (
         <div className="lg:col-span-2 bg-white rounded-lg shadow p-6 dark:bg-gray-800">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Recent Admissions</h2>
@@ -257,35 +342,78 @@ const DashboardPage = () => {
             )}
           </ul>
         </div>
+        )}
 
-        {/* Quick Actions */}
-        <div className="bg-white rounded-lg shadow p-6 dark:bg-gray-800">
+        <div className={`bg-white rounded-lg shadow p-6 dark:bg-gray-800 ${isRegistrar ? "lg:col-span-3" : ""}`}>
           <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Quick Actions</h2>
-          <div className="space-y-3">
-            <button className="w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-left text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 dark:text-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600">
-              <Link to="/piu/admin/students/add">Add New Student</Link>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <Link
+              to="/piu/admin/students/add"
+              className="flex items-center justify-between px-4 py-3 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 dark:text-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600"
+            >
+              Add New Student
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
               </svg>
-            </button>
-            <button className="w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-left text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 dark:text-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600">
-              <Link to="/piu/admin/new">Create Course</Link>
+            </Link>
+            <Link
+              to="/piu/admin/students"
+              className="flex items-center justify-between px-4 py-3 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 dark:text-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600"
+            >
+              View All Students
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
-            </button>
-            <button className="w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-left text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 dark:text-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600">
-              Generate Report
+            </Link>
+            <Link
+              to="/piu/admin/modules/add"
+              className="flex items-center justify-between px-4 py-3 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 dark:text-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600"
+            >
+              Add Course Module
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13" />
               </svg>
-            </button>
-            <button className="w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-left text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 dark:text-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600">
-              Send Notification
+            </Link>
+            <Link
+              to="/piu/admin/students/grading"
+              className="flex items-center justify-between rounded-lg bg-gray-100 px-4 py-3 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+            >
+              Student Grading
+              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </Link>
+            <Link
+              to="/piu/admin/assignments/add"
+              className="flex items-center justify-between px-4 py-3 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 dark:text-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600"
+            >
+              Add Assignment
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 6 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
               </svg>
-            </button>
+            </Link>
+            {!isRegistrar && (
+              <>
+                <Link
+                  to="/piu/admin/new"
+                  className="flex items-center justify-between px-4 py-3 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 dark:text-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600"
+                >
+                  Create Course
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  </svg>
+                </Link>
+                <Link
+                  to="/piu/admin/admission"
+                  className="flex items-center justify-between px-4 py-3 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 dark:text-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600"
+                >
+                  Review Admissions
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </div>

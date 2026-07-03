@@ -2,32 +2,23 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import { FaChevronRight, FaTimes, FaSignOutAlt } from 'react-icons/fa';
 import { useAuth } from '../../contexts/AuthContext';
-import { adminMenu } from '../../config/adminMenu';
+import { getVisibleAdminMenu } from '../../config/adminMenu';
+import { resolveUserRole } from '../../utils/authRouting';
 import {
   buildDashboardPath,
   findMenuIndexByTab,
   isDashboardTabActive,
 } from '../../utils/dashboardTabs';
 
-function resolveRole(user) {
-  return String(
-    user?.role?.name ??
-      user?.role ??
-      (Array.isArray(user?.roles) ? user.roles[0]?.name || user.roles[0] : '')
-  ).toLowerCase();
-}
-
 const AdminSidebar = ({ isSidebarOpen, toggleSidebar }) => {
   const { user } = useAuth();
-  const role = resolveRole(user);
+  const role = resolveUserRole(user);
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const [openMenu, setOpenMenu] = useState(null);
 
-  const visibleMenu = useMemo(
-    () => adminMenu.filter((item) => !item.roles || item.roles.includes(role)),
-    [role]
-  );
+  const visibleMenu = useMemo(() => getVisibleAdminMenu(role), [role]);
+  const menuTitle = role === 'registrar' ? 'Registrar Menu' : 'Admin Menu';
 
   useEffect(() => {
     const menuIndex = findMenuIndexByTab(visibleMenu, searchParams, location.pathname);
@@ -83,7 +74,7 @@ const AdminSidebar = ({ isSidebarOpen, toggleSidebar }) => {
                     lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
       >
         <div className="p-4 border-b border-gray-700 flex items-center justify-between lg:hidden">
-          <div className="font-medium">Admin Menu</div>
+          <div className="font-medium">{menuTitle}</div>
           <button
             className="p-1 rounded-full hover:bg-[#002147]"
             onClick={toggleSidebar}
