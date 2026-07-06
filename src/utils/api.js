@@ -83,6 +83,20 @@ function createApiClient(baseURL) {
 
 export const apiClient = createApiClient(API_V1_URL);
 
+function unwrapResponseData(data) {
+  if (data && typeof data === 'object' && 'data' in data) return data.data;
+  return data;
+}
+
+function unwrapResponseArray(data) {
+  const unwrapped = unwrapResponseData(data);
+
+  if (Array.isArray(unwrapped)) return unwrapped;
+  if (Array.isArray(unwrapped?.data)) return unwrapped.data;
+
+  return [];
+}
+
 // Back-compat: old code used separate v1/v2 wrappers.
 export const v1 = {
   getTeam: () => apiClient.get('/team').then((r) => r.data),
@@ -121,13 +135,13 @@ export const v2 = {
   changePassword: (payload) => apiClient.post('/user/change-password', payload).then((r) => r.data),
 
   // Public content
-  getSlides: () => apiClient.get('/slides').then((r) => r.data),
-  getNews: () => apiClient.get('/news').then((r) => r.data),
-  getNewsBySlug: (slug) => apiClient.get(`/news/slug/${slug}`).then((r) => r.data),
-  getEvents: () => apiClient.get('/events').then((r) => r.data),
-  getCourses: () => apiClient.get('/courses').then((r) => r.data),
-  getCourseCategories: () => apiClient.get('/course-categories').then((r) => r.data),
-  getGallery: () => apiClient.get('/gallery').then((r) => r.data),
+  getSlides: () => apiClient.get('/slides').then((r) => unwrapResponseArray(r.data)),
+  getNews: () => apiClient.get('/news').then((r) => unwrapResponseArray(r.data)),
+  getNewsBySlug: (slug) => apiClient.get(`/news/slug/${slug}`).then((r) => unwrapResponseData(r.data)),
+  getEvents: () => apiClient.get('/events').then((r) => unwrapResponseArray(r.data)),
+  getCourses: () => apiClient.get('/courses').then((r) => unwrapResponseArray(r.data)),
+  getCourseCategories: () => apiClient.get('/course-categories').then((r) => unwrapResponseArray(r.data)),
+  getGallery: () => apiClient.get('/gallery').then((r) => unwrapResponseArray(r.data)),
 
   // Admissions — long timeout for multi-file uploads on slow networks
   submitAdmission: (formData, options = {}) =>

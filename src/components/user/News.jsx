@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { FaCalendarCheck, FaUser, FaTag } from "react-icons/fa";
+import { FaCalendarCheck, FaUser } from "react-icons/fa";
 import LoadingSpinner from "./LoadingSpinner";
 import { v2, toStorageUrl } from "../../utils/api";
 
@@ -18,7 +18,7 @@ export default function News() {
         const data = await v2.getNews();
         
         // No need to filter by is_active since API handles it or column doesn't exist
-        setNews(data);
+        setNews(Array.isArray(data) ? data : []);
       } catch (error) {
         console.error("Network error:", error);
         setError("Unable to load news. Please try again later.");
