@@ -1,0 +1,1 @@
+function t(e,n="Something went wrong."){var g;const s=(g=e==null?void 0:e.response)==null?void 0:g.data;return s!=null&&s.message&&typeof s.message=="string"?s.message:s!=null&&s.error&&typeof s.error=="string"?s.error:e!=null&&e.message&&typeof e.message=="string"?e.message:n}export{t as g};

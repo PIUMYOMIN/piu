@@ -1,30 +1,65 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/assets/fav-fa59d523.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#002147" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="description" content="Explore programs, admissions, faculty, news, and campus updates from Phaung Daw Oo International University in Mandalay, Myanmar." />
+    <meta name="robots" content="index,follow" />
+    <meta property="og:site_name" content="Phaung Daw Oo International University" />
+    <meta property="og:title" content="Phaung Daw Oo International University" />
+    <meta property="og:description" content="Explore programs, admissions, faculty, news, and campus updates from Phaung Daw Oo International University in Mandalay, Myanmar." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://www.piueducation.org/" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Phaung Daw Oo International University" />
+    <meta name="twitter:description" content="Explore programs, admissions, faculty, news, and campus updates from Phaung Daw Oo International University in Mandalay, Myanmar." />
+    <link rel="canonical" href="https://www.piueducation.org/" />
+    <title>Phaung Daw Oo International University</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://www.google.com" />
+    <link rel="preconnect" href="https://www.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://accounts.google.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@400;500;600&family=Noto+Sans:wght@400;500&family=Oswald:wght@400;500;600&family=Roboto+Slab:wght@400;500;600&family=Roboto:ital,wght@0,400;0,500;0,700;0,900;1,400&display=swap"
+      rel="stylesheet"
+    />
 
-<head>
-  <meta charset="utf-8" />
-  <title>React Router</title>
-  <script type="text/javascript">
-    var pathSegmentsToKeep = 1;
+    <script type="text/javascript">
+      (function (l) {
+        if (l.search[1] === "/") {
+          var decoded = l.search
+            .slice(1)
+            .split("&")
+            .map(function (s) {
+              return s.replace(/~and~/g, "&");
+            })
+            .join("?");
+          window.history.replaceState(null, null, l.pathname.slice(0, -1) + decoded + l.hash);
+        }
+      })(window.location);
+    </script>
 
-    var l = window.location;
-    l.replace(
-      l.protocol +
-      "//" +
-      l.hostname +
-      (l.port ? ":" + l.port : "") +
-      l.pathname
-        .split("/")
-        .slice(0, 1 + pathSegmentsToKeep)
-        .join("/") +
-      "/?/" +
-      l.pathname.slice(1).split("/").slice(pathSegmentsToKeep).join("/").replace(/&/g, "~and~") +
-      (l.search ? "&" + l.search.slice(1).replace(/&/g, "~and~") : "") +
-      l.hash
-    );
-  </script>
-</head>
-
-<body></body>
-
+    <script type="module" crossorigin src="/assets/index-f22ab8aa.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/aos-c26fbbc3.js">
+    <link rel="modulepreload" crossorigin href="/assets/vendor-bd559ce3.js">
+    <link rel="modulepreload" crossorigin href="/assets/charts-e39f2545.js">
+    <link rel="modulepreload" crossorigin href="/assets/toast-4952653c.js">
+    <link rel="modulepreload" crossorigin href="/assets/icons-95a1fbec.js">
+    <link rel="modulepreload" crossorigin href="/assets/http-edfcd65b.js">
+    <link rel="stylesheet" href="/assets/aos-73168167.css">
+    <link rel="stylesheet" href="/assets/toast-5e8f3fb6.css">
+    <link rel="stylesheet" href="/assets/index-592d19b4.css">
+  </head>
+  <body>
+    <div id="root"></div>
+    
+  </body>
 </html>

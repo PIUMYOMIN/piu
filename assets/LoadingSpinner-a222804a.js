@@ -1,0 +1,1 @@
+import{j as e}from"./vendor-bd559ce3.js";function i(){return e.jsx("div",{children:e.jsx("div",{className:"fixed top-0 left-0 z-50 w-full h-full flex justify-center items-center bg-gray-900",children:e.jsx("div",{className:"animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-white"})})})}export{i as L};
